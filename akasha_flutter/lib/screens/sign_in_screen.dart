@@ -40,18 +40,22 @@ class _SignInScreenState extends State<SignInScreen> {
         : Center(
             child: SignInWidget(
               client: client,
-              onAuthenticated: () {
-                context.showSnackBar(
-                  message: 'User authenticated.',
-                  backgroundColor: Colors.green,
-                );
-              },
-              onError: (error) {
-                context.showSnackBar(
-                  message: 'Authentication failed: $error',
-                  backgroundColor: Colors.red,
-                );
-              },
+              emailSignInWidget: EmailSignInWidget(
+                client: client,
+                startScreen: EmailFlowScreen.login,
+                onAuthenticated: () {
+                  context.showSnackBar(
+                    message: 'User authenticated.',
+                    backgroundColor: Colors.green,
+                  );
+                },
+                onError: (error) {
+                  context.showSnackBar(
+                    message: 'Authentication failed: $error',
+                    backgroundColor: Colors.red,
+                  );
+                },
+              ),
             ),
           );
   }
