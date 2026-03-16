@@ -24,15 +24,21 @@ The following containers / services and ports are included:
 
 <br/>
 
-## Usage
+## Start
 
-In the root directory, run `dart pub get` to get (download) the dependencies.
+First of all, in the root directory, run `dart pub get` to get (download) the dependencies.
+
+### API Server
+
 In the `akasha_server` directory, run:
 
-1. `docker compose up -d` to start the PostgreSQL and Redis containers.
-2. `dart run bin/main.dart --apply-migrations` to start:
+1. `docker compose up -d` to start the PostgreSQL and Redis containers in the background.
+2. `dart run bin/main.dart --apply-migrations` or use `./dev.sh` provided script to start:
     1. API Server and apply the database migrations.
     2. Web Server.
 
 Go to http://localhost:9092 to see the homepage of the Web server, and where you can open the main UI.
-tbd
+
+### Web App
+
+To start the Web app in the browser with hot reload enabled, go to `akasha_flutter` directory and run `flutter run -d chrome` or use `./dev_web.sh` provided script.
