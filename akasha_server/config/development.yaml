@@ -1,5 +1,5 @@
 # This is the configuration file for your local development environment. By
-# default, it runs a single server on port 8080. To set up your server, you will
+# default, it runs a single server on port 9090. To set up your server, you will
 # need to add the name of the database you are connecting to and the user name.
 # The password for the database is stored in the config/passwords.yaml.
 #
@@ -8,29 +8,29 @@
 
 # Configuration for the main API server.
 apiServer:
-  port: 8080
+  port: 9090
   publicHost: localhost
-  publicPort: 8080
+  publicPort: 9090
   publicScheme: http
 
 # Configuration for the Insights server.
 insightsServer:
-  port: 8081
+  port: 9091
   publicHost: localhost
-  publicPort: 8081
+  publicPort: 9091
   publicScheme: http
 
 # Configuration for the web server.
 webServer:
-  port: 8082
+  port: 9092
   publicHost: localhost
-  publicPort: 8082
+  publicPort: 9092
   publicScheme: http
 
 # This is the database setup for your server.
 database:
   host: localhost
-  port: 8090
+  port: 9093
   name: akasha
   user: postgres
   #requireSsl: true # defaults to false
@@ -41,7 +41,7 @@ database:
 redis:
   enabled: false
   host: localhost
-  port: 8091
+  port: 9094
   #user: # defaults to empty
   #requireSsl: true # defaults to false
 
@@ -51,6 +51,7 @@ sessionLogs:
   persistentEnabled: true
   consoleEnabled: true
   consoleLogFormat: text # Defaults to "json", options are "text" or "json"
+
 
 # futureCallExecutionEnabled: true # Defaults to true
 

@@ -1,7 +1,7 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:flutter/material.dart';
-import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
+import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 import 'screens/greetings_screen.dart';
 
@@ -27,7 +27,7 @@ void main() async {
   // E.g. `flutter run --dart-define=SERVER_URL=https://api.example.com/`.
   //
   // Otherwise, the server URL is fetched from the assets/config.json file or
-  // defaults to http://$localhost:8080/ if not found.
+  // defaults to http://$localhost:9090/ if not found.
   final serverUrl = await getServerUrl();
 
   client = Client(serverUrl)

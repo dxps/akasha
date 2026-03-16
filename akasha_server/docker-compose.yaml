@@ -2,8 +2,9 @@ services:
   # Development services
   postgres:
     image: pgvector/pgvector:pg16
+    container_name: akasha_postgres
     ports:
-      - "8090:5432"
+      - "9093:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: akasha
@@ -13,8 +14,9 @@ services:
 
   redis:
     image: redis:6.2.6
+    container_name: akasha_redis
     ports:
-      - "8091:6379"
+      - "9094:6379"
     command: redis-server --requirepass "MC8nBpT-wAhlFdiEZGMzmwaTnI9zFuJk"
     environment:
       - REDIS_REPLICATION_MODE=master
@@ -22,8 +24,9 @@ services:
   # Test services
   postgres_test:
     image: pgvector/pgvector:pg16
+    container_name: akasha_postgres_test
     ports:
-      - "9090:5432"
+      - "9095:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: akasha_test
@@ -33,8 +36,9 @@ services:
 
   redis_test:
     image: redis:6.2.6
+    container_name: akasha_redis_test
     ports:
-      - "9091:6379"
+      - "9096:6379"
     command: redis-server --requirepass "_Smjod5R33eMaTohlBzli_dZ1E7LyvaW"
     environment:
       - REDIS_REPLICATION_MODE=master
