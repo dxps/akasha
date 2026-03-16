@@ -1,3 +1,9 @@
+attrTmpls:
+  - create:
+  - read:
+  - readAll:
+  - update:
+  - delete:
 emailIdp:
   - login:
   - startRegistration:

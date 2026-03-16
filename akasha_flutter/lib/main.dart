@@ -1,6 +1,8 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_flutter/screens/attr_tmpls_list_screen.dart';
 import 'package:akasha_flutter/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
@@ -40,16 +42,31 @@ void main() async {
   runApp(const MyApp());
 }
 
+final GoRouter _router = GoRouter(
+  initialLocation: '/',
+  routes: <RouteBase>[
+    GoRoute(
+      path: '/',
+      pageBuilder: (context, state) => const NoTransitionPage(child: MyHomePage(title: 'Akasha')),
+    ),
+    GoRoute(
+      path: '/attr_tmpls',
+      pageBuilder: (context, state) => const NoTransitionPage(child: AttributeTmplsScreen()),
+    ),
+  ],
+);
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      routerConfig: _router,
       title: 'Akasha',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MyHomePage(title: 'Akasha'),
+      // home: const MyHomePage(title: 'Akasha'),
     );
   }
 }

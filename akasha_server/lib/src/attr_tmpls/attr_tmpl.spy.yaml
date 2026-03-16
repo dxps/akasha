@@ -1,0 +1,14 @@
+class: AttributeTmpl
+table: attributes_tmpls
+fields:
+    ### The public ID.
+    id: UuidValue?, defaultPersist=random_v7
+    name: String
+    description: String?
+    valueType: String
+    defaultValue: String
+    required: bool
+indexes:
+    attr_tmpl_name_desc_uniq_idx:
+        fields: name, description
+        unique: true
