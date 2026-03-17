@@ -26,9 +26,27 @@ The following containers / services and ports are included:
 
 ## Start
 
+### Prerequisites
+
 First of all, in the root directory, run `dart pub get` to get (download) the dependencies.
 
-### API Server
+Make sure you have `akasha_server/config/passwords.yaml` file with such content:
+
+```yaml
+development:
+    jwtRefreshTokenHashPepper: 'replace-with-a-long-random-secret'
+    jwtHmacSha512PrivateKey: 'replace-with-another-long-random-secret'
+    serviceSecret: 'a-very-long-random-secret-at-least-20-chars'
+    emailSecretHashPepper: 'replace-with-32+-random-chars'
+```
+
+### Run
+
+All the components can easily be started in VSCode using _Run_ (`Ctrl/Cmd + F5` shortcut).
+
+Below is described the manual process of starting all of them.
+
+#### API Server
 
 In the `akasha_server` directory, run:
 
@@ -39,6 +57,6 @@ In the `akasha_server` directory, run:
 
 Go to http://localhost:9092 to see the homepage of the Web server, and where you can open the main UI.
 
-### Web App
+#### Web App
 
 To start the Web app in the browser with hot reload enabled, go to `akasha_flutter` directory and run `flutter run -d chrome` or use `./dev_web.sh` provided script.
