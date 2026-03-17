@@ -78,21 +78,21 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                             SizedBox(
                               width: 200,
                               child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                                 child: Text('name', style: TextStyle(color: Colors.grey[500])),
                               ),
                             ),
                             SizedBox(
                               width: 300,
                               child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                                 child: Text('description', style: TextStyle(color: Colors.grey[500])),
                               ),
                             ),
                             SizedBox(
                               width: 100,
                               child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 2),
+                                padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
                                 child: Text('value type', style: TextStyle(color: Colors.grey[500])),
                               ),
                             ),
@@ -129,7 +129,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                                   width: 200,
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    child: Text(limitChars(tmpl.name, 28)),
+                                    child: Text(limitChars(tmpl.name, 32)),
                                   ),
                                 ),
                                 SizedBox(
@@ -142,7 +142,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                                 SizedBox(
                                   width: 100,
                                   child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 2),
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                     child: Text(tmpl.valueType),
                                   ),
                                 ),
@@ -175,8 +175,10 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                                         );
 
+                                        if (!mounted) return;
+
                                         if (result == 'edit') {
-                                          _showAttributeTemplateDialog(context, item: tmpl);
+                                          _showAttributeTemplateDialog(this.context, item: tmpl);
                                         } else if (result == 'delete') {
                                           _deleteAttributeTmpl(tmpl);
                                         }

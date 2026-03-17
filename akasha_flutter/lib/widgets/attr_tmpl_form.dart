@@ -24,7 +24,7 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
 
   late AttributeValueType selectedType;
   late bool isRequired;
-  late bool? defaultBooleanValue;
+  late bool defaultBooleanValue;
   bool _isSaving = false;
 
   bool get _isEditing => widget.attributeTmpl != null;
@@ -47,7 +47,7 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
         : AttributeValueType.text;
 
     isRequired = tmpl?.required ?? false;
-    defaultBooleanValue = tmpl?.valueType == 'boolean' ? (tmpl?.defaultValue as bool?) : null;
+    defaultBooleanValue = tmpl?.valueType == 'boolean' ? (tmpl?.defaultValue as bool) : false;
   }
 
   @override
@@ -119,21 +119,17 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
           ),
           items: const [
             DropdownMenuItem<bool?>(
-              value: null,
-              child: Text('None'),
+              value: false,
+              child: Text('False'),
             ),
             DropdownMenuItem<bool?>(
               value: true,
               child: Text('True'),
             ),
-            DropdownMenuItem<bool?>(
-              value: false,
-              child: Text('False'),
-            ),
           ],
           onChanged: (value) {
             setState(() {
-              defaultBooleanValue = value;
+              defaultBooleanValue = value ?? false;
             });
           },
         );
@@ -196,7 +192,7 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
     }
 
     final defaultValue = switch (selectedType) {
-      AttributeValueType.boolean => defaultBooleanValue as String,
+      AttributeValueType.boolean => defaultBooleanValue.toString(),
       _ => defaultValueController.text.trim().isEmpty ? '' : defaultValueController.text.trim(),
     };
 
@@ -277,7 +273,7 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
               setState(() {
                 selectedType = value;
                 defaultValueController.clear();
-                defaultBooleanValue = null;
+                defaultBooleanValue = false;
               });
             },
           ),
