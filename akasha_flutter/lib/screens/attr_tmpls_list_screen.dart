@@ -63,99 +63,133 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
               child: SingleChildScrollView(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    dataRowMinHeight: 30,
-                    dataRowMaxHeight: 30,
-                    dividerThickness: 0.25,
-                    headingRowHeight: 30,
-                    columns: const [
-                      DataColumn(label: Text('name')),
-                      DataColumn(label: Text('description')),
-                      DataColumn(label: Text('value type')),
-                      DataColumn(label: Text('')),
-                    ],
-                    rows: attributeTmpls.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final tmpl = entry.value;
-                      final isHovered = _hoveredRowIndex == index;
-
-                      return DataRow(
-                        color: WidgetStateProperty.all(
-                          isHovered ? Colors.white : null,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header row
+                      Container(
+                        height: 30,
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[300]!)),
                         ),
-                        cells: [
-                          DataCell(
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              onEnter: (_) => setState(() => _hoveredRowIndex = index),
-                              onExit: (_) => setState(() => _hoveredRowIndex = null),
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                alignment: Alignment.centerLeft,
-                                child: Text(limitChars(tmpl.name, 48)),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 200,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                child: Text('name', style: TextStyle(color: Colors.grey[500])),
                               ),
                             ),
-                          ),
-                          DataCell(
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              onEnter: (_) => setState(() => _hoveredRowIndex = index),
-                              onExit: (_) => setState(() => _hoveredRowIndex = null),
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                alignment: Alignment.centerLeft,
-                                child: Text(tmpl.description != null ? limitChars(tmpl.description!, 50) : ''),
+                            SizedBox(
+                              width: 300,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                child: Text('description', style: TextStyle(color: Colors.grey[500])),
                               ),
                             ),
-                          ),
-                          DataCell(
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              onEnter: (_) => setState(() => _hoveredRowIndex = index),
-                              onExit: (_) => setState(() => _hoveredRowIndex = null),
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                alignment: Alignment.centerLeft,
-                                child: Text(tmpl.valueType),
+                            SizedBox(
+                              width: 100,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 2),
+                                child: Text('value type', style: TextStyle(color: Colors.grey[500])),
                               ),
                             ),
-                          ),
-                          DataCell(
-                            MouseRegion(
-                              onEnter: (_) => setState(() => _hoveredRowIndex = index),
-                              onExit: (_) => setState(() => _hoveredRowIndex = null),
-                              child: Container(
-                                width: double.infinity,
-                                height: double.infinity,
-                                alignment: Alignment.center,
-                                child: PopupMenuButton<String>(
-                                  onSelected: (value) {
-                                    if (value == 'edit') {
-                                      _showAttributeTemplateDialog(context, item: tmpl);
-                                    } else if (value == 'delete') {
-                                      _deleteAttributeTmpl(tmpl);
-                                    }
-                                  },
-                                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                                    const PopupMenuItem<String>(
-                                      value: 'edit',
-                                      child: Text('Edit'),
-                                    ),
-                                    const PopupMenuItem<String>(
-                                      value: 'delete',
-                                      child: Text('Delete'),
-                                    ),
-                                  ],
+                            SizedBox(
+                              width: 40,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                child: Text(''),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Data rows
+                      ...attributeTmpls.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final tmpl = entry.value;
+                        final isHovered = _hoveredRowIndex == index;
+
+                        return MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          onEnter: (_) => setState(() => _hoveredRowIndex = index),
+                          onExit: (_) => setState(() => _hoveredRowIndex = null),
+                          child: Container(
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: isHovered ? Colors.grey[100] : Colors.transparent,
+                              border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[350]!)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 200,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    child: Text(limitChars(tmpl.name, 28)),
+                                  ),
                                 ),
-                              ),
+                                SizedBox(
+                                  width: 300,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    child: Text(tmpl.description != null ? limitChars(tmpl.description!, 40) : ''),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 100,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 2),
+                                    child: Text(tmpl.valueType),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 30,
+                                  child: Builder(
+                                    builder: (context) => IconButton(
+                                      icon: Icon(Icons.more_vert, size: 15, color: isHovered ? Colors.grey[800] : Colors.grey[500]),
+                                      onPressed: () async {
+                                        final RenderBox button = context.findRenderObject() as RenderBox;
+                                        final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+                                        final RelativeRect position = RelativeRect.fromRect(
+                                          Rect.fromPoints(
+                                            button.localToGlobal(Offset.zero, ancestor: overlay),
+                                            button.localToGlobal(
+                                              button.size.bottomRight(Offset.zero),
+                                              ancestor: overlay,
+                                            ),
+                                          ),
+                                          Offset.zero & overlay.size,
+                                        );
+
+                                        final result = await showMenu<String>(
+                                          context: context,
+                                          position: position,
+                                          items: [
+                                            PopupMenuItem(value: 'edit', child: Text('Edit')),
+                                            PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                          ],
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                        );
+
+                                        if (result == 'edit') {
+                                          _showAttributeTemplateDialog(context, item: tmpl);
+                                        } else if (result == 'delete') {
+                                          _deleteAttributeTmpl(tmpl);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      );
-                    }).toList(),
+                        );
+                      }),
+                    ],
                   ),
                 ),
               ),
