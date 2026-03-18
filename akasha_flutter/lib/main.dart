@@ -3,6 +3,7 @@ import 'package:akasha_flutter/screens/access_levels_screen.dart';
 import 'package:akasha_flutter/screens/attr_tmpls_list_screen.dart';
 import 'package:akasha_flutter/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
@@ -22,6 +23,7 @@ late String serverUrl;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  usePathUrlStrategy();
 
   // When you are running the app on a physical device, you need to set the
   // server URL to the IP address of your computer. You can find the IP

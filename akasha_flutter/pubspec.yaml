@@ -29,8 +29,12 @@ dependencies:
   cupertino_icons: ^1.0.5
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
   akasha_client:
     path: ../akasha_client
+
   go_router: ^17.1.0
   serverpod_flutter: 3.4.4
   serverpod_auth_idp_flutter: 3.4.4
