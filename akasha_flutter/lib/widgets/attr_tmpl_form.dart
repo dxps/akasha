@@ -301,7 +301,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                   ),
                 )
               : DropdownButtonFormField<int>(
-                  value: selectedAccessLevelId,
+                  initialValue: selectedAccessLevelId,
                   decoration: const InputDecoration(
                     labelText: 'Access Level *',
                   ),

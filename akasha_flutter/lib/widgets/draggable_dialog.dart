@@ -185,33 +185,49 @@ class _DraggableDialogState extends State<DraggableDialog> {
                           widget.borderRadius,
                         ),
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _DialogDragHandle(
-                            title: widget.title,
-                            borderRadius: widget.borderRadius,
-                            showCloseButton: widget.showCloseButton,
-                            leadingIcon: widget.leadingIcon,
-                            leadingIconSize: widget.leadingIconSize,
-                            onDragUpdate: (details) {
-                              setState(() {
-                                _hasDragged = true;
-                                _position = _clampOffset(
-                                  _position! + details.delta,
-                                  constraints.biggest,
-                                  _dialogSize ?? Size(initialWidth, 0),
-                                );
-                              });
-                            },
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.grab,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onPanUpdate: (details) {
+                            setState(() {
+                              _hasDragged = true;
+                              _position = _clampOffset(
+                                _position! + details.delta,
+                                constraints.biggest,
+                                _dialogSize ?? Size(initialWidth, 0),
+                              );
+                            });
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _DialogDragHandle(
+                                title: widget.title,
+                                borderRadius: widget.borderRadius,
+                                showCloseButton: widget.showCloseButton,
+                                leadingIcon: widget.leadingIcon,
+                                leadingIconSize: widget.leadingIconSize,
+                                onDragUpdate: (details) {
+                                  setState(() {
+                                    _hasDragged = true;
+                                    _position = _clampOffset(
+                                      _position! + details.delta,
+                                      constraints.biggest,
+                                      _dialogSize ?? Size(initialWidth, 0),
+                                    );
+                                  });
+                                },
+                              ),
+                              Flexible(
+                                child: SingleChildScrollView(
+                                  padding: widget.padding,
+                                  child: widget.child,
+                                ),
+                              ),
+                            ],
                           ),
-                          Flexible(
-                            child: SingleChildScrollView(
-                              padding: widget.padding,
-                              child: widget.child,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -280,7 +296,7 @@ class _DialogDragHandle extends StatelessWidget {
           height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
+            color: Colors.transparent,
             borderRadius: BorderRadius.vertical(
               top: Radius.circular(borderRadius),
             ),
