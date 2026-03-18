@@ -11,6 +11,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import '../access_level/access_level.dart' as _i2;
+import 'package:akasha_client/src/protocol/protocol.dart' as _i3;
 
 abstract class AttributeTmpl implements _i1.SerializableModel {
   AttributeTmpl._({
@@ -20,6 +22,8 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
     required this.valueType,
     required this.defaultValue,
     required this.required,
+    required this.accessLevelId,
+    required this.accessLevel,
   });
 
   factory AttributeTmpl({
@@ -29,6 +33,8 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
     required String valueType,
     required String defaultValue,
     required bool required,
+    required int accessLevelId,
+    required _i2.AccessLevel? accessLevel,
   }) = _AttributeTmplImpl;
 
   factory AttributeTmpl.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -41,6 +47,12 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
       valueType: jsonSerialization['valueType'] as String,
       defaultValue: jsonSerialization['defaultValue'] as String,
       required: _i1.BoolJsonExtension.fromJson(jsonSerialization['required']),
+      accessLevelId: jsonSerialization['accessLevelId'] as int,
+      accessLevel: jsonSerialization['accessLevel'] == null
+          ? null
+          : _i3.Protocol().deserialize<_i2.AccessLevel>(
+              jsonSerialization['accessLevel'],
+            ),
     );
   }
 
@@ -57,6 +69,10 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
 
   bool required;
 
+  int accessLevelId;
+
+  _i2.AccessLevel? accessLevel;
+
   /// Returns a shallow copy of this [AttributeTmpl]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -67,6 +83,8 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
     String? valueType,
     String? defaultValue,
     bool? required,
+    int? accessLevelId,
+    _i2.AccessLevel? accessLevel,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -78,6 +96,8 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
       'valueType': valueType,
       'defaultValue': defaultValue,
       'required': required,
+      'accessLevelId': accessLevelId,
+      if (accessLevel != null) 'accessLevel': accessLevel?.toJson(),
     };
   }
 
@@ -97,6 +117,8 @@ class _AttributeTmplImpl extends AttributeTmpl {
     required String valueType,
     required String defaultValue,
     required bool required,
+    required int accessLevelId,
+    required _i2.AccessLevel? accessLevel,
   }) : super._(
          id: id,
          name: name,
@@ -104,6 +126,8 @@ class _AttributeTmplImpl extends AttributeTmpl {
          valueType: valueType,
          defaultValue: defaultValue,
          required: required,
+         accessLevelId: accessLevelId,
+         accessLevel: accessLevel,
        );
 
   /// Returns a shallow copy of this [AttributeTmpl]
@@ -117,6 +141,8 @@ class _AttributeTmplImpl extends AttributeTmpl {
     String? valueType,
     String? defaultValue,
     bool? required,
+    int? accessLevelId,
+    Object? accessLevel = _Undefined,
   }) {
     return AttributeTmpl(
       id: id is _i1.UuidValue? ? id : this.id,
@@ -125,6 +151,10 @@ class _AttributeTmplImpl extends AttributeTmpl {
       valueType: valueType ?? this.valueType,
       defaultValue: defaultValue ?? this.defaultValue,
       required: required ?? this.required,
+      accessLevelId: accessLevelId ?? this.accessLevelId,
+      accessLevel: accessLevel is _i2.AccessLevel?
+          ? accessLevel
+          : this.accessLevel?.copyWith(),
     );
   }
 }

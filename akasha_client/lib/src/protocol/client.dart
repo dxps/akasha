@@ -12,13 +12,57 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'package:akasha_client/src/protocol/attr_tmpls/attr_tmpl.dart' as _i3;
+import 'package:akasha_client/src/protocol/access_level/access_level.dart'
+    as _i3;
+import 'package:akasha_client/src/protocol/attr_tmpls/attr_tmpl.dart' as _i4;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i4;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i5;
-import 'package:akasha_client/src/protocol/greetings/greeting.dart' as _i6;
-import 'protocol.dart' as _i7;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i6;
+import 'package:akasha_client/src/protocol/greetings/greeting.dart' as _i7;
+import 'protocol.dart' as _i8;
+
+/// {@category Endpoint}
+class EndpointAccessLevel extends _i1.EndpointRef {
+  EndpointAccessLevel(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'accessLevel';
+
+  _i2.Future<_i3.AccessLevel> create(_i3.AccessLevel data) =>
+      caller.callServerEndpoint<_i3.AccessLevel>(
+        'accessLevel',
+        'create',
+        {'data': data},
+      );
+
+  _i2.Future<_i3.AccessLevel?> read(int id) =>
+      caller.callServerEndpoint<_i3.AccessLevel?>(
+        'accessLevel',
+        'read',
+        {'id': id},
+      );
+
+  _i2.Future<List<_i3.AccessLevel>> readAll() =>
+      caller.callServerEndpoint<List<_i3.AccessLevel>>(
+        'accessLevel',
+        'readAll',
+        {},
+      );
+
+  _i2.Future<_i3.AccessLevel> update(_i3.AccessLevel data) =>
+      caller.callServerEndpoint<_i3.AccessLevel>(
+        'accessLevel',
+        'update',
+        {'data': data},
+      );
+
+  _i2.Future<bool> delete(int id) => caller.callServerEndpoint<bool>(
+    'accessLevel',
+    'delete',
+    {'id': id},
+  );
+}
 
 /// {@category Endpoint}
 class EndpointAttrTmpls extends _i1.EndpointRef {
@@ -27,29 +71,29 @@ class EndpointAttrTmpls extends _i1.EndpointRef {
   @override
   String get name => 'attrTmpls';
 
-  _i2.Future<_i3.AttributeTmpl> create(_i3.AttributeTmpl data) =>
-      caller.callServerEndpoint<_i3.AttributeTmpl>(
+  _i2.Future<_i4.AttributeTmpl> create(_i4.AttributeTmpl data) =>
+      caller.callServerEndpoint<_i4.AttributeTmpl>(
         'attrTmpls',
         'create',
         {'data': data},
       );
 
-  _i2.Future<_i3.AttributeTmpl?> read(_i1.UuidValue id) =>
-      caller.callServerEndpoint<_i3.AttributeTmpl?>(
+  _i2.Future<_i4.AttributeTmpl?> read(_i1.UuidValue id) =>
+      caller.callServerEndpoint<_i4.AttributeTmpl?>(
         'attrTmpls',
         'read',
         {'id': id},
       );
 
-  _i2.Future<List<_i3.AttributeTmpl>> readAll() =>
-      caller.callServerEndpoint<List<_i3.AttributeTmpl>>(
+  _i2.Future<List<_i4.AttributeTmpl>> readAll() =>
+      caller.callServerEndpoint<List<_i4.AttributeTmpl>>(
         'attrTmpls',
         'readAll',
         {},
       );
 
-  _i2.Future<_i3.AttributeTmpl> update(_i3.AttributeTmpl data) =>
-      caller.callServerEndpoint<_i3.AttributeTmpl>(
+  _i2.Future<_i4.AttributeTmpl> update(_i4.AttributeTmpl data) =>
+      caller.callServerEndpoint<_i4.AttributeTmpl>(
         'attrTmpls',
         'update',
         {'data': data},
@@ -66,7 +110,7 @@ class EndpointAttrTmpls extends _i1.EndpointRef {
 /// are made available on the server and enable the corresponding sign-in widget
 /// on the client.
 /// {@category Endpoint}
-class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
+class EndpointEmailIdp extends _i5.EndpointEmailIdpBase {
   EndpointEmailIdp(_i1.EndpointCaller caller) : super(caller);
 
   @override
@@ -82,10 +126,10 @@ class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
   ///
   /// Throws an [AuthUserBlockedException] if the auth user is blocked.
   @override
-  _i2.Future<_i5.AuthSuccess> login({
+  _i2.Future<_i6.AuthSuccess> login({
     required String email,
     required String password,
-  }) => caller.callServerEndpoint<_i5.AuthSuccess>(
+  }) => caller.callServerEndpoint<_i6.AuthSuccess>(
     'emailIdp',
     'login',
     {
@@ -150,10 +194,10 @@ class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
   ///
   /// Returns a session for the newly created user.
   @override
-  _i2.Future<_i5.AuthSuccess> finishRegistration({
+  _i2.Future<_i6.AuthSuccess> finishRegistration({
     required String registrationToken,
     required String password,
-  }) => caller.callServerEndpoint<_i5.AuthSuccess>(
+  }) => caller.callServerEndpoint<_i6.AuthSuccess>(
     'emailIdp',
     'finishRegistration',
     {
@@ -248,7 +292,7 @@ class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
 /// By extending [RefreshJwtTokensEndpoint], the JWT token refresh endpoint
 /// is made available on the server and enables automatic token refresh on the client.
 /// {@category Endpoint}
-class EndpointJwtRefresh extends _i5.EndpointRefreshJwtTokens {
+class EndpointJwtRefresh extends _i6.EndpointRefreshJwtTokens {
   EndpointJwtRefresh(_i1.EndpointCaller caller) : super(caller);
 
   @override
@@ -273,9 +317,9 @@ class EndpointJwtRefresh extends _i5.EndpointRefreshJwtTokens {
   /// This endpoint is unauthenticated, meaning the client won't include any
   /// authentication information with the call.
   @override
-  _i2.Future<_i5.AuthSuccess> refreshAccessToken({
+  _i2.Future<_i6.AuthSuccess> refreshAccessToken({
     required String refreshToken,
-  }) => caller.callServerEndpoint<_i5.AuthSuccess>(
+  }) => caller.callServerEndpoint<_i6.AuthSuccess>(
     'jwtRefresh',
     'refreshAccessToken',
     {'refreshToken': refreshToken},
@@ -293,8 +337,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i6.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i6.Greeting>(
+  _i2.Future<_i7.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i7.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -303,13 +347,13 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    serverpod_auth_idp = _i4.Caller(client);
-    serverpod_auth_core = _i5.Caller(client);
+    serverpod_auth_idp = _i5.Caller(client);
+    serverpod_auth_core = _i6.Caller(client);
   }
 
-  late final _i4.Caller serverpod_auth_idp;
+  late final _i5.Caller serverpod_auth_idp;
 
-  late final _i5.Caller serverpod_auth_core;
+  late final _i6.Caller serverpod_auth_core;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -332,7 +376,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i7.Protocol(),
+         _i8.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -341,12 +385,15 @@ class Client extends _i1.ServerpodClientShared {
          disconnectStreamsOnLostInternetConnection:
              disconnectStreamsOnLostInternetConnection,
        ) {
+    accessLevel = EndpointAccessLevel(this);
     attrTmpls = EndpointAttrTmpls(this);
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
+
+  late final EndpointAccessLevel accessLevel;
 
   late final EndpointAttrTmpls attrTmpls;
 
@@ -360,6 +407,7 @@ class Client extends _i1.ServerpodClientShared {
 
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
+    'accessLevel': accessLevel,
     'attrTmpls': attrTmpls,
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,

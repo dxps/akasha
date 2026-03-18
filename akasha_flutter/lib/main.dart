@@ -1,4 +1,5 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_flutter/screens/access_levels_screen.dart';
 import 'package:akasha_flutter/screens/attr_tmpls_list_screen.dart';
 import 'package:akasha_flutter/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +54,10 @@ final GoRouter _router = GoRouter(
       path: '/attr_tmpls',
       pageBuilder: (context, state) => const NoTransitionPage(child: AttributeTmplsScreen()),
     ),
+    GoRoute(
+      path: '/access_levels',
+      pageBuilder: (context, state) => const NoTransitionPage(child: AccessLevelsScreen()),
+    ),
   ],
 );
 
@@ -104,18 +109,20 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(title: Text(title), backgroundColor: Colors.transparent),
       // body: const GreetingsScreen(),
       // To test authentication in this example app, uncomment the line below
       // and comment out the line above. This wraps the GreetingsScreen with a
       // SignInScreen, which automatically shows a sign-in UI when the user is
       // not authenticated and displays the GreetingsScreen once they sign in.
       //
-      body: SignInScreen(
-        child: GreetingsScreen(
-          onSignOut: () async {
-            await client.auth.signOutDevice();
-          },
+      body: Center(
+        child: SignInScreen(
+          child: GreetingsScreen(
+            onSignOut: () async {
+              await client.auth.signOutDevice();
+            },
+          ),
         ),
       ),
     );

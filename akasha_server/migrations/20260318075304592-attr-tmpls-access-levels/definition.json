@@ -4,7 +4,70 @@
   "tables": [
     {
       "__className__": "serverpod.TableDefinition",
-      "name": "attributes_tmpls",
+      "name": "access_levels",
+      "dartName": "AccessLevel",
+      "module": "akasha",
+      "schema": "public",
+      "columns": [
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "id",
+          "columnType": 6,
+          "isNullable": false,
+          "columnDefault": "nextval('access_levels_id_seq'::regclass)",
+          "dartType": "int?"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "name",
+          "columnType": 0,
+          "isNullable": false,
+          "dartType": "String"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "description",
+          "columnType": 0,
+          "isNullable": true,
+          "dartType": "String?"
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "__className__": "serverpod.IndexDefinition",
+          "indexName": "access_levels_pkey",
+          "elements": [
+            {
+              "__className__": "serverpod.IndexElementDefinition",
+              "type": 0,
+              "definition": "id"
+            }
+          ],
+          "type": "btree",
+          "isUnique": true,
+          "isPrimary": true
+        },
+        {
+          "__className__": "serverpod.IndexDefinition",
+          "indexName": "access_level_name_uniq_idx",
+          "elements": [
+            {
+              "__className__": "serverpod.IndexElementDefinition",
+              "type": 0,
+              "definition": "name"
+            }
+          ],
+          "type": "btree",
+          "isUnique": true,
+          "isPrimary": false
+        }
+      ],
+      "managed": true
+    },
+    {
+      "__className__": "serverpod.TableDefinition",
+      "name": "attribute_tmpls",
       "dartName": "AttributeTmpl",
       "module": "akasha",
       "schema": "public",
@@ -51,13 +114,35 @@
           "columnType": 1,
           "isNullable": false,
           "dartType": "bool"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
+          "name": "accessLevelId",
+          "columnType": 6,
+          "isNullable": false,
+          "dartType": "int"
         }
       ],
-      "foreignKeys": [],
+      "foreignKeys": [
+        {
+          "__className__": "serverpod.ForeignKeyDefinition",
+          "constraintName": "attribute_tmpls_fk_0",
+          "columns": [
+            "accessLevelId"
+          ],
+          "referenceTable": "access_levels",
+          "referenceTableSchema": "public",
+          "referenceColumns": [
+            "id"
+          ],
+          "onUpdate": 3,
+          "onDelete": 3
+        }
+      ],
       "indexes": [
         {
           "__className__": "serverpod.IndexDefinition",
-          "indexName": "attributes_tmpls_pkey",
+          "indexName": "attribute_tmpls_pkey",
           "elements": [
             {
               "__className__": "serverpod.IndexElementDefinition",
@@ -3237,7 +3322,7 @@
     {
       "__className__": "serverpod.DatabaseMigrationVersion",
       "module": "akasha",
-      "version": "20260316111847439-add-attributes-tmpls-table"
+      "version": "20260318075304592-attr-tmpls-access-levels"
     },
     {
       "__className__": "serverpod.DatabaseMigrationVersion",

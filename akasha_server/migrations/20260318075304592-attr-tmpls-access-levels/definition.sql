@@ -30,19 +30,32 @@ language plpgsql
 volatile;
 
 --
--- Class AttributeTmpl as table attributes_tmpls
+-- Class AccessLevel as table access_levels
 --
-CREATE TABLE "attributes_tmpls" (
+CREATE TABLE "access_levels" (
+    "id" bigserial PRIMARY KEY,
+    "name" text NOT NULL,
+    "description" text
+);
+
+-- Indexes
+CREATE UNIQUE INDEX "access_level_name_uniq_idx" ON "access_levels" USING btree ("name");
+
+--
+-- Class AttributeTmpl as table attribute_tmpls
+--
+CREATE TABLE "attribute_tmpls" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
     "name" text NOT NULL,
     "description" text,
     "valueType" text NOT NULL,
     "defaultValue" text NOT NULL,
-    "required" boolean NOT NULL
+    "required" boolean NOT NULL,
+    "accessLevelId" bigint NOT NULL
 );
 
 -- Indexes
-CREATE UNIQUE INDEX "attr_tmpl_name_desc_uniq_idx" ON "attributes_tmpls" USING btree ("name", "description");
+CREATE UNIQUE INDEX "attr_tmpl_name_desc_uniq_idx" ON "attribute_tmpls" USING btree ("name", "description");
 
 --
 -- Class CloudStorageEntry as table serverpod_cloud_storage
@@ -518,6 +531,16 @@ CREATE TABLE "serverpod_auth_core_user" (
 );
 
 --
+-- Foreign relations for "attribute_tmpls" table
+--
+ALTER TABLE ONLY "attribute_tmpls"
+    ADD CONSTRAINT "attribute_tmpls_fk_0"
+    FOREIGN KEY("accessLevelId")
+    REFERENCES "access_levels"("id")
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION;
+
+--
 -- Foreign relations for "serverpod_log" table
 --
 ALTER TABLE ONLY "serverpod_log"
@@ -726,9 +749,9 @@ ALTER TABLE ONLY "serverpod_auth_core_session"
 -- MIGRATION VERSION FOR akasha
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('akasha', '20260316111847439-add-attributes-tmpls-table', now())
+    VALUES ('akasha', '20260318075304592-attr-tmpls-access-levels', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20260316111847439-add-attributes-tmpls-table', "timestamp" = now();
+    DO UPDATE SET "version" = '20260318075304592-attr-tmpls-access-levels', "timestamp" = now();
 
 --
 -- MIGRATION VERSION FOR serverpod

@@ -57,6 +57,10 @@ class _GreetingsScreenState extends State<GreetingsScreen> {
                   onPressed: () => context.go('/attr_tmpls'),
                   child: const Text('Attribute Templates'),
                 ),
+                ElevatedButton(
+                  onPressed: () => context.go('/access_levels'),
+                  child: const Text('Access Levels'),
+                ),
               ],
             ),
           ],

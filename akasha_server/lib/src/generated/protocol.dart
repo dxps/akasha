@@ -16,9 +16,13 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i3;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
-import 'attr_tmpls/attr_tmpl.dart' as _i5;
-import 'greetings/greeting.dart' as _i6;
-import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i7;
+import 'access_level/access_level.dart' as _i5;
+import 'attr_tmpls/attr_tmpl.dart' as _i6;
+import 'greetings/greeting.dart' as _i7;
+import 'package:akasha_server/src/generated/access_level/access_level.dart'
+    as _i8;
+import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i9;
+export 'access_level/access_level.dart';
 export 'attr_tmpls/attr_tmpl.dart';
 export 'greetings/greeting.dart';
 
@@ -31,7 +35,64 @@ class Protocol extends _i1.SerializationManagerServer {
 
   static final List<_i2.TableDefinition> targetTableDefinitions = [
     _i2.TableDefinition(
-      name: 'attributes_tmpls',
+      name: 'access_levels',
+      dartName: 'AccessLevel',
+      schema: 'public',
+      module: 'akasha',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int?',
+          columnDefault: 'nextval(\'access_levels_id_seq\'::regclass)',
+        ),
+        _i2.ColumnDefinition(
+          name: 'name',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'description',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'access_levels_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'access_level_name_uniq_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'name',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'attribute_tmpls',
       dartName: 'AttributeTmpl',
       schema: 'public',
       module: 'akasha',
@@ -73,11 +134,28 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: false,
           dartType: 'bool',
         ),
+        _i2.ColumnDefinition(
+          name: 'accessLevelId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'attribute_tmpls_fk_0',
+          columns: ['accessLevelId'],
+          referenceTable: 'access_levels',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
       indexes: [
         _i2.IndexDefinition(
-          indexName: 'attributes_tmpls_pkey',
+          indexName: 'attribute_tmpls_pkey',
           tableSpace: null,
           elements: [
             _i2.IndexElementDefinition(
@@ -141,21 +219,31 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
 
-    if (t == _i5.AttributeTmpl) {
-      return _i5.AttributeTmpl.fromJson(data) as T;
+    if (t == _i5.AccessLevel) {
+      return _i5.AccessLevel.fromJson(data) as T;
     }
-    if (t == _i6.Greeting) {
-      return _i6.Greeting.fromJson(data) as T;
+    if (t == _i6.AttributeTmpl) {
+      return _i6.AttributeTmpl.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i5.AttributeTmpl?>()) {
-      return (data != null ? _i5.AttributeTmpl.fromJson(data) : null) as T;
+    if (t == _i7.Greeting) {
+      return _i7.Greeting.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i6.Greeting?>()) {
-      return (data != null ? _i6.Greeting.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i5.AccessLevel?>()) {
+      return (data != null ? _i5.AccessLevel.fromJson(data) : null) as T;
     }
-    if (t == List<_i7.AttributeTmpl>) {
+    if (t == _i1.getType<_i6.AttributeTmpl?>()) {
+      return (data != null ? _i6.AttributeTmpl.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i7.Greeting?>()) {
+      return (data != null ? _i7.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == List<_i8.AccessLevel>) {
+      return (data as List).map((e) => deserialize<_i8.AccessLevel>(e)).toList()
+          as T;
+    }
+    if (t == List<_i9.AttributeTmpl>) {
       return (data as List)
-              .map((e) => deserialize<_i7.AttributeTmpl>(e))
+              .map((e) => deserialize<_i9.AttributeTmpl>(e))
               .toList()
           as T;
     }
@@ -173,8 +261,9 @@ class Protocol extends _i1.SerializationManagerServer {
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
-      _i5.AttributeTmpl => 'AttributeTmpl',
-      _i6.Greeting => 'Greeting',
+      _i5.AccessLevel => 'AccessLevel',
+      _i6.AttributeTmpl => 'AttributeTmpl',
+      _i7.Greeting => 'Greeting',
       _ => null,
     };
   }
@@ -189,9 +278,11 @@ class Protocol extends _i1.SerializationManagerServer {
     }
 
     switch (data) {
-      case _i5.AttributeTmpl():
+      case _i5.AccessLevel():
+        return 'AccessLevel';
+      case _i6.AttributeTmpl():
         return 'AttributeTmpl';
-      case _i6.Greeting():
+      case _i7.Greeting():
         return 'Greeting';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -215,11 +306,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
+    if (dataClassName == 'AccessLevel') {
+      return deserialize<_i5.AccessLevel>(data['data']);
+    }
     if (dataClassName == 'AttributeTmpl') {
-      return deserialize<_i5.AttributeTmpl>(data['data']);
+      return deserialize<_i6.AttributeTmpl>(data['data']);
     }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i6.Greeting>(data['data']);
+      return deserialize<_i7.Greeting>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -257,8 +351,10 @@ class Protocol extends _i1.SerializationManagerServer {
       }
     }
     switch (t) {
-      case _i5.AttributeTmpl:
-        return _i5.AttributeTmpl.t;
+      case _i5.AccessLevel:
+        return _i5.AccessLevel.t;
+      case _i6.AttributeTmpl:
+        return _i6.AttributeTmpl.t;
     }
     return null;
   }

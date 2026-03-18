@@ -33,11 +33,23 @@ First of all, in the root directory, run `dart pub get` to get (download) the de
 Make sure you have `akasha_server/config/passwords.yaml` file with such content:
 
 ```yaml
+# Save passwords used across all configurations here.
+shared:
+    mySharedPassword: 'my password'
+
+# These are passwords used when running the server locally in development mode
 development:
-    jwtRefreshTokenHashPepper: 'replace-with-a-long-random-secret'
-    jwtHmacSha512PrivateKey: 'replace-with-another-long-random-secret'
-    serviceSecret: 'a-very-long-random-secret-at-least-20-chars'
-    emailSecretHashPepper: 'replace-with-32+-random-chars'
+    database: 'ndy0IdJXkIkfVkiFiTkBY1sFHgCTtUTe'
+    redis: 'MC8nBpT-wAhlFdiEZGMzmwaTnI9zFuJk'
+
+    # The service secret is used to communicate between servers and to access the
+    # service protocol.
+    serviceSecret: 'GBWY47kjcARweSsrxU-FQFBA5HSJOG1k'
+
+    emailSecretHashPepper: 'm5cPG9hCdc_KrCUxxucbSMCXlyirWmsh'
+    jwtHmacSha512PrivateKey: 'QptFy_ooWSKV22TfDb64PRlXCRzgpNIq'
+    jwtRefreshTokenHashPepper: 'EAyRjbGq453vdKnjeiqFAXh056Mpm4qW'
+    # serverSideSessionKeyHashPepper: 'XMKvXKUFZxboXS5rzw_pDAQqQXzHvG2W'
 ```
 
 ### Run

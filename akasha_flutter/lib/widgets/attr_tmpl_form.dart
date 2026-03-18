@@ -1,9 +1,10 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/model/attr_value_type.dart';
 import 'package:flutter/material.dart';
 
-class AddAttributeTemplateForm extends StatefulWidget {
-  const AddAttributeTemplateForm({
+class AttributeTemplateForm extends StatefulWidget {
+  const AttributeTemplateForm({
     super.key,
     this.attributeTmpl,
     required this.onSave,
@@ -13,10 +14,10 @@ class AddAttributeTemplateForm extends StatefulWidget {
   final Future<void> Function(AttributeTmpl) onSave;
 
   @override
-  State<AddAttributeTemplateForm> createState() => _AddAttributeTemplateFormState();
+  State<AttributeTemplateForm> createState() => _AttributeTemplateFormState();
 }
 
-class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
+class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
   final formKey = GlobalKey<FormState>();
   late final TextEditingController nameController;
   late final TextEditingController descriptionController;
@@ -25,7 +26,10 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
   late AttributeValueType selectedType;
   late bool isRequired;
   late bool defaultBooleanValue;
+  late int? selectedAccessLevelId;
+  List<AccessLevel> accessLevels = [];
   bool _isSaving = false;
+  bool _isLoadingAccessLevels = true;
 
   bool get _isEditing => widget.attributeTmpl != null;
 
@@ -48,6 +52,29 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
 
     isRequired = tmpl?.required ?? false;
     defaultBooleanValue = tmpl?.valueType == 'boolean' ? (tmpl?.defaultValue as bool) : false;
+    selectedAccessLevelId = tmpl?.accessLevelId;
+
+    _fetchAccessLevels();
+  }
+
+  Future<void> _fetchAccessLevels() async {
+    try {
+      final items = await client.accessLevel.readAll();
+      setState(() {
+        accessLevels = items;
+        _isLoadingAccessLevels = false;
+      });
+    } catch (e) {
+      debugPrint('Error fetching access levels: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingAccessLevels = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading access levels: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -191,6 +218,13 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
       return;
     }
 
+    if (selectedAccessLevelId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an access level')),
+      );
+      return;
+    }
+
     final defaultValue = switch (selectedType) {
       AttributeValueType.boolean => defaultBooleanValue.toString(),
       _ => defaultValueController.text.trim().isEmpty ? '' : defaultValueController.text.trim(),
@@ -206,6 +240,8 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
         valueType: selectedType.name,
         defaultValue: defaultValue,
         required: isRequired,
+        accessLevelId: selectedAccessLevelId!,
+        accessLevel: null,
       );
 
       await widget.onSave(tmpl);
@@ -254,6 +290,42 @@ class _AddAttributeTemplateFormState extends State<AddAttributeTemplateForm> {
               labelText: 'Description',
             ),
           ),
+          const SizedBox(height: 12),
+          _isLoadingAccessLevels
+              ? const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : DropdownButtonFormField<int>(
+                  value: selectedAccessLevelId,
+                  decoration: const InputDecoration(
+                    labelText: 'Access Level *',
+                  ),
+                  items: accessLevels
+                      .map(
+                        (level) => DropdownMenuItem(
+                          value: level.id,
+                          child: Text(level.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() {
+                      selectedAccessLevelId = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Access level is required';
+                    }
+                    return null;
+                  },
+                ),
           const SizedBox(height: 12),
           DropdownButtonFormField<AttributeValueType>(
             initialValue: selectedType,

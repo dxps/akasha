@@ -1,3 +1,9 @@
+accessLevel:
+  - create:
+  - read:
+  - readAll:
+  - update:
+  - delete:
 attrTmpls:
   - create:
   - read:

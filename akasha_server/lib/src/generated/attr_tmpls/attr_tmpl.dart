@@ -8,9 +8,12 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 // ignore_for_file: invalid_use_of_internal_member
+// ignore_for_file: unnecessary_null_comparison
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import '../access_level/access_level.dart' as _i2;
+import 'package:akasha_server/src/generated/protocol.dart' as _i3;
 
 abstract class AttributeTmpl
     implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
@@ -21,6 +24,8 @@ abstract class AttributeTmpl
     required this.valueType,
     required this.defaultValue,
     required this.required,
+    required this.accessLevelId,
+    required this.accessLevel,
   });
 
   factory AttributeTmpl({
@@ -30,6 +35,8 @@ abstract class AttributeTmpl
     required String valueType,
     required String defaultValue,
     required bool required,
+    required int accessLevelId,
+    required _i2.AccessLevel? accessLevel,
   }) = _AttributeTmplImpl;
 
   factory AttributeTmpl.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -42,6 +49,12 @@ abstract class AttributeTmpl
       valueType: jsonSerialization['valueType'] as String,
       defaultValue: jsonSerialization['defaultValue'] as String,
       required: _i1.BoolJsonExtension.fromJson(jsonSerialization['required']),
+      accessLevelId: jsonSerialization['accessLevelId'] as int,
+      accessLevel: jsonSerialization['accessLevel'] == null
+          ? null
+          : _i3.Protocol().deserialize<_i2.AccessLevel>(
+              jsonSerialization['accessLevel'],
+            ),
     );
   }
 
@@ -62,6 +75,10 @@ abstract class AttributeTmpl
 
   bool required;
 
+  int accessLevelId;
+
+  _i2.AccessLevel? accessLevel;
+
   @override
   _i1.Table<_i1.UuidValue?> get table => t;
 
@@ -75,6 +92,8 @@ abstract class AttributeTmpl
     String? valueType,
     String? defaultValue,
     bool? required,
+    int? accessLevelId,
+    _i2.AccessLevel? accessLevel,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -86,6 +105,8 @@ abstract class AttributeTmpl
       'valueType': valueType,
       'defaultValue': defaultValue,
       'required': required,
+      'accessLevelId': accessLevelId,
+      if (accessLevel != null) 'accessLevel': accessLevel?.toJson(),
     };
   }
 
@@ -99,11 +120,13 @@ abstract class AttributeTmpl
       'valueType': valueType,
       'defaultValue': defaultValue,
       'required': required,
+      'accessLevelId': accessLevelId,
+      if (accessLevel != null) 'accessLevel': accessLevel?.toJsonForProtocol(),
     };
   }
 
-  static AttributeTmplInclude include() {
-    return AttributeTmplInclude._();
+  static AttributeTmplInclude include({_i2.AccessLevelInclude? accessLevel}) {
+    return AttributeTmplInclude._(accessLevel: accessLevel);
   }
 
   static AttributeTmplIncludeList includeList({
@@ -142,6 +165,8 @@ class _AttributeTmplImpl extends AttributeTmpl {
     required String valueType,
     required String defaultValue,
     required bool required,
+    required int accessLevelId,
+    required _i2.AccessLevel? accessLevel,
   }) : super._(
          id: id,
          name: name,
@@ -149,6 +174,8 @@ class _AttributeTmplImpl extends AttributeTmpl {
          valueType: valueType,
          defaultValue: defaultValue,
          required: required,
+         accessLevelId: accessLevelId,
+         accessLevel: accessLevel,
        );
 
   /// Returns a shallow copy of this [AttributeTmpl]
@@ -162,6 +189,8 @@ class _AttributeTmplImpl extends AttributeTmpl {
     String? valueType,
     String? defaultValue,
     bool? required,
+    int? accessLevelId,
+    Object? accessLevel = _Undefined,
   }) {
     return AttributeTmpl(
       id: id is _i1.UuidValue? ? id : this.id,
@@ -170,6 +199,10 @@ class _AttributeTmplImpl extends AttributeTmpl {
       valueType: valueType ?? this.valueType,
       defaultValue: defaultValue ?? this.defaultValue,
       required: required ?? this.required,
+      accessLevelId: accessLevelId ?? this.accessLevelId,
+      accessLevel: accessLevel is _i2.AccessLevel?
+          ? accessLevel
+          : this.accessLevel?.copyWith(),
     );
   }
 }
@@ -201,11 +234,16 @@ class AttributeTmplUpdateTable extends _i1.UpdateTable<AttributeTmplTable> {
     table.required,
     value,
   );
+
+  _i1.ColumnValue<int, int> accessLevelId(int value) => _i1.ColumnValue(
+    table.accessLevelId,
+    value,
+  );
 }
 
 class AttributeTmplTable extends _i1.Table<_i1.UuidValue?> {
   AttributeTmplTable({super.tableRelation})
-    : super(tableName: 'attributes_tmpls') {
+    : super(tableName: 'attribute_tmpls') {
     updateTable = AttributeTmplUpdateTable(this);
     name = _i1.ColumnString(
       'name',
@@ -227,6 +265,10 @@ class AttributeTmplTable extends _i1.Table<_i1.UuidValue?> {
       'required',
       this,
     );
+    accessLevelId = _i1.ColumnInt(
+      'accessLevelId',
+      this,
+    );
   }
 
   late final AttributeTmplUpdateTable updateTable;
@@ -241,6 +283,23 @@ class AttributeTmplTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnBool required;
 
+  late final _i1.ColumnInt accessLevelId;
+
+  _i2.AccessLevelTable? _accessLevel;
+
+  _i2.AccessLevelTable get accessLevel {
+    if (_accessLevel != null) return _accessLevel!;
+    _accessLevel = _i1.createRelationTable(
+      relationFieldName: 'accessLevel',
+      field: AttributeTmpl.t.accessLevelId,
+      foreignField: _i2.AccessLevel.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i2.AccessLevelTable(tableRelation: foreignTableRelation),
+    );
+    return _accessLevel!;
+  }
+
   @override
   List<_i1.Column> get columns => [
     id,
@@ -249,14 +308,27 @@ class AttributeTmplTable extends _i1.Table<_i1.UuidValue?> {
     valueType,
     defaultValue,
     required,
+    accessLevelId,
   ];
+
+  @override
+  _i1.Table? getRelationTable(String relationField) {
+    if (relationField == 'accessLevel') {
+      return accessLevel;
+    }
+    return null;
+  }
 }
 
 class AttributeTmplInclude extends _i1.IncludeObject {
-  AttributeTmplInclude._();
+  AttributeTmplInclude._({_i2.AccessLevelInclude? accessLevel}) {
+    _accessLevel = accessLevel;
+  }
+
+  _i2.AccessLevelInclude? _accessLevel;
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _i1.Include?> get includes => {'accessLevel': _accessLevel};
 
   @override
   _i1.Table<_i1.UuidValue?> get table => AttributeTmpl.t;
@@ -284,6 +356,8 @@ class AttributeTmplIncludeList extends _i1.IncludeList {
 
 class AttributeTmplRepository {
   const AttributeTmplRepository._();
+
+  final attachRow = const AttributeTmplAttachRowRepository._();
 
   /// Returns a list of [AttributeTmpl]s matching the given query parameters.
   ///
@@ -316,6 +390,7 @@ class AttributeTmplRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<AttributeTmplTable>? orderByList,
     _i1.Transaction? transaction,
+    AttributeTmplInclude? include,
     _i1.LockMode? lockMode,
     _i1.LockBehavior? lockBehavior,
   }) async {
@@ -327,6 +402,7 @@ class AttributeTmplRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      include: include,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
     );
@@ -357,6 +433,7 @@ class AttributeTmplRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<AttributeTmplTable>? orderByList,
     _i1.Transaction? transaction,
+    AttributeTmplInclude? include,
     _i1.LockMode? lockMode,
     _i1.LockBehavior? lockBehavior,
   }) async {
@@ -367,6 +444,7 @@ class AttributeTmplRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      include: include,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
     );
@@ -377,12 +455,14 @@ class AttributeTmplRepository {
     _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    AttributeTmplInclude? include,
     _i1.LockMode? lockMode,
     _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<AttributeTmpl>(
       id,
       transaction: transaction,
+      include: include,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
     );
@@ -564,6 +644,33 @@ class AttributeTmplRepository {
       where: where(AttributeTmpl.t),
       lockMode: lockMode,
       lockBehavior: lockBehavior,
+      transaction: transaction,
+    );
+  }
+}
+
+class AttributeTmplAttachRowRepository {
+  const AttributeTmplAttachRowRepository._();
+
+  /// Creates a relation between the given [AttributeTmpl] and [AccessLevel]
+  /// by setting the [AttributeTmpl]'s foreign key `accessLevelId` to refer to the [AccessLevel].
+  Future<void> accessLevel(
+    _i1.DatabaseSession session,
+    AttributeTmpl attributeTmpl,
+    _i2.AccessLevel accessLevel, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (attributeTmpl.id == null) {
+      throw ArgumentError.notNull('attributeTmpl.id');
+    }
+    if (accessLevel.id == null) {
+      throw ArgumentError.notNull('accessLevel.id');
+    }
+
+    var $attributeTmpl = attributeTmpl.copyWith(accessLevelId: accessLevel.id);
+    await session.db.updateRow<AttributeTmpl>(
+      $attributeTmpl,
+      columns: [AttributeTmpl.t.accessLevelId],
       transaction: transaction,
     );
   }

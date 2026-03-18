@@ -1,0 +1,10 @@
+class: AccessLevel
+table: access_levels
+fields:
+    id: int?, defaultPersist=serial
+    name: String
+    description: String?
+indexes:
+    access_level_name_uniq_idx:
+        fields: name
+        unique: true

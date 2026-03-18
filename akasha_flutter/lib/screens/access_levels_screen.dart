@@ -1,59 +1,59 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/utils/string.dart';
-import 'package:akasha_flutter/widgets/attr_tmpl_form.dart';
+import 'package:akasha_flutter/widgets/access_level_form.dart';
 import 'package:akasha_flutter/widgets/draggable_dialog.dart';
 import 'package:flutter/material.dart';
 
-class AttributeTmplsScreen extends StatefulWidget {
-  const AttributeTmplsScreen({super.key});
+class AccessLevelsScreen extends StatefulWidget {
+  const AccessLevelsScreen({super.key});
 
   @override
-  State<AttributeTmplsScreen> createState() => _AttributeTmplsScreenState();
+  State<AccessLevelsScreen> createState() => _AccessLevelsScreenState();
 }
 
-class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
-  List<AttributeTmpl> attributeTmpls = [];
+class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
+  List<AccessLevel> accessLevels = [];
   int? _hoveredRowIndex;
 
-  Future<void> _getAttributeTmpls() async {
-    final items = await client.attrTmpls.readAll();
-    debugPrint("[_AttributeTmplsScreenStat] Got ${items.length} attributeTmpls.");
-    setState(() => attributeTmpls = items);
+  Future<void> _getAccessLevels() async {
+    final items = await client.accessLevel.readAll();
+    debugPrint("[_AccessLevelsScreenState] Got ${items.length} access levels.");
+    setState(() => accessLevels = items);
   }
 
   @override
   void initState() {
     super.initState();
-    _getAttributeTmpls();
+    _getAccessLevels();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Attribute Templates', style: TextStyle(fontSize: 16)),
+        title: const Text('Access Levels', style: TextStyle(fontSize: 16)),
         backgroundColor: Colors.transparent,
         actions: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton.icon(
-              onPressed: () => _showAttributeTemplateDialog(context),
+              onPressed: () => _showAccessLevelDialog(context),
               icon: const Icon(Icons.add),
               label: const Text('Add'),
             ),
           ),
         ],
       ),
-      body: attributeTmpls.isEmpty
+      body: accessLevels.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('No attribute templates yet.'),
+                  const Text('No access levels yet.'),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () => _showAttributeTemplateDialog(context),
+                    onPressed: () => _showAccessLevelDialog(context),
                     child: const Text('Add'),
                   ),
                 ],
@@ -90,13 +90,6 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                               ),
                             ),
                             SizedBox(
-                              width: 100,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
-                                child: Text('value type', style: TextStyle(color: Colors.grey[500])),
-                              ),
-                            ),
-                            SizedBox(
                               width: 40,
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -107,9 +100,9 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                         ),
                       ),
                       // Data rows
-                      ...attributeTmpls.asMap().entries.map((entry) {
+                      ...accessLevels.asMap().entries.map((entry) {
                         final index = entry.key;
-                        final tmpl = entry.value;
+                        final level = entry.value;
                         final isHovered = _hoveredRowIndex == index;
 
                         return MouseRegion(
@@ -129,21 +122,14 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                                   width: 200,
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    child: Text(limitChars(tmpl.name, 32)),
+                                    child: Text(limitChars(level.name, 32)),
                                   ),
                                 ),
                                 SizedBox(
                                   width: 300,
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    child: Text(tmpl.description != null ? limitChars(tmpl.description!, 40) : ''),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 100,
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    child: Text(tmpl.valueType),
+                                    child: Text(level.description != null ? limitChars(level.description!, 40) : ''),
                                   ),
                                 ),
                                 SizedBox(
@@ -178,9 +164,9 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                                         if (!mounted) return;
 
                                         if (result == 'edit') {
-                                          _showAttributeTemplateDialog(this.context, item: tmpl);
+                                          _showAccessLevelDialog(this.context, item: level);
                                         } else if (result == 'delete') {
-                                          _deleteAttributeTmpl(tmpl);
+                                          _deleteAccessLevel(level);
                                         }
                                       },
                                     ),
@@ -199,37 +185,37 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     );
   }
 
-  Future<void> _showAttributeTemplateDialog(
+  Future<void> _showAccessLevelDialog(
     BuildContext context, {
-    AttributeTmpl? item,
+    AccessLevel? item,
   }) async {
     final isEditing = item != null;
     await DraggableDialog.show(
       context,
       barrierDismissible: false,
-      title: Text(isEditing ? 'Edit attribute template' : 'Add attribute template'),
+      title: Text(isEditing ? 'Edit access level' : 'Add access level'),
       minWidth: 250,
       maxWidth: 400,
-      child: AttributeTemplateForm(
-        attributeTmpl: isEditing ? item : null,
-        onSave: (tmpl) async {
+      child: AddAccessLevelForm(
+        accessLevel: isEditing ? item : null,
+        onSave: (level) async {
           if (isEditing) {
-            await client.attrTmpls.update(tmpl);
+            await client.accessLevel.update(level);
           } else {
-            await client.attrTmpls.create(tmpl);
+            await client.accessLevel.create(level);
           }
-          await _getAttributeTmpls();
+          await _getAccessLevels();
         },
       ),
     );
   }
 
-  Future<void> _deleteAttributeTmpl(AttributeTmpl tmpl) async {
+  Future<void> _deleteAccessLevel(AccessLevel level) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Attribute Template', style: TextStyle(fontSize: 18)),
-        content: Text('Are you sure you want to delete "${tmpl.name}"?'),
+        title: const Text('Delete Access Level'),
+        content: Text('Are you sure you want to delete "${level.name}"?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         actions: [
           TextButton(
@@ -238,7 +224,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: TextStyle(color: Colors.red[800])),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -246,13 +232,13 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
     if (confirmed == true) {
       try {
-        await client.attrTmpls.delete(tmpl.id!);
-        await _getAttributeTmpls();
+        await client.accessLevel.delete(level.id!);
+        await _getAccessLevels();
       } catch (e) {
-        debugPrint('Error deleting attribute template: $e');
+        debugPrint('Error deleting access level: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error deleting template: $e')),
+            SnackBar(content: Text('Error deleting access level: $e')),
           );
         }
       }

@@ -1,5 +1,5 @@
 class: AttributeTmpl
-table: attributes_tmpls
+table: attribute_tmpls
 fields:
     ### The public ID.
     id: UuidValue?, defaultPersist=random_v7
@@ -8,6 +8,7 @@ fields:
     valueType: String
     defaultValue: String
     required: bool
+    accessLevel: AccessLevel?, required, relation
 indexes:
     attr_tmpl_name_desc_uniq_idx:
         fields: name, description
