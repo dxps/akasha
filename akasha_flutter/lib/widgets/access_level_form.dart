@@ -56,8 +56,9 @@ class _AddAccessLevelFormState extends State<AddAccessLevelForm> {
 
       await widget.onSave(accessLevel);
 
-      if (!mounted) return;
-      Navigator.of(context).pop();
+      // dxps: Removed
+      //if (!mounted) return;
+      //Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

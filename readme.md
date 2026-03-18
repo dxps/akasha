@@ -30,7 +30,7 @@ The following containers / services and ports are included:
 
 First of all, in the root directory, run `dart pub get` to get (download) the dependencies.
 
-Make sure you have `akasha_server/config/passwords.yaml` file with such content:
+Make sure you have `akasha_server/config/passwords.yaml` file with such content (minimal example):
 
 ```yaml
 # Save passwords used across all configurations here.
