@@ -53,12 +53,7 @@ class _AddAccessLevelFormState extends State<AddAccessLevelForm> {
         name: nameController.text.trim(),
         description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
       );
-
       await widget.onSave(accessLevel);
-
-      // dxps: Removed
-      //if (!mounted) return;
-      //Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

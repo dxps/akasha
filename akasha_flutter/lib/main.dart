@@ -1,6 +1,5 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/screens/access_levels_screen.dart';
-import 'package:akasha_flutter/screens/access_levels_screen2.dart';
 import 'package:akasha_flutter/screens/attr_tmpls_list_screen.dart';
 import 'package:akasha_flutter/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
@@ -60,10 +59,6 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/access_levels',
       pageBuilder: (context, state) => const NoTransitionPage(child: AccessLevelsScreen()),
-    ),
-    GoRoute(
-      path: '/access_levels_2',
-      pageBuilder: (context, state) => const NoTransitionPage(child: AccessLevelsScreen2()),
     ),
   ],
 );

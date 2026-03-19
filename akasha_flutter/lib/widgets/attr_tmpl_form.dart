@@ -51,7 +51,9 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
         : AttributeValueType.text;
 
     isRequired = tmpl?.required ?? false;
-    defaultBooleanValue = tmpl?.valueType == 'boolean' ? (tmpl?.defaultValue as bool) : false;
+    debugPrint('Setting defaultBooleanValue for value type ${tmpl?.valueType} ...');
+    defaultBooleanValue = tmpl?.valueType == 'boolean' ? tmpl?.defaultValue.toLowerCase() == 'true' : false;
+    debugPrint('Done setting defaultBooleanValue for value type ${tmpl?.valueType}: $defaultBooleanValue');
     selectedAccessLevelId = tmpl?.accessLevelId;
 
     _fetchAccessLevels();
