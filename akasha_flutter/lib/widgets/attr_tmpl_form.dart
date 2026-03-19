@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 class AttributeTemplateForm extends StatefulWidget {
   const AttributeTemplateForm({
     super.key,
-    this.attributeTmpl,
+    this.item,
     required this.onSave,
   });
 
-  final AttributeTmpl? attributeTmpl;
+  final AttributeTmpl? item;
   final Future<void> Function(AttributeTmpl) onSave;
 
   @override
@@ -31,13 +31,13 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
   bool _isSaving = false;
   bool _isLoadingAccessLevels = true;
 
-  bool get _isEditing => widget.attributeTmpl != null;
+  bool get _isEdit => widget.item != null;
 
   @override
   void initState() {
     super.initState();
 
-    final tmpl = widget.attributeTmpl;
+    final tmpl = widget.item;
 
     nameController = TextEditingController(text: tmpl?.name ?? '');
     descriptionController = TextEditingController(text: tmpl?.description ?? '');
@@ -73,7 +73,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
           _isLoadingAccessLevels = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading access levels: $e')),
+          SnackBar(content: Text('Error fetching access levels: $e')),
         );
       }
     }
@@ -236,7 +236,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
 
     try {
       final tmpl = AttributeTmpl(
-        id: widget.attributeTmpl?.id,
+        id: widget.item?.id,
         name: nameController.text.trim(),
         description: descriptionController.text.trim(),
         valueType: selectedType.name,
@@ -264,126 +264,122 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
 
   @override
   Widget build(BuildContext context) {
-    final buttonLabel = _isEditing ? 'Update' : 'Add';
-
     return Form(
       key: formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextFormField(
-            controller: nameController,
-            decoration: const InputDecoration(
-              labelText: 'Name *',
-              hintText: 'Required',
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Name *',
+                hintText: 'Required',
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Name is required';
+                }
+                return null;
+              },
+              onChanged: (_) => formKey.currentState?.validate(),
             ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Name is required';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: descriptionController,
-            decoration: const InputDecoration(
-              labelText: 'Description',
+            const SizedBox(height: 12),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _isLoadingAccessLevels
-              ? const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              : DropdownButtonFormField<int>(
-                  initialValue: selectedAccessLevelId,
-                  decoration: const InputDecoration(
-                    labelText: 'Access Level *',
-                  ),
-                  items: accessLevels
-                      .map(
-                        (level) => DropdownMenuItem(
-                          value: level.id,
-                          child: Text(level.name),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value == null) return;
-                    setState(() {
-                      selectedAccessLevelId = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Access level is required';
-                    }
-                    return null;
-                  },
-                ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<AttributeValueType>(
-            initialValue: selectedType,
-            decoration: const InputDecoration(
-              labelText: 'Value type *',
-            ),
-            items: AttributeValueType.values
-                .map(
-                  (type) => DropdownMenuItem(
-                    value: type,
-                    child: Text(type.label),
-                  ),
-                )
-                .toList(),
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() {
-                selectedType = value;
-                defaultValueController.clear();
-                defaultBooleanValue = false;
-              });
-            },
-          ),
-          const SizedBox(height: 12),
-          buildDefaultValueField(),
-          const SizedBox(height: 8),
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.trailing,
-            title: const Text('Is required'),
-            value: isRequired,
-            visualDensity: VisualDensity.compact,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            onChanged: (value) {
-              setState(() {
-                isRequired = value ?? false;
-              });
-            },
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton.icon(
-              onPressed: _isSaving ? null : onSave,
-              // style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 20))),
-              icon: const Icon(Icons.save),
-              label: _isSaving
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
+            const SizedBox(height: 12),
+            _isLoadingAccessLevels
+                ? const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      height: 20,
+                      width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(buttonLabel),
+                    ),
+                  )
+                : DropdownButtonFormField<int>(
+                    initialValue: selectedAccessLevelId,
+                    decoration: const InputDecoration(
+                      labelText: 'Access Level *',
+                    ),
+                    items: accessLevels
+                        .map(
+                          (level) => DropdownMenuItem(
+                            value: level.id,
+                            child: Text(level.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        selectedAccessLevelId = value;
+                      });
+                      formKey.currentState?.validate();
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Access level is required';
+                      }
+                      return null;
+                    },
+                  ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<AttributeValueType>(
+              initialValue: selectedType,
+              decoration: const InputDecoration(
+                labelText: 'Value type *',
+              ),
+              items: AttributeValueType.values
+                  .map(
+                    (type) => DropdownMenuItem(
+                      value: type,
+                      child: Text(type.label),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  selectedType = value;
+                  defaultValueController.clear();
+                  defaultBooleanValue = false;
+                });
+              },
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            buildDefaultValueField(),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.trailing,
+              title: const Text('Is required ?'),
+              value: isRequired,
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              onChanged: (value) {
+                setState(() {
+                  isRequired = value ?? false;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                onPressed: _isSaving ? null : onSave,
+                color: Theme.of(context).primaryColor,
+                icon: _isSaving ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.save),
+                tooltip: _isEdit ? 'Update' : 'Add',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -249,7 +249,6 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
                   onTap: () => _bringToFront(modal.id),
                   onClose: () => _closeModal(modal.id),
                   onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
-                  onResize: (_) {},
                 ),
             ],
           );
@@ -265,7 +264,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
 
     // Calculate centered position if viewport is provided
     Offset offset = const Offset(24, 80); // fallback position
-    const modalSize = Size(340, 240);
+    const modalSize = Size(340, 230);
 
     if (viewportSize != null) {
       offset = Offset(
@@ -280,7 +279,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
       offset: offset,
       size: modalSize,
       child: AddAccessLevelForm(
-        accessLevel: item,
+        item: item,
         onSave: (item) async {
           debugPrint('>>> Got from form the item (AccessLevel): $item');
           if (isEdit) {
@@ -307,8 +306,6 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         backgroundColor: Colors.white,
         titleTextStyle: TextStyle(fontSize: 18),
-        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        iconPadding: EdgeInsetsGeometry.all(0),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),

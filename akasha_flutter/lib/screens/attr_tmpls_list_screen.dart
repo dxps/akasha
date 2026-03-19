@@ -124,145 +124,142 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                     )
                   : Center(
                       child: SingleChildScrollView(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Header row
-                              Container(
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[300]!)),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      width: 200,
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
-                                        child: Text('name', style: TextStyle(color: Colors.grey[500])),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 300,
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
-                                        child: Text('description', style: TextStyle(color: Colors.grey[500])),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 100,
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
-                                        child: Text('value type', style: TextStyle(color: Colors.grey[500])),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 40,
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                        child: Text(''),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Header row
+                            Container(
+                              height: 30,
+                              decoration: BoxDecoration(
+                                border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[300]!)),
                               ),
-                              // Data rows
-                              ...attributeTmpls.asMap().entries.map((entry) {
-                                final index = entry.key;
-                                final tmpl = entry.value;
-                                final isHovered = _hoveredRowIndex == index;
-
-                                return MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  onEnter: (_) => setState(() => _hoveredRowIndex = index),
-                                  onExit: (_) => setState(() => _hoveredRowIndex = null),
-                                  child: Container(
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      color: isHovered ? Colors.grey[100] : Colors.transparent,
-                                      border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[350]!)),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: 200,
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            child: Text(limitChars(tmpl.name, 32)),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 300,
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            child: Text(tmpl.description != null ? limitChars(tmpl.description!, 40) : ''),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 100,
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            child: Text(tmpl.valueType),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 30,
-                                          child: Builder(
-                                            builder: (context) => IconButton(
-                                              icon: Icon(Icons.more_vert, size: 15, color: isHovered ? Colors.grey[800] : Colors.grey[500]),
-                                              onPressed: () async {
-                                                final RenderBox button = context.findRenderObject() as RenderBox;
-                                                final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-                                                final RelativeRect position = RelativeRect.fromRect(
-                                                  Rect.fromPoints(
-                                                    button.localToGlobal(Offset.zero, ancestor: overlay),
-                                                    button.localToGlobal(
-                                                      button.size.bottomRight(Offset.zero),
-                                                      ancestor: overlay,
-                                                    ),
-                                                  ),
-                                                  Offset.zero & overlay.size,
-                                                );
-
-                                                final result = await showMenu<String>(
-                                                  context: context,
-
-                                                  items: [
-                                                    PopupMenuItem(value: 'edit', height: 32, child: Text('Edit')),
-                                                    PopupMenuItem(value: 'delete', height: 32, child: Text('Delete')),
-                                                  ],
-                                                  color: Colors.white,
-                                                  clipBehavior: Clip.antiAlias,
-                                                  menuPadding: const EdgeInsets.symmetric(vertical: 0),
-                                                  position: position,
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                                );
-
-                                                if (result == 'edit') {
-                                                  _openAccessLevelModal(item: tmpl, viewportSize: vwSize);
-                                                } else if (result == 'delete') {
-                                                  _deleteAttributeTmpl(tmpl);
-                                                }
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    width: 200,
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
+                                      child: Text('name', style: TextStyle(color: Colors.grey[500])),
                                     ),
                                   ),
-                                );
-                              }),
-                            ],
-                          ),
+                                  SizedBox(
+                                    width: 300,
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
+                                      child: Text('description', style: TextStyle(color: Colors.grey[500])),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 100,
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
+                                      child: Text('value type', style: TextStyle(color: Colors.grey[500])),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 40,
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      child: Text(''),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Data rows
+                            ...attributeTmpls.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final tmpl = entry.value;
+                              final isHovered = _hoveredRowIndex == index;
+
+                              return MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                onEnter: (_) => setState(() => _hoveredRowIndex = index),
+                                onExit: (_) => setState(() => _hoveredRowIndex = null),
+                                child: Container(
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: isHovered ? Colors.white : Colors.transparent,
+                                    border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[350]!)),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        width: 200,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          child: Text(limitChars(tmpl.name, 32)),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 300,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          child: Text(tmpl.description != null ? limitChars(tmpl.description!, 40) : ''),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          child: Text(tmpl.valueType),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 30,
+                                        child: Builder(
+                                          builder: (context) => IconButton(
+                                            icon: Icon(Icons.more_vert, size: 15, color: isHovered ? Colors.grey[800] : Colors.grey[500]),
+                                            onPressed: () async {
+                                              final RenderBox button = context.findRenderObject() as RenderBox;
+                                              final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+                                              final RelativeRect position = RelativeRect.fromRect(
+                                                Rect.fromPoints(
+                                                  button.localToGlobal(Offset.zero, ancestor: overlay),
+                                                  button.localToGlobal(
+                                                    button.size.bottomRight(Offset.zero),
+                                                    ancestor: overlay,
+                                                  ),
+                                                ),
+                                                Offset.zero & overlay.size,
+                                              );
+
+                                              final result = await showMenu<String>(
+                                                context: context,
+
+                                                items: [
+                                                  PopupMenuItem(value: 'edit', height: 32, child: Text('Edit')),
+                                                  PopupMenuItem(value: 'delete', height: 32, child: Text('Delete')),
+                                                ],
+                                                color: Colors.white,
+                                                clipBehavior: Clip.antiAlias,
+                                                menuPadding: const EdgeInsets.symmetric(vertical: 0),
+                                                position: position,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              );
+
+                                              if (result == 'edit') {
+                                                _openAccessLevelModal(item: tmpl, viewportSize: vwSize);
+                                              } else if (result == 'delete') {
+                                                _deleteAttributeTmpl(tmpl);
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
                         ),
                       ),
                     ), // end-of-Center
 
-              for (final modal in _modals)
+              for (final modal in _modals) // Render the modals.
                 DraggableModal(
                   key: ValueKey(modal.id),
                   data: modal,
@@ -270,7 +267,6 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                   onTap: () => _bringToFront(modal.id),
                   onClose: () => _closeModal(modal.id),
                   onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
-                  onResize: (_) {},
                 ),
             ],
           );
@@ -286,7 +282,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
     // Calculate centered position if viewport is provided
     Offset offset = const Offset(24, 80); // fallback position
-    const modalSize = Size(340, 500);
+    const modalSize = Size(340, 460);
 
     if (viewportSize != null) {
       offset = Offset(
@@ -301,7 +297,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
       offset: offset,
       size: modalSize,
       child: AttributeTemplateForm(
-        attributeTmpl: item,
+        item: item,
         onSave: (tmpl) async {
           debugPrint('>>> Got from form the item (Attribute Template): $item');
           if (isEdit) {
@@ -325,6 +321,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Attribute Template', style: TextStyle(fontSize: 18)),
         content: Text('Are you sure you want to delete "${tmpl.name}"?'),
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         actions: [
           TextButton(

@@ -10,7 +10,7 @@ class DraggableModal extends StatefulWidget {
     required this.onTap,
     required this.onClose,
     required this.onDrag,
-    required this.onResize,
+    this.onResize,
   });
 
   final ModalData data;
@@ -18,7 +18,7 @@ class DraggableModal extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onClose;
   final ValueChanged<Offset> onDrag;
-  final ValueChanged<Size> onResize;
+  final ValueChanged<Size>? onResize;
 
   @override
   State<DraggableModal> createState() => _DraggableModalState();
@@ -72,7 +72,7 @@ class _DraggableModalState extends State<DraggableModal> {
 
     final Offset delta = details.globalPosition - _resizeStartPointerGlobal!;
 
-    widget.onResize(Size(_resizeStartSize!.width + delta.dx, _resizeStartSize!.height + delta.dy));
+    widget.onResize?.call(Size(_resizeStartSize!.width + delta.dx, _resizeStartSize!.height + delta.dy));
   }
 
   void _endResize() {
@@ -114,7 +114,7 @@ class _DraggableModalState extends State<DraggableModal> {
                 child: Column(
                   children: [
                     Container(
-                      height: 40,
+                      height: 36,
                       padding: const EdgeInsets.all(0),
                       child: Row(
                         children: [
@@ -150,34 +150,33 @@ class _DraggableModalState extends State<DraggableModal> {
                           Positioned.fill(
                             child: Padding(padding: const EdgeInsets.all(12), child: widget.data.child),
                           ),
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: MouseRegion(
-                              cursor: _isResizing
-                                  ? SystemMouseCursors.resizeUpLeftDownRight
-                                  : SystemMouseCursors.resizeUpLeftDownRight,
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: widget.onTap,
-                                onPanStart: _startResize,
-                                onPanUpdate: _updateResize,
-                                onPanEnd: (_) => _endResize(),
-                                onPanCancel: _endResize,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(1),
-                                  child: Transform.rotate(
-                                    angle: -0.9,
-                                    child: Icon(
-                                      Icons.filter_list,
-                                      size: 18,
-                                      color: theme.colorScheme.onSurfaceVariant.withAlpha(40),
+                          if (widget.onResize != null)
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: MouseRegion(
+                                cursor: _isResizing ? SystemMouseCursors.resizeUpLeftDownRight : SystemMouseCursors.resizeUpLeftDownRight,
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: widget.onTap,
+                                  onPanStart: _startResize,
+                                  onPanUpdate: _updateResize,
+                                  onPanEnd: (_) => _endResize(),
+                                  onPanCancel: _endResize,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(1),
+                                    child: Transform.rotate(
+                                      angle: -0.9,
+                                      child: Icon(
+                                        Icons.filter_list,
+                                        size: 18,
+                                        color: theme.colorScheme.onSurfaceVariant.withAlpha(40),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),

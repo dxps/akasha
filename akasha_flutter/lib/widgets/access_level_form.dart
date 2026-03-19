@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 class AddAccessLevelForm extends StatefulWidget {
   const AddAccessLevelForm({
     super.key,
-    this.accessLevel,
+    this.item,
     required this.onSave,
   });
 
-  final AccessLevel? accessLevel;
+  final AccessLevel? item;
   final Future<void> Function(AccessLevel) onSave;
 
   @override
@@ -21,13 +21,13 @@ class _AddAccessLevelFormState extends State<AddAccessLevelForm> {
   late final TextEditingController descriptionController;
   bool _isSaving = false;
 
-  bool get _isEditing => widget.accessLevel != null;
+  bool get _isEdit => widget.item != null;
 
   @override
   void initState() {
     super.initState();
 
-    final accessLevel = widget.accessLevel;
+    final accessLevel = widget.item;
 
     nameController = TextEditingController(text: accessLevel?.name ?? '');
     descriptionController = TextEditingController(text: accessLevel?.description ?? '');
@@ -49,7 +49,7 @@ class _AddAccessLevelFormState extends State<AddAccessLevelForm> {
 
     try {
       final accessLevel = AccessLevel(
-        id: widget.accessLevel?.id,
+        id: widget.item?.id,
         name: nameController.text.trim(),
         description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
       );
@@ -68,44 +68,46 @@ class _AddAccessLevelFormState extends State<AddAccessLevelForm> {
 
   @override
   Widget build(BuildContext context) {
-    final buttonLabel = _isEditing ? 'Update' : 'Add';
-
     return Form(
       key: formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextFormField(
-            controller: nameController,
-            decoration: const InputDecoration(
-              labelText: 'Name *',
-              hintText: 'Required',
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Name *',
+                hintText: 'Required',
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Name is required';
+                }
+                return null;
+              },
+              onChanged: (_) => formKey.currentState?.validate(),
             ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Name is required';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: descriptionController,
-            decoration: const InputDecoration(
-              labelText: 'Description',
+            const SizedBox(height: 12),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton.icon(
-              onPressed: _isSaving ? null : onSave,
-              icon: const Icon(Icons.check),
-              label: Text(buttonLabel),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                onPressed: _isSaving ? null : onSave,
+                color: Theme.of(context).primaryColor,
+                icon: const Icon(Icons.save),
+                tooltip: _isEdit ? 'Update' : 'Add',
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
