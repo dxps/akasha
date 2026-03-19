@@ -41,6 +41,15 @@ CREATE TABLE "access_levels" (
 -- Indexes
 CREATE UNIQUE INDEX "access_level_name_uniq_idx" ON "access_levels" USING btree ("name");
 
+-------------------------------------
+-- dxps: "access_levels" initial data
+-------------------------------------
+INSERT INTO "access_levels" ("name", "description") VALUES
+    ('Public', 'Publicly accessible data'),
+    ('Private', 'Private data'),
+    ('Confidential', 'Confidential data')
+ON CONFLICT DO NOTHING;
+
 --
 -- Class AttributeTmpl as table attribute_tmpls
 --

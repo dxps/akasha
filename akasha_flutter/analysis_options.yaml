@@ -29,4 +29,4 @@ linter:
 
 formatter:
   trailing_commas: preserve
-  page_width: 140
+  page_width: 145

@@ -4,7 +4,6 @@ import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/utils/string.dart';
 import 'package:akasha_flutter/widgets/access_level_form.dart';
-import 'package:akasha_flutter/widgets/draggable_dialog.dart';
 import 'package:akasha_flutter/widgets/modal/draggable_modal.dart';
 import 'package:akasha_flutter/widgets/modal/modal_content.dart';
 import 'package:flutter/material.dart';
@@ -34,8 +33,8 @@ class _AccessLevelsScreen2State extends State<AccessLevelsScreen2> {
     _getAccessLevels();
   }
 
-  // ----------------------
-  // Modal related methods.
+  // -----------------------
+  // Modals related methods.
 
   void _addModal({
     required int id,
@@ -90,9 +89,12 @@ class _AccessLevelsScreen2State extends State<AccessLevelsScreen2> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton.icon(
-              onPressed: () => _showAccessLevelDialog(context),
+              onPressed: () {
+                final size = MediaQuery.of(context).size;
+                _openAccessLevelModal(viewport: size);
+              },
               icon: const Icon(Icons.add),
-              label: const Text('Add'),
+              label: const Text("Add"),
             ),
           ),
         ],
@@ -110,32 +112,9 @@ class _AccessLevelsScreen2State extends State<AccessLevelsScreen2> {
                           const Text('No access levels yet.'),
                           const SizedBox(height: 20),
                           ElevatedButton(
-                            // onPressed: () => _showAccessLevelDialog(context),
                             onPressed: () {
-                              final id = _nextModalId++;
-                              debugPrint('Opening modal (id: $id) to create access level...');
-                              _addModal(
-                                id: id,
-                                title: 'title',
-                                offset: const Offset(24, 80),
-                                size: const Size(340, 240),
-                                child: AddAccessLevelForm(
-                                  accessLevel: null,
-                                  onSave: (item) async {
-                                    //   if (isEditing) {
-                                    //     await client.accessLevel.update(level);
-                                    //   } else {
-                                    //     await client.accessLevel.create(level);
-                                    //   }
-                                    //   await _getAccessLevels();
-                                    // TODO
-                                    debugPrint('item (AccessLevel): $item');
-                                    await client.accessLevel.create(item);
-                                    _closeModal(id);
-                                    await _getAccessLevels();
-                                  },
-                                ),
-                              );
+                              final size = MediaQuery.of(context).size;
+                              _openAccessLevelModal(viewport: size);
                             },
                             child: const Text('Add'),
                           ),
@@ -194,7 +173,7 @@ class _AccessLevelsScreen2State extends State<AccessLevelsScreen2> {
                                 child: Container(
                                   height: 28,
                                   decoration: BoxDecoration(
-                                    color: isHovered ? Colors.grey[100] : Colors.transparent,
+                                    color: isHovered ? Colors.white : Colors.transparent,
                                     border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[350]!)),
                                   ),
                                   child: Row(
@@ -218,18 +197,14 @@ class _AccessLevelsScreen2State extends State<AccessLevelsScreen2> {
                                         width: 30,
                                         child: Builder(
                                           builder: (context) => IconButton(
-                                            icon: Icon(Icons.more_vert, size: 15, color: isHovered ? Colors.grey[800] : Colors.grey[500]),
+                                            icon: Icon(Icons.more_vert, size: 15, color: isHovered ? Colors.grey[800] : Colors.grey[400]),
                                             onPressed: () async {
                                               final RenderBox button = context.findRenderObject() as RenderBox;
-                                              final RenderBox overlay =
-                                                  Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+                                              final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
                                               final RelativeRect position = RelativeRect.fromRect(
                                                 Rect.fromPoints(
                                                   button.localToGlobal(Offset.zero, ancestor: overlay),
-                                                  button.localToGlobal(
-                                                    button.size.bottomRight(Offset.zero),
-                                                    ancestor: overlay,
-                                                  ),
+                                                  button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
                                                 ),
                                                 Offset.zero & overlay.size,
                                               );
@@ -238,16 +213,17 @@ class _AccessLevelsScreen2State extends State<AccessLevelsScreen2> {
                                                 context: context,
                                                 position: position,
                                                 items: [
-                                                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                                                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                                                  PopupMenuItem(value: 'edit', height: 28, child: Text('Edit')),
+                                                  PopupMenuItem(value: 'delete', height: 28, child: Text('Delete')),
                                                 ],
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                                color: Colors.white,
+                                                menuPadding: const EdgeInsets.symmetric(vertical: 0),
+                                                clipBehavior: Clip.antiAlias,
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                               );
 
-                                              if (!mounted) return;
-
                                               if (result == 'edit') {
-                                                _showAccessLevelDialog(this.context, item: level);
+                                                _openAccessLevelModal(item: level, viewport: viewport);
                                               } else if (result == 'delete') {
                                                 _deleteAccessLevel(level);
                                               }
@@ -282,22 +258,38 @@ class _AccessLevelsScreen2State extends State<AccessLevelsScreen2> {
     );
   }
 
-  Future<void> _showAccessLevelDialog(BuildContext context, {AccessLevel? item}) async {
-    final isEditing = item != null;
-    await DraggableDialog.show(
-      context,
-      barrierDismissible: false,
-      title: Text(isEditing ? 'Edit access level' : 'Add access level'),
-      minWidth: 250,
-      maxWidth: 400,
+  Future<void> _openAccessLevelModal({AccessLevel? item, Size? viewport}) async {
+    final id = _nextModalId++;
+    debugPrint('Opening modal (id: $id) to create access level...');
+    final isEdit = item != null;
+
+    // Calculate centered position if viewport is provided
+    Offset offset = const Offset(24, 80); // fallback position
+    const modalSize = Size(340, 240);
+
+    if (viewport != null) {
+      offset = Offset(
+        (viewport.width - modalSize.width) / 2,
+        (viewport.height - modalSize.height) / 2,
+      );
+    }
+
+    _addModal(
+      id: id,
+      title: isEdit ? 'Edit Access Level' : 'New Access Level',
+      offset: offset,
+      size: modalSize,
       child: AddAccessLevelForm(
-        accessLevel: isEditing ? item : null,
-        onSave: (level) async {
-          if (isEditing) {
-            await client.accessLevel.update(level);
+        accessLevel: item,
+        onSave: (item) async {
+          debugPrint('>>> Got from form the item (AccessLevel): $item');
+          if (isEdit) {
+            await client.accessLevel.update(item);
           } else {
-            await client.accessLevel.create(level);
+            await client.accessLevel.create(item);
           }
+          debugPrint('>>> Item (AccessLevel) has been created/updated. Closing modal (id: $id) and refreshing access levels list...');
+          _closeModal(id);
           await _getAccessLevels();
         },
       ),
@@ -311,6 +303,7 @@ class _AccessLevelsScreen2State extends State<AccessLevelsScreen2> {
         title: const Text('Delete Access Level'),
         content: Text('Are you sure you want to delete "${level.name}"?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
