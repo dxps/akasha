@@ -18,13 +18,17 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
 import 'access_level/access_level.dart' as _i5;
 import 'attr_tmpls/attr_tmpl.dart' as _i6;
-import 'greetings/greeting.dart' as _i7;
+import 'attr_tmpls/attr_tmpl_api_resp.dart' as _i7;
+import 'greetings/greeting.dart' as _i8;
+import 'shared/api/exceptions/api_exception.dart' as _i9;
 import 'package:akasha_server/src/generated/access_level/access_level.dart'
-    as _i8;
-import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i9;
+    as _i10;
+import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i11;
 export 'access_level/access_level.dart';
 export 'attr_tmpls/attr_tmpl.dart';
+export 'attr_tmpls/attr_tmpl_api_resp.dart';
 export 'greetings/greeting.dart';
+export 'shared/api/exceptions/api_exception.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -225,8 +229,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i6.AttributeTmpl) {
       return _i6.AttributeTmpl.fromJson(data) as T;
     }
-    if (t == _i7.Greeting) {
-      return _i7.Greeting.fromJson(data) as T;
+    if (t == _i7.AttributeTmplApiResponse) {
+      return _i7.AttributeTmplApiResponse.fromJson(data) as T;
+    }
+    if (t == _i8.Greeting) {
+      return _i8.Greeting.fromJson(data) as T;
+    }
+    if (t == _i9.ApiException) {
+      return _i9.ApiException.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.AccessLevel?>()) {
       return (data != null ? _i5.AccessLevel.fromJson(data) : null) as T;
@@ -234,16 +244,25 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i6.AttributeTmpl?>()) {
       return (data != null ? _i6.AttributeTmpl.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i7.Greeting?>()) {
-      return (data != null ? _i7.Greeting.fromJson(data) : null) as T;
-    }
-    if (t == List<_i8.AccessLevel>) {
-      return (data as List).map((e) => deserialize<_i8.AccessLevel>(e)).toList()
+    if (t == _i1.getType<_i7.AttributeTmplApiResponse?>()) {
+      return (data != null ? _i7.AttributeTmplApiResponse.fromJson(data) : null)
           as T;
     }
-    if (t == List<_i9.AttributeTmpl>) {
+    if (t == _i1.getType<_i8.Greeting?>()) {
+      return (data != null ? _i8.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i9.ApiException?>()) {
+      return (data != null ? _i9.ApiException.fromJson(data) : null) as T;
+    }
+    if (t == List<_i10.AccessLevel>) {
       return (data as List)
-              .map((e) => deserialize<_i9.AttributeTmpl>(e))
+              .map((e) => deserialize<_i10.AccessLevel>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i11.AttributeTmpl>) {
+      return (data as List)
+              .map((e) => deserialize<_i11.AttributeTmpl>(e))
               .toList()
           as T;
     }
@@ -263,7 +282,9 @@ class Protocol extends _i1.SerializationManagerServer {
     return switch (type) {
       _i5.AccessLevel => 'AccessLevel',
       _i6.AttributeTmpl => 'AttributeTmpl',
-      _i7.Greeting => 'Greeting',
+      _i7.AttributeTmplApiResponse => 'AttributeTmplApiResponse',
+      _i8.Greeting => 'Greeting',
+      _i9.ApiException => 'ApiException',
       _ => null,
     };
   }
@@ -282,8 +303,12 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'AccessLevel';
       case _i6.AttributeTmpl():
         return 'AttributeTmpl';
-      case _i7.Greeting():
+      case _i7.AttributeTmplApiResponse():
+        return 'AttributeTmplApiResponse';
+      case _i8.Greeting():
         return 'Greeting';
+      case _i9.ApiException():
+        return 'ApiException';
     }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -312,8 +337,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'AttributeTmpl') {
       return deserialize<_i6.AttributeTmpl>(data['data']);
     }
+    if (dataClassName == 'AttributeTmplApiResponse') {
+      return deserialize<_i7.AttributeTmplApiResponse>(data['data']);
+    }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i7.Greeting>(data['data']);
+      return deserialize<_i8.Greeting>(data['data']);
+    }
+    if (dataClassName == 'ApiException') {
+      return deserialize<_i9.ApiException>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);

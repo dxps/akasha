@@ -13,17 +13,21 @@
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'access_level/access_level.dart' as _i2;
 import 'attr_tmpls/attr_tmpl.dart' as _i3;
-import 'greetings/greeting.dart' as _i4;
+import 'attr_tmpls/attr_tmpl_api_resp.dart' as _i4;
+import 'greetings/greeting.dart' as _i5;
+import 'shared/api/exceptions/api_exception.dart' as _i6;
 import 'package:akasha_client/src/protocol/access_level/access_level.dart'
-    as _i5;
-import 'package:akasha_client/src/protocol/attr_tmpls/attr_tmpl.dart' as _i6;
-import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _i7;
+import 'package:akasha_client/src/protocol/attr_tmpls/attr_tmpl.dart' as _i8;
+import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
+    as _i9;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
-    as _i8;
+    as _i10;
 export 'access_level/access_level.dart';
 export 'attr_tmpls/attr_tmpl.dart';
+export 'attr_tmpls/attr_tmpl_api_resp.dart';
 export 'greetings/greeting.dart';
+export 'shared/api/exceptions/api_exception.dart';
 export 'client.dart';
 
 class Protocol extends _i1.SerializationManager {
@@ -66,8 +70,14 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i3.AttributeTmpl) {
       return _i3.AttributeTmpl.fromJson(data) as T;
     }
-    if (t == _i4.Greeting) {
-      return _i4.Greeting.fromJson(data) as T;
+    if (t == _i4.AttributeTmplApiResponse) {
+      return _i4.AttributeTmplApiResponse.fromJson(data) as T;
+    }
+    if (t == _i5.Greeting) {
+      return _i5.Greeting.fromJson(data) as T;
+    }
+    if (t == _i6.ApiException) {
+      return _i6.ApiException.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.AccessLevel?>()) {
       return (data != null ? _i2.AccessLevel.fromJson(data) : null) as T;
@@ -75,24 +85,31 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i3.AttributeTmpl?>()) {
       return (data != null ? _i3.AttributeTmpl.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i4.Greeting?>()) {
-      return (data != null ? _i4.Greeting.fromJson(data) : null) as T;
-    }
-    if (t == List<_i5.AccessLevel>) {
-      return (data as List).map((e) => deserialize<_i5.AccessLevel>(e)).toList()
+    if (t == _i1.getType<_i4.AttributeTmplApiResponse?>()) {
+      return (data != null ? _i4.AttributeTmplApiResponse.fromJson(data) : null)
           as T;
     }
-    if (t == List<_i6.AttributeTmpl>) {
+    if (t == _i1.getType<_i5.Greeting?>()) {
+      return (data != null ? _i5.Greeting.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i6.ApiException?>()) {
+      return (data != null ? _i6.ApiException.fromJson(data) : null) as T;
+    }
+    if (t == List<_i7.AccessLevel>) {
+      return (data as List).map((e) => deserialize<_i7.AccessLevel>(e)).toList()
+          as T;
+    }
+    if (t == List<_i8.AttributeTmpl>) {
       return (data as List)
-              .map((e) => deserialize<_i6.AttributeTmpl>(e))
+              .map((e) => deserialize<_i8.AttributeTmpl>(e))
               .toList()
           as T;
     }
     try {
-      return _i7.Protocol().deserialize<T>(data, t);
+      return _i9.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i8.Protocol().deserialize<T>(data, t);
+      return _i10.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -101,7 +118,9 @@ class Protocol extends _i1.SerializationManager {
     return switch (type) {
       _i2.AccessLevel => 'AccessLevel',
       _i3.AttributeTmpl => 'AttributeTmpl',
-      _i4.Greeting => 'Greeting',
+      _i4.AttributeTmplApiResponse => 'AttributeTmplApiResponse',
+      _i5.Greeting => 'Greeting',
+      _i6.ApiException => 'ApiException',
       _ => null,
     };
   }
@@ -120,14 +139,18 @@ class Protocol extends _i1.SerializationManager {
         return 'AccessLevel';
       case _i3.AttributeTmpl():
         return 'AttributeTmpl';
-      case _i4.Greeting():
+      case _i4.AttributeTmplApiResponse():
+        return 'AttributeTmplApiResponse';
+      case _i5.Greeting():
         return 'Greeting';
+      case _i6.ApiException():
+        return 'ApiException';
     }
-    className = _i7.Protocol().getClassNameForObject(data);
+    className = _i9.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i8.Protocol().getClassNameForObject(data);
+    className = _i10.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -146,16 +169,22 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'AttributeTmpl') {
       return deserialize<_i3.AttributeTmpl>(data['data']);
     }
+    if (dataClassName == 'AttributeTmplApiResponse') {
+      return deserialize<_i4.AttributeTmplApiResponse>(data['data']);
+    }
     if (dataClassName == 'Greeting') {
-      return deserialize<_i4.Greeting>(data['data']);
+      return deserialize<_i5.Greeting>(data['data']);
+    }
+    if (dataClassName == 'ApiException') {
+      return deserialize<_i6.ApiException>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i7.Protocol().deserializeByClassName(data);
+      return _i9.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i8.Protocol().deserializeByClassName(data);
+      return _i10.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -170,10 +199,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i7.Protocol().mapRecordToJson(record);
+      return _i9.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i8.Protocol().mapRecordToJson(record);
+      return _i10.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

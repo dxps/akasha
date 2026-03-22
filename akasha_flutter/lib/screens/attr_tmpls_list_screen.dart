@@ -92,7 +92,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
               //   onPressed: () => _showAttributeTemplateDialog(context),
               onPressed: () {
                 final size = MediaQuery.of(context).size;
-                _openAccessLevelModal(viewportSize: size);
+                _openModal(viewportSize: size);
               },
               icon: const Icon(Icons.add),
               label: const Text('Add'),
@@ -115,7 +115,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                           ElevatedButton(
                             onPressed: () {
                               final size = MediaQuery.of(context).size;
-                              _openAccessLevelModal(viewportSize: size);
+                              _openModal(viewportSize: size);
                             },
                             child: const Text('Add'),
                           ),
@@ -241,7 +241,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                                               );
 
                                               if (result == 'edit') {
-                                                _openAccessLevelModal(item: tmpl, viewportSize: vwSize);
+                                                _openModal(item: tmpl, viewportSize: vwSize);
                                               } else if (result == 'delete') {
                                                 _deleteAttributeTmpl(tmpl);
                                               }
@@ -275,7 +275,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     );
   }
 
-  Future<void> _openAccessLevelModal({AttributeTmpl? item, Size? viewportSize}) async {
+  Future<void> _openModal({AttributeTmpl? item, Size? viewportSize}) async {
     final id = _nextModalId++;
     final isEdit = item != null;
     debugPrint('Opening modal (id: $id) to ${isEdit ? 'edit' : 'create'} an attribute template ...');
@@ -299,17 +299,43 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
       child: AttributeTemplateForm(
         item: item,
         onSave: (tmpl) async {
-          debugPrint('>>> Got from form the item (Attribute Template): $item');
-          if (isEdit) {
-            await client.attrTmpls.update(tmpl);
-          } else {
-            await client.attrTmpls.create(tmpl);
+          debugPrint('>>> Got from form (Attribute Template): $tmpl');
+
+          try {
+            if (isEdit) {
+              final response = await client.attrTmpls.update(tmpl);
+
+              if (response.success && mounted) {
+                debugPrint(
+                  '>>> Attribute template has been updated. Closing modal (id: $id) and refreshing attribute templates list...',
+                );
+                _closeModal(id);
+                await _getAttributeTmpls();
+              }
+
+              return response;
+            }
+
+            final response = await client.attrTmpls.create(tmpl);
+
+            if (response.success && mounted) {
+              debugPrint(
+                '>>> Attribute template has been created. Closing modal (id: $id) and refreshing attribute templates list...',
+              );
+              _closeModal(id);
+              await _getAttributeTmpls();
+            }
+
+            return response;
+          } catch (e) {
+            debugPrint('>>> Save failed with exception: $e');
+
+            return AttributeTmplApiResponse(
+              success: false,
+              errorCode: 'ATE-001',
+              message: 'Unexpected error while saving attribute template.',
+            );
           }
-          debugPrint(
-            '>>> Item (Attribute Template) has been ${isEdit ? 'updated' : 'created'}. Closing modal (id: $id) and refreshing attribute templates list...',
-          );
-          _closeModal(id);
-          await _getAttributeTmpls();
         },
       ),
     );
