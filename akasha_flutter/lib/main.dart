@@ -1,5 +1,5 @@
 import 'package:akasha_client/akasha_client.dart';
-import 'package:akasha_flutter/screens/access_levels_screen.dart';
+import 'package:akasha_flutter/access_level/access_levels_screen.dart';
 import 'package:akasha_flutter/screens/attr_tmpls_list_screen.dart';
 import 'package:akasha_flutter/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';

@@ -1,0 +1,6 @@
+class: AccessLevelApiResponse
+fields:
+    success: bool
+    data: AccessLevel?
+    errorCode: String?
+    errorMessage: String?

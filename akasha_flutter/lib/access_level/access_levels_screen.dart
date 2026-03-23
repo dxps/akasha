@@ -1,12 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_flutter/access_level/access_level_form.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/utils/string.dart';
-import 'package:akasha_flutter/widgets/access_level_form.dart';
 import 'package:akasha_flutter/widgets/modal/draggable_modal.dart';
 import 'package:akasha_flutter/widgets/modal/modal_content.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AccessLevelsScreen extends StatefulWidget {
   const AccessLevelsScreen({super.key});
@@ -91,7 +92,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
             child: ElevatedButton.icon(
               onPressed: () {
                 final size = MediaQuery.of(context).size;
-                _openAccessLevelModal(viewportSize: size);
+                _openModal(viewportSize: size);
               },
               icon: const Icon(Icons.add),
               label: const Text("Add"),
@@ -114,7 +115,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
                           ElevatedButton(
                             onPressed: () {
                               final size = MediaQuery.of(context).size;
-                              _openAccessLevelModal(viewportSize: size);
+                              _openModal(viewportSize: size);
                             },
                             child: const Text('Add'),
                           ),
@@ -223,7 +224,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
                                               );
 
                                               if (result == 'edit') {
-                                                _openAccessLevelModal(item: level, viewportSize: vwSize);
+                                                _openModal(item: level, viewportSize: vwSize);
                                               } else if (result == 'delete') {
                                                 _deleteAccessLevel(level);
                                               }
@@ -257,7 +258,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
     );
   }
 
-  Future<void> _openAccessLevelModal({AccessLevel? item, Size? viewportSize}) async {
+  Future<void> _openModal({AccessLevel? item, Size? viewportSize}) async {
     final id = _nextModalId++;
     final isEdit = item != null;
     debugPrint('Opening modal (id: $id) to ${isEdit ? 'edit' : 'create'} an access level ...');
@@ -282,17 +283,67 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
         item: item,
         onSave: (item) async {
           debugPrint('>>> Got from form the item (AccessLevel): $item');
-          if (isEdit) {
-            await client.accessLevel.update(item);
-          } else {
-            await client.accessLevel.create(item);
+
+          try {
+            if (isEdit) {
+              final response = await client.accessLevel.update(item);
+
+              if (response.success && mounted) {
+                _closeModal(id);
+                await _getAccessLevels();
+              } else if (!response.success) {
+                _showErrorFeedback(response.errorMessage ?? 'Failed to save access level: ${response.errorCode}');
+              }
+              return;
+            }
+
+            final response = await client.accessLevel.create(item);
+
+            if (response.success && mounted) {
+              _closeModal(id);
+              await _getAccessLevels();
+            } else if (!response.success) {
+              _showErrorFeedback(response.errorMessage ?? 'Failed to create access level: ${response.errorCode}');
+            }
+          } catch (e) {
+            debugPrint('Failed to save access level: $e.');
+            _showErrorFeedback('Failed to save access level: $e');
           }
-          debugPrint(
-            '>>> Item (AccessLevel) has been ${isEdit ? 'updated' : 'created'}. Closing modal (id: $id) and refreshing access levels list...',
-          );
-          _closeModal(id);
-          await _getAccessLevels();
         },
+      ),
+    );
+  }
+
+  void _showErrorFeedback(String errorMsg) {
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.red.shade100,
+        duration: const Duration(seconds: 4),
+        showCloseIcon: true,
+        closeIconColor: Colors.red.shade500,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        content: Row(
+          children: [
+            Expanded(
+              child: SelectableText(
+                errorMsg,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.red.shade900),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Copy',
+              icon: Icon(
+                Icons.copy,
+                color: Colors.red.shade700,
+                size: 18,
+              ),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: errorMsg));
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

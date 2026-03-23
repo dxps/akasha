@@ -328,8 +328,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
             return response;
           } catch (e) {
-            debugPrint('>>> Save failed with exception: $e');
-
+            debugPrint('>>> Failed to save attribute template: $e');
             return AttributeTmplApiResponse(
               success: false,
               errorCode: 'ATE-001',
