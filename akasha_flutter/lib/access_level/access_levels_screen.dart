@@ -4,10 +4,10 @@ import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/access_level/access_level_form.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/utils/string.dart';
+import 'package:akasha_flutter/widgets/feedback.dart';
 import 'package:akasha_flutter/widgets/modal/draggable_modal.dart';
 import 'package:akasha_flutter/widgets/modal/modal_content.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class AccessLevelsScreen extends StatefulWidget {
   const AccessLevelsScreen({super.key});
@@ -292,7 +292,8 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
                 _closeModal(id);
                 await _getAccessLevels();
               } else if (!response.success) {
-                _showErrorFeedback(response.errorMessage ?? 'Failed to save access level: ${response.errorCode}');
+                if (!mounted) return;
+                showErrorSnackbar(context, response.errorMessage ?? 'Failed to save access level: ${response.errorCode}');
               }
               return;
             }
@@ -303,47 +304,15 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
               _closeModal(id);
               await _getAccessLevels();
             } else if (!response.success) {
-              _showErrorFeedback(response.errorMessage ?? 'Failed to create access level: ${response.errorCode}');
+              if (!mounted) return;
+              showErrorSnackbar(context, response.errorMessage ?? 'Failed to create access level: ${response.errorCode}');
             }
           } catch (e) {
             debugPrint('Failed to save access level: $e.');
-            _showErrorFeedback('Failed to save access level: $e');
+            if (!mounted) return;
+            showErrorSnackbar(context, 'Failed to save access level: $e');
           }
         },
-      ),
-    );
-  }
-
-  void _showErrorFeedback(String errorMsg) {
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.red.shade100,
-        duration: const Duration(seconds: 4),
-        showCloseIcon: true,
-        closeIconColor: Colors.red.shade500,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        content: Row(
-          children: [
-            Expanded(
-              child: SelectableText(
-                errorMsg,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.red.shade900),
-              ),
-            ),
-            IconButton(
-              tooltip: 'Copy',
-              icon: Icon(
-                Icons.copy,
-                color: Colors.red.shade700,
-                size: 18,
-              ),
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: errorMsg));
-              },
-            ),
-          ],
-        ),
       ),
     );
   }
