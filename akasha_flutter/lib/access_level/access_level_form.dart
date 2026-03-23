@@ -28,7 +28,6 @@ class _AddAccessLevelFormState extends State<AddAccessLevelForm> {
     super.initState();
 
     final accessLevel = widget.item;
-
     nameController = TextEditingController(text: accessLevel?.name ?? '');
     descriptionController = TextEditingController(text: accessLevel?.description ?? '');
   }
@@ -47,22 +46,14 @@ class _AddAccessLevelFormState extends State<AddAccessLevelForm> {
 
     setState(() => _isSaving = true);
 
-    try {
-      final accessLevel = AccessLevel(
-        id: widget.item?.id,
-        name: nameController.text.trim(),
-        description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
-      );
-      await widget.onSave(accessLevel);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+    final accessLevel = AccessLevel(
+      id: widget.item?.id,
+      name: nameController.text.trim(),
+      description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+    );
+    await widget.onSave(accessLevel);
+    if (mounted) {
+      setState(() => _isSaving = false);
     }
   }
 
