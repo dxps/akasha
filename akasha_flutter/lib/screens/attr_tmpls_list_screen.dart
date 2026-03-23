@@ -4,6 +4,7 @@ import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/utils/string.dart';
 import 'package:akasha_flutter/widgets/attr_tmpl_form.dart';
+import 'package:akasha_flutter/widgets/feedback.dart';
 import 'package:akasha_flutter/widgets/modal/draggable_modal.dart';
 import 'package:akasha_flutter/widgets/modal/modal_content.dart';
 import 'package:flutter/material.dart';
@@ -298,42 +299,35 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
       size: modalSize,
       child: AttributeTemplateForm(
         item: item,
-        onSave: (tmpl) async {
-          debugPrint('>>> Got from form (Attribute Template): $tmpl');
+        onSave: (item) async {
+          debugPrint('>>> Got from form the Attribute Template: $item');
 
           try {
             if (isEdit) {
-              final response = await client.attrTmpls.update(tmpl);
+              final response = await client.attrTmpls.update(item);
 
               if (response.success && mounted) {
-                debugPrint(
-                  '>>> Attribute template has been updated. Closing modal (id: $id) and refreshing attribute templates list...',
-                );
                 _closeModal(id);
                 await _getAttributeTmpls();
+              } else if (!response.success) {
+                if (!mounted) return;
+                showErrorSnackbar(context, response.errorMessage ?? 'Failed to update attribute template: ${response.errorCode}');
               }
-
-              return response;
             }
 
-            final response = await client.attrTmpls.create(tmpl);
+            final response = await client.attrTmpls.create(item);
 
             if (response.success && mounted) {
-              debugPrint(
-                '>>> Attribute template has been created. Closing modal (id: $id) and refreshing attribute templates list...',
-              );
               _closeModal(id);
               await _getAttributeTmpls();
+            } else if (!response.success) {
+              if (!mounted) return;
+              showErrorSnackbar(context, response.errorMessage ?? 'Failed to create attribute template: ${response.errorCode}');
             }
-
-            return response;
           } catch (e) {
             debugPrint('>>> Failed to save attribute template: $e');
-            return AttributeTmplApiResponse(
-              success: false,
-              errorCode: 'ATE-001',
-              message: 'Unexpected error while saving attribute template.',
-            );
+            if (!mounted) return;
+            showErrorSnackbar(context, 'Failed to save attribute template: $e');
           }
         },
       ),

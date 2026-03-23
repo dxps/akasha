@@ -20,14 +20,14 @@ abstract class AttributeTmplApiResponse
     required this.success,
     this.data,
     this.errorCode,
-    this.message,
+    this.errorMessage,
   });
 
   factory AttributeTmplApiResponse({
     required bool success,
     _i2.AttributeTmpl? data,
     String? errorCode,
-    String? message,
+    String? errorMessage,
   }) = _AttributeTmplApiResponseImpl;
 
   factory AttributeTmplApiResponse.fromJson(
@@ -41,7 +41,7 @@ abstract class AttributeTmplApiResponse
               jsonSerialization['data'],
             ),
       errorCode: jsonSerialization['errorCode'] as String?,
-      message: jsonSerialization['message'] as String?,
+      errorMessage: jsonSerialization['errorMessage'] as String?,
     );
   }
 
@@ -51,7 +51,7 @@ abstract class AttributeTmplApiResponse
 
   String? errorCode;
 
-  String? message;
+  String? errorMessage;
 
   /// Returns a shallow copy of this [AttributeTmplApiResponse]
   /// with some or all fields replaced by the given arguments.
@@ -60,7 +60,7 @@ abstract class AttributeTmplApiResponse
     bool? success,
     _i2.AttributeTmpl? data,
     String? errorCode,
-    String? message,
+    String? errorMessage,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -69,7 +69,7 @@ abstract class AttributeTmplApiResponse
       'success': success,
       if (data != null) 'data': data?.toJson(),
       if (errorCode != null) 'errorCode': errorCode,
-      if (message != null) 'message': message,
+      if (errorMessage != null) 'errorMessage': errorMessage,
     };
   }
 
@@ -80,7 +80,7 @@ abstract class AttributeTmplApiResponse
       'success': success,
       if (data != null) 'data': data?.toJsonForProtocol(),
       if (errorCode != null) 'errorCode': errorCode,
-      if (message != null) 'message': message,
+      if (errorMessage != null) 'errorMessage': errorMessage,
     };
   }
 
@@ -97,12 +97,12 @@ class _AttributeTmplApiResponseImpl extends AttributeTmplApiResponse {
     required bool success,
     _i2.AttributeTmpl? data,
     String? errorCode,
-    String? message,
+    String? errorMessage,
   }) : super._(
          success: success,
          data: data,
          errorCode: errorCode,
-         message: message,
+         errorMessage: errorMessage,
        );
 
   /// Returns a shallow copy of this [AttributeTmplApiResponse]
@@ -113,13 +113,13 @@ class _AttributeTmplApiResponseImpl extends AttributeTmplApiResponse {
     bool? success,
     Object? data = _Undefined,
     Object? errorCode = _Undefined,
-    Object? message = _Undefined,
+    Object? errorMessage = _Undefined,
   }) {
     return AttributeTmplApiResponse(
       success: success ?? this.success,
       data: data is _i2.AttributeTmpl? ? data : this.data?.copyWith(),
       errorCode: errorCode is String? ? errorCode : this.errorCode,
-      message: message is String? ? message : this.message,
+      errorMessage: errorMessage is String? ? errorMessage : this.errorMessage,
     );
   }
 }

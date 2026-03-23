@@ -7,17 +7,10 @@ class AttrTmplsEndpoint extends Endpoint {
     try {
       final created = await AttributeTmpl.db.insertRow(session, data);
 
-      return AttributeTmplApiResponse(
-        success: true,
-        data: created,
-      );
+      return AttributeTmplApiResponse(success: true, data: created);
     } on DatabaseQueryException catch (e) {
       if (e.code == PgErrorCode.uniqueViolation && e.constraintName == 'attr_tmpl_name_desc_uniq_idx') {
-        return AttributeTmplApiResponse(
-          success: false,
-          errorCode: 'ATE-002',
-          message: 'An attribute template with the same name and description already exists.',
-        );
+        return alreadyExistsResponse();
       }
 
       session.log(
@@ -27,33 +20,15 @@ class AttrTmplsEndpoint extends Endpoint {
         level: LogLevel.error,
       );
 
-      return AttributeTmplApiResponse(
-        success: false,
-        errorCode: 'ATE-001',
-        message: 'Could not create attribute template.',
-      );
+      return failureResponse(null, false);
     } on DatabaseException catch (e) {
-      session.log(
-        'DatabaseException while creating attribute template: ${e.message}',
-        level: LogLevel.error,
-      );
+      session.log('DatabaseException while creating attribute template: ${e.message}', level: LogLevel.error);
 
-      return AttributeTmplApiResponse(
-        success: false,
-        errorCode: 'ATE-001',
-        message: 'Could not create attribute template.',
-      );
+      return failureResponse(null, false);
     } catch (e) {
-      session.log(
-        'Unexpected error while creating attribute template: $e',
-        level: LogLevel.error,
-      );
+      session.log('Unexpected error while creating attribute template: $e', level: LogLevel.error);
 
-      return AttributeTmplApiResponse(
-        success: false,
-        errorCode: 'ATE-001',
-        message: 'Unexpected error while creating attribute template.',
-      );
+      return failureResponse(null, false);
     }
   }
 
@@ -78,11 +53,7 @@ class AttrTmplsEndpoint extends Endpoint {
       );
     } on DatabaseQueryException catch (e) {
       if (e.code == PgErrorCode.uniqueViolation && e.constraintName == 'attr_tmpl_name_desc_uniq_idx') {
-        return AttributeTmplApiResponse(
-          success: false,
-          errorCode: 'ATE-002',
-          message: 'An attribute template with the same name and description already exists.',
-        );
+        return alreadyExistsResponse();
       }
 
       session.log(
@@ -92,33 +63,14 @@ class AttrTmplsEndpoint extends Endpoint {
         level: LogLevel.error,
       );
 
-      return AttributeTmplApiResponse(
-        success: false,
-        errorCode: 'ATE-001',
-        message: 'Could not update attribute template.',
-      );
+      return failureResponse(null, true);
     } on DatabaseException catch (e) {
-      session.log(
-        'DatabaseException while updating attribute template: ${e.message}',
-        level: LogLevel.error,
-      );
+      session.log('DatabaseException while updating attribute template: ${e.message}', level: LogLevel.error);
 
-      return AttributeTmplApiResponse(
-        success: false,
-        errorCode: 'ATE-001',
-        message: 'Could not update attribute template.',
-      );
+      return failureResponse(null, true);
     } catch (e) {
-      session.log(
-        'Unexpected error while updating attribute template: $e',
-        level: LogLevel.error,
-      );
-
-      return AttributeTmplApiResponse(
-        success: false,
-        errorCode: 'ATE-001',
-        message: 'Unexpected error while updating attribute template.',
-      );
+      session.log('Unexpected error while updating attribute template: $e', level: LogLevel.error);
+      return failureResponse(null, true);
     }
   }
 
@@ -128,5 +80,21 @@ class AttrTmplsEndpoint extends Endpoint {
       where: (t) => t.id.equals(id),
     );
     return deleted.isNotEmpty;
+  }
+
+  AttributeTmplApiResponse alreadyExistsResponse() {
+    return AttributeTmplApiResponse(
+      success: false,
+      errorCode: 'ATE-003',
+      errorMessage: 'An attribute template with the same name already exists.',
+    );
+  }
+
+  AttributeTmplApiResponse failureResponse(String? message, bool isUpdate) {
+    return AttributeTmplApiResponse(
+      success: false,
+      errorCode: message != null ? 'ATE-002' : 'ATE-001',
+      errorMessage: message ?? 'Could not ${isUpdate ? 'update' : 'create'} attribute template.',
+    );
   }
 }

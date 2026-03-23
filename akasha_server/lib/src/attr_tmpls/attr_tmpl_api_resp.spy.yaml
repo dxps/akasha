@@ -3,4 +3,4 @@ fields:
     success: bool
     data: AttributeTmpl?
     errorCode: String?
-    message: String?
+    errorMessage: String?

@@ -2,7 +2,6 @@ import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/model/attr_value_type.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class AttributeTemplateForm extends StatefulWidget {
   const AttributeTemplateForm({
@@ -12,7 +11,7 @@ class AttributeTemplateForm extends StatefulWidget {
   });
 
   final AttributeTmpl? item;
-  final Future<AttributeTmplApiResponse> Function(AttributeTmpl) onSave;
+  final Future<void> Function(AttributeTmpl) onSave;
 
   @override
   State<AttributeTemplateForm> createState() => _AttributeTemplateFormState();
@@ -241,86 +240,23 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
       _ => defaultValueController.text.trim().isEmpty ? '' : defaultValueController.text.trim(),
     };
 
-    setState(() {
-      _isSaving = true;
-    });
+    setState(() => _isSaving = true);
 
-    try {
-      final tmpl = AttributeTmpl(
-        id: widget.item?.id,
-        name: nameController.text.trim(),
-        description: descriptionController.text.trim(),
-        valueType: selectedType.name,
-        defaultValue: defaultValue,
-        required: isRequired,
-        accessLevelId: selectedAccessLevelId!,
-        accessLevel: null,
-      );
+    final tmpl = AttributeTmpl(
+      id: widget.item?.id,
+      name: nameController.text.trim(),
+      description: descriptionController.text.trim(),
+      valueType: selectedType.name,
+      defaultValue: defaultValue,
+      required: isRequired,
+      accessLevelId: selectedAccessLevelId!,
+      accessLevel: null,
+    );
 
-      final response = await widget.onSave(tmpl);
+    await widget.onSave(tmpl);
 
-      if (!mounted) return;
-
-      if (!response.success) {
-        setState(() {
-          _isSaving = false;
-        });
-        final errorMsg = response.message ?? 'Could not save attribute template.';
-        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red.shade100,
-            duration: const Duration(seconds: 4),
-            showCloseIcon: true,
-            closeIconColor: Colors.red.shade500,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            content: Row(
-              children: [
-                Expanded(
-                  child: SelectableText(
-                    errorMsg,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.red.shade900),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Copy',
-                  icon: Icon(
-                    Icons.copy,
-                    color: Colors.red.shade700,
-                    size: 18,
-                  ),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: errorMsg));
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-        return;
-      }
-
-      // Success path:
-      // Parent handles closing the modal and refreshing the list.
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('AttributeTemplateForm.onSave error: $e');
-
-      if (!mounted) return;
-
-      setState(() {
-        _isSaving = false;
-      });
-
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        const SnackBar(
-          content: Text('Unexpected error while saving attribute template.'),
-        ),
-      );
+    if (mounted) {
+      setState(() => _isSaving = false);
     }
   }
 
