@@ -281,7 +281,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                   SizedBox(
                     width: 140,
                     child: DropdownButtonFormField<AttributeValueType>(
-                      value: selectedType,
+                      initialValue: selectedType,
                       isExpanded: true,
                       decoration: _dropdownDecoration('Value type *'),
                       items: AttributeValueType.values
@@ -318,7 +318,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                           )
                         : DropdownButtonFormField<int>(
                             key: accessLevelFieldKey,
-                            value: selectedAccessLevelId,
+                            initialValue: selectedAccessLevelId,
                             isExpanded: true,
                             decoration: _dropdownDecoration('Access Level *'),
                             items: accessLevels

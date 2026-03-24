@@ -310,6 +310,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     AttributeTmpl? item,
     Size? viewportSize,
     bool readOnly = false,
+    Offset? initialOffset,
   }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
@@ -322,15 +323,16 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
           : 'create'} an attribute template ...',
     );
 
-    Offset offset = const Offset(24, 80);
     const modalSize = Size(340, 400);
 
-    if (viewportSize != null) {
-      offset = Offset(
-        (viewportSize.width - modalSize.width) / 2,
-        (viewportSize.height - modalSize.height) / 2,
-      );
-    }
+    final offset =
+        initialOffset ??
+        (viewportSize != null
+            ? Offset(
+                (viewportSize.width - modalSize.width) / 2,
+                (viewportSize.height - modalSize.height) / 2,
+              )
+            : const Offset(24, 80));
 
     _addModal(
       id: id,
@@ -346,20 +348,23 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
         readOnly: readOnly,
         onRequestEdit: readOnly && item != null
             ? () {
+                final currentModal = _modals.firstWhere((m) => m.id == id);
+                final currentOffset = currentModal.offset;
+
                 _closeModal(id);
+
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
                   _openModal(
                     item: item,
                     viewportSize: viewportSize,
                     readOnly: false,
+                    initialOffset: currentOffset,
                   );
                 });
               }
             : null,
         onSave: (item) async {
-          debugPrint('>>> Got from form the Attribute Template: $item');
-
           try {
             if (isEdit) {
               final response = await client.attrTmpls.update(item);

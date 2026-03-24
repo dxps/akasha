@@ -225,6 +225,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
     AccessLevel? item,
     Size? viewportSize,
     bool readOnly = false,
+    Offset? initialOffset,
   }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
@@ -237,15 +238,15 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
           : 'create'} an access level ...',
     );
 
-    Offset offset = const Offset(24, 80);
     const modalSize = Size(340, 226);
-
-    if (viewportSize != null) {
-      offset = Offset(
-        (viewportSize.width - modalSize.width) / 2,
-        (viewportSize.height - modalSize.height) / 2,
-      );
-    }
+    final offset =
+        initialOffset ??
+        (viewportSize != null
+            ? Offset(
+                (viewportSize.width - modalSize.width) / 2,
+                (viewportSize.height - modalSize.height) / 2,
+              )
+            : const Offset(24, 80));
 
     _addModal(
       id: id,
@@ -261,6 +262,9 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
         readOnly: readOnly,
         onRequestEdit: readOnly && item != null
             ? () {
+                final currentModal = _modals.firstWhere((m) => m.id == id);
+                final currentOffset = currentModal.offset;
+
                 _closeModal(id);
 
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -269,6 +273,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
                     item: item,
                     viewportSize: viewportSize,
                     readOnly: false,
+                    initialOffset: currentOffset,
                   );
                 });
               }
