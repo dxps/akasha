@@ -23,6 +23,7 @@ late String serverUrl;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // TODO: This works only for the Web.
   usePathUrlStrategy();
 
   // When you are running the app on a physical device, you need to set the
@@ -72,33 +73,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
       title: 'Akasha',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        scaffoldBackgroundColor: Colors.grey[200],
-        dataTableTheme: DataTableThemeData(
-          headingTextStyle: const TextStyle(color: Colors.grey),
-          dataRowMinHeight: 30,
-          dataRowMaxHeight: 30,
-          dividerThickness: 0.25,
-          headingRowHeight: 30,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
-      ),
-      // home: const MyHomePage(title: 'Akasha'),
+      theme: initThemeData(),
     );
   }
 }
@@ -113,11 +88,9 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title), backgroundColor: Colors.transparent),
       // body: const GreetingsScreen(),
-      // To test authentication in this example app, uncomment the line below
-      // and comment out the line above. This wraps the GreetingsScreen with a
-      // SignInScreen, which automatically shows a sign-in UI when the user is
-      // not authenticated and displays the GreetingsScreen once they sign in.
-      //
+      // This wraps the GreetingsScreen with a SignInScreen, which automatically
+      // shows a sign-in UI when the user is not authenticated and displays
+      // the GreetingsScreen once they sign in.
       body: Center(
         child: SignInScreen(
           child: GreetingsScreen(
@@ -129,4 +102,68 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
+}
+
+ThemeData initThemeData() {
+  final base = ThemeData(
+    useMaterial3: true,
+    primarySwatch: Colors.deepPurple,
+    scaffoldBackgroundColor: Colors.grey[200],
+  );
+
+  return base.copyWith(
+    dataTableTheme: const DataTableThemeData(
+      headingTextStyle: TextStyle(color: Colors.grey, fontSize: 13),
+      dataRowMinHeight: 30,
+      dataRowMaxHeight: 30,
+      dividerThickness: 0.25,
+      headingRowHeight: 30,
+    ),
+
+    textTheme: base.textTheme.copyWith(
+      bodyLarge: const TextStyle(fontSize: 15),
+      bodyMedium: const TextStyle(fontSize: 14),
+      titleMedium: const TextStyle(fontSize: 14), // important for ListTile/CheckboxListTile
+      labelLarge: const TextStyle(fontSize: 14),
+      labelMedium: const TextStyle(fontSize: 14),
+    ),
+
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white,
+      isDense: true,
+      contentPadding: EdgeInsets.symmetric(vertical: 8),
+      labelStyle: TextStyle(fontSize: 14),
+      floatingLabelStyle: TextStyle(fontSize: 15),
+      hintStyle: TextStyle(fontSize: 13),
+      helperStyle: TextStyle(fontSize: 12),
+      errorStyle: TextStyle(fontSize: 12),
+    ),
+
+    listTileTheme: const ListTileThemeData(
+      titleTextStyle: TextStyle(fontSize: 14),
+    ),
+
+    dropdownMenuTheme: const DropdownMenuThemeData(
+      textStyle: TextStyle(fontSize: 14),
+    ),
+
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
+
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
+
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
+  );
 }

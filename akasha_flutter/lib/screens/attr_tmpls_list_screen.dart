@@ -229,7 +229,6 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
                                               final result = await showMenu<String>(
                                                 context: context,
-
                                                 items: [
                                                   PopupMenuItem(value: 'edit', height: 32, child: Text('Edit')),
                                                   PopupMenuItem(value: 'delete', height: 32, child: Text('Delete')),
@@ -283,7 +282,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
     // Calculate centered position if viewport is provided
     Offset offset = const Offset(24, 80); // fallback position
-    const modalSize = Size(340, 460);
+    const modalSize = Size(340, 390);
 
     if (viewportSize != null) {
       offset = Offset(
