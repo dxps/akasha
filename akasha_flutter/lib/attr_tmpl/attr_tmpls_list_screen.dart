@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_flutter/attr_tmpl/attr_tmpl_form.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/utils/string.dart';
-import 'package:akasha_flutter/widgets/attr_tmpl_form.dart';
 import 'package:akasha_flutter/widgets/feedback.dart';
 import 'package:akasha_flutter/widgets/modal/draggable_modal.dart';
 import 'package:akasha_flutter/widgets/modal/modal_content.dart';
@@ -17,15 +17,20 @@ class AttributeTmplsScreen extends StatefulWidget {
 }
 
 class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
+  bool isFetchingData = false;
   List<AttributeTmpl> attributeTmpls = [];
   int? _hoveredRowIndex;
   final List<ModalData> _modals = [];
   int _nextModalId = 1;
 
   Future<void> _getAttributeTmpls() async {
+    setState(() => isFetchingData = true);
     final items = await client.attrTmpls.readAll();
-    debugPrint("[_AttributeTmplsScreenStat] Got ${items.length} attributeTmpls.");
-    setState(() => attributeTmpls = items);
+    debugPrint("Got ${items.length} attribute templates.");
+    setState(() {
+      attributeTmpls = items;
+      isFetchingData = false;
+    });
   }
 
   @override
@@ -90,7 +95,6 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton.icon(
-              //   onPressed: () => _showAttributeTemplateDialog(context),
               onPressed: () {
                 final size = MediaQuery.of(context).size;
                 _openModal(viewportSize: size);
@@ -106,7 +110,9 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
           final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
           return Stack(
             children: [
-              attributeTmpls.isEmpty
+              isFetchingData
+                  ? const Center(child: CircularProgressIndicator())
+                  : attributeTmpls.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -312,6 +318,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                 if (!mounted) return;
                 showErrorSnackbar(context, response.errorMessage ?? 'Failed to update attribute template: ${response.errorCode}');
               }
+              return;
             }
 
             final response = await client.attrTmpls.create(item);

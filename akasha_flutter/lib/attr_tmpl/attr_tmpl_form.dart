@@ -20,6 +20,8 @@ class AttributeTemplateForm extends StatefulWidget {
 
 class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
   final formKey = GlobalKey<FormState>();
+  final nameFieldKey = GlobalKey<FormFieldState<String>>();
+  final accessLevelFieldKey = GlobalKey<FormFieldState<int>>();
 
   late final TextEditingController nameController;
   late final TextEditingController descriptionController;
@@ -264,6 +266,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextFormField(
+                key: nameFieldKey,
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Name *', hintText: 'Required'),
                 validator: (value) {
@@ -272,12 +275,12 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                   }
                   return null;
                 },
-                onChanged: (_) => formKey.currentState?.validate(),
+                onChanged: (_) => nameFieldKey.currentState?.validate(),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
+                decoration: const InputDecoration(labelText: 'Description', contentPadding: EdgeInsets.symmetric(vertical: 8)),
               ),
               const SizedBox(height: 12),
               Row(
@@ -293,7 +296,6 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                         defaultValueController.clear();
                         defaultBooleanValue = false;
                       });
-                      formKey.currentState?.validate();
                     },
                     width: 140,
                     menuHeight: 230,
@@ -302,17 +304,6 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                       padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 6, horizontal: 0)),
                     ),
                     requestFocusOnTap: false,
-                    decorationBuilder: (context, controller) {
-                      return const InputDecoration(
-                        border: UnderlineInputBorder(),
-                        enabledBorder: UnderlineInputBorder(),
-                        focusedBorder: UnderlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(vertical: 4),
-                        isDense: true,
-                        filled: true,
-                        fillColor: Colors.white,
-                      );
-                    },
                   ),
                   const SizedBox(width: 12),
                   _isLoadingAccessLevels
@@ -325,6 +316,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                           ),
                         )
                       : DropdownMenuFormField<int>(
+                          key: accessLevelFieldKey,
                           initialSelection: selectedAccessLevelId,
                           label: const Text('Access Level *', overflow: TextOverflow.ellipsis),
                           dropdownMenuEntries: accessLevels.map((level) => DropdownMenuEntry<int>(value: level.id!, label: level.name)).toList(),
@@ -332,7 +324,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                             setState(() {
                               selectedAccessLevelId = value;
                             });
-                            formKey.currentState?.validate();
+                            accessLevelFieldKey.currentState?.validate();
                           },
                           validator: (value) {
                             if (value == null) {
@@ -347,18 +339,6 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                           ),
                           width: 154,
                           requestFocusOnTap: false,
-                          // make it match your other text fields
-                          decorationBuilder: (context, controller) {
-                            return const InputDecoration(
-                              border: UnderlineInputBorder(),
-                              enabledBorder: UnderlineInputBorder(),
-                              focusedBorder: UnderlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(vertical: 4),
-                              isDense: true,
-                              filled: true,
-                              fillColor: Colors.white,
-                            );
-                          },
                         ),
                 ],
               ),

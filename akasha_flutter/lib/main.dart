@@ -1,6 +1,6 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/access_level/access_levels_screen.dart';
-import 'package:akasha_flutter/screens/attr_tmpls_list_screen.dart';
+import 'package:akasha_flutter/attr_tmpl/attr_tmpls_list_screen.dart';
 import 'package:akasha_flutter/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -109,6 +109,7 @@ ThemeData initThemeData() {
     useMaterial3: true,
     primarySwatch: Colors.deepPurple,
     scaffoldBackgroundColor: Colors.grey[200],
+    // scaffoldBackgroundColor: const Color(0xFFd1d2d1),
   );
 
   return base.copyWith(
@@ -129,8 +130,11 @@ ThemeData initThemeData() {
     ),
 
     inputDecorationTheme: const InputDecorationTheme(
-      filled: true,
-      fillColor: Colors.white,
+      border: UnderlineInputBorder(),
+      enabledBorder: UnderlineInputBorder(),
+      focusedBorder: UnderlineInputBorder(),
+      filled: false,
+      hoverColor: Colors.transparent,
       isDense: true,
       contentPadding: EdgeInsets.symmetric(vertical: 8),
       labelStyle: TextStyle(fontSize: 14),
@@ -138,6 +142,12 @@ ThemeData initThemeData() {
       hintStyle: TextStyle(fontSize: 13),
       helperStyle: TextStyle(fontSize: 12),
       errorStyle: TextStyle(fontSize: 12),
+      errorBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.red),
+      ),
+      focusedErrorBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.red),
+      ),
     ),
 
     listTileTheme: const ListTileThemeData(
@@ -149,13 +159,30 @@ ThemeData initThemeData() {
     ),
 
     elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.hovered)) {
+            return const Color.fromARGB(255, 224, 251, 224);
+          }
+          return Colors.white;
+        }),
+        elevation: WidgetStateProperty.resolveWith<double?>((states) {
+          if (states.contains(WidgetState.disabled)) return 0;
+          if (states.contains(WidgetState.hovered)) return 1; // same as normal
+          if (states.contains(WidgetState.pressed)) return 1; // or higher if you want
+          return 1; // normal
+        }),
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        foregroundColor: const WidgetStatePropertyAll(Colors.black87),
+        shape: const WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+        ),
       ),
     ),
 
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     ),

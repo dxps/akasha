@@ -62,42 +62,45 @@ class _AddAccessLevelFormState extends State<AddAccessLevelForm> {
     return Form(
       key: formKey,
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextFormField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name *',
-                hintText: 'Required',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name *',
+                  hintText: 'Required',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Name is required';
+                  }
+                  return null;
+                },
+                onChanged: (_) => formKey.currentState?.validate(),
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Name is required';
-                }
-                return null;
-              },
-              onChanged: (_) => formKey.currentState?.validate(),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
+              const SizedBox(height: 12),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                onPressed: _isSaving ? null : onSave,
-                color: Theme.of(context).primaryColor,
-                icon: const Icon(Icons.save),
-                tooltip: _isEdit ? 'Update' : 'Add',
+              const SizedBox(height: 20),
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  onPressed: _isSaving ? null : onSave,
+                  color: Theme.of(context).primaryColor,
+                  icon: _isSaving ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.save),
+                  tooltip: _isEdit ? 'Update' : 'Add',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -45,6 +45,7 @@ class AttrTmplsEndpoint extends Endpoint {
 
   Future<AttributeTmplApiResponse> update(Session session, AttributeTmpl data) async {
     try {
+      session.log('Updating attribute template with id ${data.id}', level: LogLevel.info);
       final updated = await AttributeTmpl.db.updateRow(session, data);
 
       return AttributeTmplApiResponse(

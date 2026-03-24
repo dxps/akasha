@@ -17,15 +17,20 @@ class AccessLevelsScreen extends StatefulWidget {
 }
 
 class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
+  bool isFetchingData = false;
   List<AccessLevel> accessLevels = [];
   int? _hoveredRowIndex;
   final List<ModalData> _modals = [];
   int _nextModalId = 1;
 
   Future<void> _getAccessLevels() async {
+    setState(() => isFetchingData = true);
     final items = await client.accessLevel.readAll();
     debugPrint("[_AccessLevelsScreenState] Got ${items.length} access levels.");
-    setState(() => accessLevels = items);
+    setState(() {
+      accessLevels = items;
+      isFetchingData = false;
+    });
   }
 
   @override
@@ -105,7 +110,9 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
           final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
           return Stack(
             children: [
-              accessLevels.isEmpty
+              isFetchingData
+                  ? const Center(child: CircularProgressIndicator())
+                  : accessLevels.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -265,7 +272,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
 
     // Calculate centered position if viewport is provided
     Offset offset = const Offset(24, 80); // fallback position
-    const modalSize = Size(340, 230);
+    const modalSize = Size(340, 226);
 
     if (viewportSize != null) {
       offset = Offset(
