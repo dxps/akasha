@@ -109,7 +109,6 @@ ThemeData initThemeData() {
     useMaterial3: true,
     primarySwatch: Colors.deepPurple,
     scaffoldBackgroundColor: Colors.grey[200],
-    // scaffoldBackgroundColor: const Color(0xFFd1d2d1),
   );
 
   return base.copyWith(

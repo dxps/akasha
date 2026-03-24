@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/access_level/access_level_form.dart';
+import 'package:akasha_flutter/access_level/access_level_row.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/utils/string.dart';
 import 'package:akasha_flutter/widgets/feedback.dart';
@@ -131,123 +132,9 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
                     )
                   : Center(
                       child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Header row
-                            Container(
-                              height: 30,
-                              decoration: BoxDecoration(
-                                border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[300]!)),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    width: 200,
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
-                                      child: Text('name', style: TextStyle(color: Colors.grey[500])),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 300,
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
-                                      child: Text('description', style: TextStyle(color: Colors.grey[500])),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 40,
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      child: Text(''),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Data rows
-                            ...accessLevels.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final level = entry.value;
-                              final isHovered = _hoveredRowIndex == index;
-
-                              return MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                onEnter: (_) => setState(() => _hoveredRowIndex = index),
-                                onExit: (_) => setState(() => _hoveredRowIndex = null),
-                                child: Container(
-                                  height: 28,
-                                  decoration: BoxDecoration(
-                                    color: isHovered ? Colors.white : Colors.transparent,
-                                    border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[350]!)),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        width: 200,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          child: Text(limitChars(level.name, 32)),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 300,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          child: Text(level.description != null ? limitChars(level.description!, 40) : ''),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 30,
-                                        child: Builder(
-                                          builder: (context) => IconButton(
-                                            icon: Icon(Icons.more_vert, size: 15, color: isHovered ? Colors.grey[800] : Colors.grey[400]),
-                                            onPressed: () async {
-                                              final RenderBox button = context.findRenderObject() as RenderBox;
-                                              final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-                                              final RelativeRect position = RelativeRect.fromRect(
-                                                Rect.fromPoints(
-                                                  button.localToGlobal(Offset.zero, ancestor: overlay),
-                                                  button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
-                                                ),
-                                                Offset.zero & overlay.size,
-                                              );
-
-                                              final result = await showMenu<String>(
-                                                context: context,
-                                                items: [
-                                                  PopupMenuItem(value: 'edit', height: 32, child: Text('Edit')),
-                                                  PopupMenuItem(value: 'delete', height: 32, child: Text('Delete')),
-                                                ],
-                                                color: Colors.white,
-                                                clipBehavior: Clip.antiAlias,
-                                                menuPadding: const EdgeInsets.symmetric(vertical: 0),
-                                                position: position,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                              );
-
-                                              if (result == 'edit') {
-                                                _openModal(item: level, viewportSize: vwSize);
-                                              } else if (result == 'delete') {
-                                                _deleteAccessLevel(level);
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
+                        child: _buildTable(vwSize),
                       ),
-                    ), // end-of-Center
+                    ),
 
               for (final modal in _modals)
                 DraggableModal(
@@ -265,13 +152,93 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
     );
   }
 
-  Future<void> _openModal({AccessLevel? item, Size? viewportSize}) async {
+  Widget _buildTable(Size? viewportSize) {
+    final size = viewportSize ?? MediaQuery.sizeOf(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 30,
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                width: 0.25,
+                color: Colors.grey[300]!,
+              ),
+            ),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 200,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
+                  child: Text(
+                    'name',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 300,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
+                  child: Text(
+                    'description',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 30,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  child: Text(''),
+                ),
+              ),
+            ],
+          ),
+        ),
+        ...accessLevels.map((level) {
+          return AccessLevelRow(
+            level: level,
+            nameText: limitChars(level.name, 32),
+            descriptionText: level.description != null ? limitChars(level.description!, 40) : '',
+            onView: () => _openModal(
+              item: level,
+              viewportSize: size,
+              readOnly: true,
+            ),
+            onEdit: () => _openModal(
+              item: level,
+              viewportSize: size,
+            ),
+            onDelete: () => _deleteAccessLevel(level),
+          );
+        }),
+      ],
+    );
+  }
+
+  Future<void> _openModal({
+    AccessLevel? item,
+    Size? viewportSize,
+    bool readOnly = false,
+  }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
-    debugPrint('Opening modal (id: $id) to ${isEdit ? 'edit' : 'create'} an access level ...');
 
-    // Calculate centered position if viewport is provided
-    Offset offset = const Offset(24, 80); // fallback position
+    debugPrint(
+      'Opening modal (id: $id) to ${readOnly
+          ? 'view'
+          : isEdit
+          ? 'edit'
+          : 'create'} an access level ...',
+    );
+
+    Offset offset = const Offset(24, 80);
     const modalSize = Size(340, 226);
 
     if (viewportSize != null) {
@@ -283,11 +250,30 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
 
     _addModal(
       id: id,
-      title: isEdit ? 'Edit Access Level' : 'New Access Level',
+      title: readOnly
+          ? 'Access Level'
+          : isEdit
+          ? 'Edit Access Level'
+          : 'New Access Level',
       offset: offset,
       size: modalSize,
-      child: AddAccessLevelForm(
+      child: AccessLevelForm(
         item: item,
+        readOnly: readOnly,
+        onRequestEdit: readOnly && item != null
+            ? () {
+                _closeModal(id);
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  _openModal(
+                    item: item,
+                    viewportSize: viewportSize,
+                    readOnly: false,
+                  );
+                });
+              }
+            : null,
         onSave: (item) async {
           debugPrint('>>> Got from form the item (AccessLevel): $item');
 
@@ -300,7 +286,10 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
                 await _getAccessLevels();
               } else if (!response.success) {
                 if (!mounted) return;
-                showErrorSnackbar(context, response.errorMessage ?? 'Failed to save access level: ${response.errorCode}');
+                showErrorSnackbar(
+                  context,
+                  response.errorMessage ?? 'Failed to save access level: ${response.errorCode}',
+                );
               }
               return;
             }
@@ -312,7 +301,10 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
               await _getAccessLevels();
             } else if (!response.success) {
               if (!mounted) return;
-              showErrorSnackbar(context, response.errorMessage ?? 'Failed to create access level: ${response.errorCode}');
+              showErrorSnackbar(
+                context,
+                response.errorMessage ?? 'Failed to create access level: ${response.errorCode}',
+              );
             }
           } catch (e) {
             debugPrint('Failed to save access level: $e.');
