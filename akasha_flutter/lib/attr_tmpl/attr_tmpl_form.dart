@@ -10,11 +10,15 @@ class AttributeTemplateForm extends StatefulWidget {
   const AttributeTemplateForm({
     super.key,
     this.item,
-    required this.onSave,
+    this.onSave,
+    this.onRequestEdit,
+    this.readOnly = false,
   });
 
   final AttributeTmpl? item;
-  final Future<void> Function(AttributeTmpl) onSave;
+  final Future<void> Function(AttributeTmpl)? onSave;
+  final VoidCallback? onRequestEdit;
+  final bool readOnly;
 
   @override
   State<AttributeTemplateForm> createState() => _AttributeTemplateFormState();
@@ -37,7 +41,9 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
   List<AccessLevel> accessLevels = [];
   bool _isSaving = false;
   bool _isLoadingAccessLevels = true;
+
   bool get _isEdit => widget.item != null;
+  bool get _isReadOnly => widget.readOnly;
 
   @override
   void initState() {
@@ -90,12 +96,14 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
   }
 
   Future<void> pickDate() async {
+    if (_isReadOnly) return;
     final picked = await DateTimePickers.pickDate(context);
     if (!mounted || picked == null) return;
     defaultValueController.text = formatDateYmd(picked);
   }
 
   Future<void> pickDateTime() async {
+    if (_isReadOnly) return;
     final picked = await DateTimePickers.pickDateTime(context);
     if (!mounted || picked == null) return;
     defaultValueController.text = picked.toIso8601String();
@@ -119,58 +127,66 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
               child: Text('True'),
             ),
           ],
-          onChanged: (value) {
-            setState(() {
-              defaultBooleanValue = value ?? false;
-            });
-          },
+          onChanged: _isReadOnly
+              ? null
+              : (value) {
+                  setState(() {
+                    defaultBooleanValue = value ?? false;
+                  });
+                },
         );
 
       case AttributeValueType.number:
         return TextFormField(
           controller: defaultValueController,
+          readOnly: _isReadOnly,
           decoration: const InputDecoration(
             labelText: 'Default value',
             hintText: 'e.g. 42 or 3.14',
           ),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          validator: (value) {
-            final trimmed = value?.trim() ?? '';
-            if (trimmed.isEmpty) return null;
-            if (double.tryParse(trimmed) == null) {
-              return 'Enter a valid number';
-            }
-            return null;
-          },
+          validator: _isReadOnly
+              ? null
+              : (value) {
+                  final trimmed = value?.trim() ?? '';
+                  if (trimmed.isEmpty) return null;
+                  if (double.tryParse(trimmed) == null) {
+                    return 'Enter a valid number';
+                  }
+                  return null;
+                },
         );
 
       case AttributeValueType.date:
         return TextFormField(
           controller: defaultValueController,
+          readOnly: _isReadOnly,
           selectAllOnFocus: false,
           decoration: const InputDecoration(
             labelText: 'Default value',
             hintText: 'YYYY-MM-DD',
             suffixIcon: Icon(Icons.calendar_today),
           ),
-          onTap: pickDate,
+          onTap: _isReadOnly ? null : pickDate,
         );
 
       case AttributeValueType.dateTime:
         return TextFormField(
           controller: defaultValueController,
+          readOnly: _isReadOnly,
           selectAllOnFocus: false,
           decoration: const InputDecoration(
             labelText: 'Default value',
             hintText: 'ISO 8601 date-time',
             suffixIcon: Icon(Icons.schedule),
           ),
-          onTap: pickDateTime,
+          onTap: _isReadOnly ? null : pickDateTime,
         );
 
       case AttributeValueType.text:
         return TextFormField(
           controller: defaultValueController,
+          readOnly: _isReadOnly,
           decoration: const InputDecoration(
             labelText: 'Default value',
           ),
@@ -179,7 +195,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
   }
 
   Future<void> onSave() async {
-    if (_isSaving) return;
+    if (_isSaving || _isReadOnly || widget.onSave == null) return;
 
     if (!formKey.currentState!.validate()) {
       return;
@@ -199,21 +215,23 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
 
     setState(() => _isSaving = true);
 
-    final tmpl = AttributeTmpl(
-      id: widget.item?.id,
-      name: nameController.text.trim(),
-      description: descriptionController.text.trim(),
-      valueType: selectedType.name,
-      defaultValue: defaultValue,
-      required: isRequired,
-      accessLevelId: selectedAccessLevelId!,
-      accessLevel: null,
-    );
+    try {
+      final tmpl = AttributeTmpl(
+        id: widget.item?.id,
+        name: nameController.text.trim(),
+        description: descriptionController.text.trim(),
+        valueType: selectedType.name,
+        defaultValue: defaultValue,
+        required: isRequired,
+        accessLevelId: selectedAccessLevelId!,
+        accessLevel: null,
+      );
 
-    await widget.onSave(tmpl);
-
-    if (mounted) {
-      setState(() => _isSaving = false);
+      await widget.onSave!(tmpl);
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -231,81 +249,106 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
               TextFormField(
                 key: nameFieldKey,
                 controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name *', hintText: 'Required'),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Name is required';
-                  }
-                  return null;
-                },
-                onChanged: (_) => nameFieldKey.currentState?.validate(),
+                readOnly: _isReadOnly,
+                decoration: InputDecoration(
+                  labelText: _isReadOnly ? 'Name' : 'Name *',
+                  hintText: _isReadOnly ? null : 'Required',
+                ),
+                validator: _isReadOnly
+                    ? null
+                    : (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Name is required';
+                        }
+                        return null;
+                      },
+                onChanged: _isReadOnly ? null : (_) => nameFieldKey.currentState?.validate(),
               ),
               const SizedBox(height: 12),
-              TextField(
+              TextFormField(
                 controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description', contentPadding: EdgeInsets.symmetric(vertical: 8)),
+                readOnly: _isReadOnly,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+                maxLines: _isReadOnly ? 1 : null,
+                minLines: 1,
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  DropdownMenuFormField<AttributeValueType>(
-                    initialSelection: selectedType,
-                    label: const Text('Value type *'),
-                    dropdownMenuEntries: AttributeValueType.values.map((type) => DropdownMenuEntry(value: type, label: type.label)).toList(),
-                    onSelected: (value) {
-                      if (value == null) return;
-                      setState(() {
-                        selectedType = value;
-                        defaultValueController.clear();
-                        defaultBooleanValue = false;
-                      });
-                    },
+                  SizedBox(
                     width: 140,
-                    menuHeight: 230,
-                    menuStyle: const MenuStyle(
-                      backgroundColor: WidgetStatePropertyAll(Colors.white),
-                      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 6, horizontal: 0)),
+                    child: DropdownButtonFormField<AttributeValueType>(
+                      value: selectedType,
+                      isExpanded: true,
+                      decoration: _dropdownDecoration('Value type *'),
+                      items: AttributeValueType.values
+                          .map(
+                            (type) => DropdownMenuItem<AttributeValueType>(
+                              value: type,
+                              child: Text(type.label),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: _isReadOnly
+                          ? null
+                          : (value) {
+                              if (value == null) return;
+                              setState(() {
+                                selectedType = value;
+                                defaultValueController.clear();
+                                defaultBooleanValue = false;
+                              });
+                            },
                     ),
-                    requestFocusOnTap: false,
                   ),
                   const SizedBox(width: 12),
-                  _isLoadingAccessLevels
-                      ? const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                  SizedBox(
+                    width: 154,
+                    child: _isLoadingAccessLevels
+                        ? const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : DropdownButtonFormField<int>(
+                            key: accessLevelFieldKey,
+                            value: selectedAccessLevelId,
+                            isExpanded: true,
+                            decoration: _dropdownDecoration('Access Level *'),
+                            items: accessLevels
+                                .map(
+                                  (level) => DropdownMenuItem<int>(
+                                    value: level.id!,
+                                    child: Text(level.name),
+                                  ),
+                                )
+                                .toList(),
+                            validator: _isReadOnly
+                                ? null
+                                : (value) {
+                                    if (value == null) {
+                                      return 'Access level is required';
+                                    }
+                                    return null;
+                                  },
+                            onChanged: _isReadOnly
+                                ? null
+                                : (value) {
+                                    setState(() {
+                                      selectedAccessLevelId = value;
+                                    });
+                                    accessLevelFieldKey.currentState?.validate();
+                                  },
                           ),
-                        )
-                      : DropdownMenuFormField<int>(
-                          key: accessLevelFieldKey,
-                          initialSelection: selectedAccessLevelId,
-                          label: const Text('Access Level *', overflow: TextOverflow.ellipsis),
-                          dropdownMenuEntries: accessLevels.map((level) => DropdownMenuEntry<int>(value: level.id!, label: level.name)).toList(),
-                          onSelected: (value) {
-                            setState(() {
-                              selectedAccessLevelId = value;
-                            });
-                            accessLevelFieldKey.currentState?.validate();
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Access level is required';
-                            }
-                            return null;
-                          },
-                          menuHeight: 200,
-                          menuStyle: const MenuStyle(
-                            backgroundColor: WidgetStatePropertyAll(Colors.white),
-                            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 6, horizontal: 0)),
-                          ),
-                          width: 154,
-                          requestFocusOnTap: false,
-                        ),
+                  ),
                 ],
               ),
-
               const SizedBox(height: 12),
               buildDefaultValueField(),
               const SizedBox(height: 8),
@@ -316,19 +359,34 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                 value: isRequired,
                 visualDensity: VisualDensity.compact,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                onChanged: (value) {
-                  setState(() => isRequired = value ?? false);
-                },
+                onChanged: _isReadOnly
+                    ? null
+                    : (value) {
+                        setState(() => isRequired = value ?? false);
+                      },
               ),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
-                child: IconButton(
-                  onPressed: _isSaving ? null : onSave,
-                  color: Theme.of(context).primaryColor,
-                  icon: _isSaving ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.save),
-                  tooltip: _isEdit ? 'Update' : 'Add',
-                ),
+                child: _isReadOnly
+                    ? IconButton(
+                        onPressed: _isEdit ? widget.onRequestEdit : null,
+                        color: Theme.of(context).primaryColor,
+                        icon: const Icon(Icons.edit),
+                        tooltip: 'Edit',
+                      )
+                    : IconButton(
+                        onPressed: _isSaving ? null : onSave,
+                        color: Theme.of(context).primaryColor,
+                        icon: _isSaving
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.save),
+                        tooltip: _isEdit ? 'Update' : 'Add',
+                      ),
               ),
             ],
           ),
@@ -336,4 +394,16 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
       ),
     );
   }
+}
+
+InputDecoration _dropdownDecoration(String label) {
+  return InputDecoration(
+    labelText: label,
+    isDense: true,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+    border: const UnderlineInputBorder(),
+    enabledBorder: const UnderlineInputBorder(),
+    disabledBorder: const UnderlineInputBorder(),
+    focusedBorder: const UnderlineInputBorder(),
+  );
 }

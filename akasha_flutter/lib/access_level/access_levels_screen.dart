@@ -20,7 +20,6 @@ class AccessLevelsScreen extends StatefulWidget {
 class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
   bool isFetchingData = false;
   List<AccessLevel> accessLevels = [];
-  int? _hoveredRowIndex;
   final List<ModalData> _modals = [];
   int _nextModalId = 1;
 
