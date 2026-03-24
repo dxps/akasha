@@ -1,6 +1,8 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_flutter/main.dart';
 import 'package:akasha_flutter/model/attr_value_type.dart';
+import 'package:akasha_flutter/utils/date_time.dart';
+import 'package:akasha_flutter/widgets/datetime_pickers.dart';
 import 'package:akasha_flutter/widgets/feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -88,54 +90,15 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
   }
 
   Future<void> pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (!mounted) return;
-
-    if (picked != null) {
-      defaultValueController.text =
-          '${picked.year.toString().padLeft(4, '0')}-'
-          '${picked.month.toString().padLeft(2, '0')}-'
-          '${picked.day.toString().padLeft(2, '0')}';
-    }
+    final picked = await DateTimePickers.pickDate(context);
+    if (!mounted || picked == null) return;
+    defaultValueController.text = formatDateYmd(picked);
   }
 
   Future<void> pickDateTime() async {
-    final now = DateTime.now();
-
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (!mounted) return;
-    if (pickedDate == null) return;
-
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(now),
-    );
-
-    if (!mounted) return;
-    if (pickedTime == null) return;
-
-    final pickedDateTime = DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-      pickedTime.hour,
-      pickedTime.minute,
-    );
-
-    defaultValueController.text = pickedDateTime.toIso8601String();
+    final picked = await DateTimePickers.pickDateTime(context);
+    if (!mounted || picked == null) return;
+    defaultValueController.text = picked.toIso8601String();
   }
 
   Widget buildDefaultValueField() {
@@ -168,7 +131,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
           controller: defaultValueController,
           decoration: const InputDecoration(
             labelText: 'Default value',
-            hintText: 'e.g. 42',
+            hintText: 'e.g. 42 or 3.14',
           ),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: (value) {
@@ -184,7 +147,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
       case AttributeValueType.date:
         return TextFormField(
           controller: defaultValueController,
-          readOnly: true,
+          selectAllOnFocus: false,
           decoration: const InputDecoration(
             labelText: 'Default value',
             hintText: 'YYYY-MM-DD',
@@ -196,7 +159,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
       case AttributeValueType.dateTime:
         return TextFormField(
           controller: defaultValueController,
-          readOnly: true,
+          selectAllOnFocus: false,
           decoration: const InputDecoration(
             labelText: 'Default value',
             hintText: 'ISO 8601 date-time',
