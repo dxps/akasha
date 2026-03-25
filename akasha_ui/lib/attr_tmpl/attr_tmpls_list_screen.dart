@@ -5,6 +5,7 @@ import 'package:akasha_ui/attr_tmpl/attr_tmpl_form.dart';
 import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/utils/string.dart';
 import 'package:akasha_ui/widgets/feedback.dart';
+import 'package:akasha_ui/widgets/layout_scaffold.dart';
 import 'package:akasha_ui/widgets/modal/draggable_modal.dart';
 import 'package:akasha_ui/widgets/modal/modal_content.dart';
 import 'package:flutter/material.dart';
@@ -107,6 +108,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
           );
           return Stack(
             children: [
+              TopHeader(),
               isFetchingData
                   ? const Center(child: CircularProgressIndicator())
                   : attributeTmpls.isEmpty

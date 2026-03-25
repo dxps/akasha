@@ -31,7 +31,6 @@ class LayoutScaffold extends StatelessWidget {
                 ? child
                 : Column(
                     children: [
-                      const _TopHeader(),
                       Expanded(child: child),
                     ],
                   ),
@@ -65,8 +64,8 @@ class LayoutScaffold extends StatelessWidget {
   }
 }
 
-class _TopHeader extends StatelessWidget {
-  const _TopHeader();
+class TopHeader extends StatelessWidget {
+  const TopHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
