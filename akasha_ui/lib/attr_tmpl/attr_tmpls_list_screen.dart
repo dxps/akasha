@@ -94,26 +94,17 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Attribute Templates', style: TextStyle(fontSize: 16)),
-        backgroundColor: Colors.transparent,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                final size = MediaQuery.of(context).size;
-                _openModal(viewportSize: size);
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Add'),
-            ),
-          ),
-        ],
-      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
+          final addButton = IconButton(
+            onPressed: () {
+              final size = MediaQuery.of(context).size;
+              _openModal(viewportSize: size);
+            },
+            icon: const Icon(Icons.add),
+            tooltip: 'Add Attribute Template',
+          );
           return Stack(
             children: [
               isFetchingData
@@ -125,19 +116,19 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                         children: [
                           const Text('No attribute templates yet.'),
                           const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              final size = MediaQuery.of(context).size;
-                              _openModal(viewportSize: size);
-                            },
-                            child: const Text('Add'),
-                          ),
+                          addButton,
                         ],
                       ),
                     )
                   : Center(
                       child: SingleChildScrollView(
-                        child: _buildTable(vwSize),
+                        child: Column(
+                          children: [
+                            _buildTable(vwSize),
+                            const SizedBox(height: 20),
+                            addButton,
+                          ],
+                        ),
                       ),
                     ),
 

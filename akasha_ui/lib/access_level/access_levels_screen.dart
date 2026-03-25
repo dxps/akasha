@@ -93,6 +93,14 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final addButton = IconButton(
+      onPressed: () {
+        final size = MediaQuery.of(context).size;
+        _openModal(viewportSize: size);
+      },
+      icon: const Icon(Icons.add),
+      tooltip: 'Add Access Level',
+    );
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -108,19 +116,19 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
                         children: [
                           const Text('No access levels yet.'),
                           const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              final size = MediaQuery.of(context).size;
-                              _openModal(viewportSize: size);
-                            },
-                            child: const Text('Add'),
-                          ),
+                          addButton,
                         ],
                       ),
                     )
                   : Center(
                       child: SingleChildScrollView(
-                        child: _buildTable(vwSize),
+                        child: Column(
+                          children: [
+                            _buildTable(vwSize),
+                            const SizedBox(height: 20),
+                            addButton,
+                          ],
+                        ),
                       ),
                     ),
 
@@ -162,21 +170,15 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
               SizedBox(
                 width: 200,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
-                  child: Text(
-                    'name',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  child: Text('name', style: TextStyle(color: Colors.grey)),
                 ),
               ),
               SizedBox(
                 width: 300,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 13, vertical: 2),
-                  child: Text(
-                    'description',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  child: Text('description', style: TextStyle(color: Colors.grey)),
                 ),
               ),
               SizedBox(
