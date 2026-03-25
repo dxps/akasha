@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 const double mobileBreakpoint = 768;
 
@@ -60,53 +59,6 @@ class LayoutScaffold extends StatelessWidget {
               : null,
         );
       },
-    );
-  }
-}
-
-class TopHeader extends StatelessWidget {
-  const TopHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      surfaceTintColor: Colors.transparent,
-      child: SizedBox(
-        height: 36,
-        child: Row(
-          children: [
-            const SizedBox(width: 16),
-            const Text(
-              'Akasha',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
-            ),
-            const Spacer(),
-            TextButton(
-              onPressed: () {
-                context.go('/');
-              },
-              style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),
-              child: const Text('Home'),
-            ),
-            TextButton(
-              onPressed: () {
-                context.go('/attribute_templates');
-              },
-              style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),
-              child: const Text('Attribute Templates'),
-            ),
-            TextButton(
-              onPressed: () {
-                context.go('/access_levels');
-              },
-              style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),
-              child: const Text('Access Levels'),
-            ),
-            const SizedBox(width: 16),
-          ],
-        ),
-      ),
     );
   }
 }

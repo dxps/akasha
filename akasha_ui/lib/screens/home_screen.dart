@@ -1,7 +1,7 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_ui/screens/greetings_screen.dart';
 import 'package:akasha_ui/screens/sign_in_screen.dart';
-import 'package:akasha_ui/widgets/layout_scaffold.dart';
+import 'package:akasha_ui/widgets/top_header.dart';
 import 'package:flutter/material.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
@@ -18,7 +18,8 @@ class HomeScreen extends StatelessWidget {
       // the GreetingsScreen once they sign in.
       body: Column(
         children: [
-          TopHeader(),
+          const TopHeader(),
+          Image.asset('images/logo_o_light_grey.png', width: 200, height: 200),
           Center(
             child: SignInScreen(
               child: GreetingsScreen(

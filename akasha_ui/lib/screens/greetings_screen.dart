@@ -90,13 +90,13 @@ class ResultDisplay extends StatelessWidget {
     String text;
     Color backgroundColor;
     if (errorMessage != null) {
-      backgroundColor = Colors.red[300]!;
+      backgroundColor = Colors.red[200]!;
       text = errorMessage!;
     } else if (resultMessage != null) {
-      backgroundColor = Colors.green[300]!;
+      backgroundColor = Colors.green[200]!;
       text = resultMessage!;
     } else {
-      backgroundColor = Colors.grey[300]!;
+      backgroundColor = Colors.grey[100]!;
       text = 'No server response yet.';
     }
 
