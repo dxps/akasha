@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-class ThemeCubit extends Cubit<ThemeMode> {
+class ThemeCubit extends HydratedCubit<ThemeMode> {
   ThemeCubit() : super(ThemeMode.light);
 
   void toggleTheme() {
@@ -15,4 +15,14 @@ class ThemeCubit extends Cubit<ThemeMode> {
   bool get isDarkMode => state == ThemeMode.dark;
 
   bool get isLightMode => state == ThemeMode.light;
+
+  @override
+  ThemeMode fromJson(Map<String, dynamic> json) {
+    return ThemeMode.values[json['themeMode'] as int];
+  }
+
+  @override
+  Map<String, dynamic> toJson(ThemeMode state) {
+    return {'themeMode': state.index};
+  }
 }

@@ -5,10 +5,13 @@ import 'package:akasha_ui/screens/home_screen.dart';
 import 'package:akasha_ui/theming/init_theme.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/widgets/app_shell.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
@@ -25,8 +28,14 @@ late String serverUrl;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // TODO: This works only for the Web.
-  usePathUrlStrategy();
+
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: kIsWeb ? HydratedStorageDirectory.web : HydratedStorageDirectory((await getTemporaryDirectory()).path),
+  );
+
+  if (kIsWeb) {
+    usePathUrlStrategy();
+  }
 
   // When you are running the app on a physical device, you need to set the
   // server URL to the IP address of your computer. You can find the IP
