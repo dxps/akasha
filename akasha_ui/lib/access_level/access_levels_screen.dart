@@ -48,8 +48,14 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
     required String title,
     required Offset offset,
     required Size size,
-    required Widget child,
+    required AccessLevelForm child,
   }) {
+    for (final modal in _modals) {
+      if ((modal.child as AccessLevelForm).item == child.item) {
+        debugPrint('That (access level) modal is already open.');
+        return;
+      }
+    }
     setState(() {
       _modals.add(ModalData(id: id, type: type, title: title, offset: offset, size: size, child: child));
     });
@@ -88,23 +94,6 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Access Levels', style: TextStyle(fontSize: 16)),
-        backgroundColor: Colors.transparent,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              onPressed: () {
-                final size = MediaQuery.of(context).size;
-                _openModal(viewportSize: size);
-              },
-              icon: const Icon(Icons.add),
-              label: const Text("Add"),
-            ),
-          ),
-        ],
-      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);

@@ -1,14 +1,13 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_ui/access_level/access_levels_screen.dart';
 import 'package:akasha_ui/attr_tmpl/attr_tmpls_list_screen.dart';
-import 'package:akasha_ui/screens/sign_in_screen.dart';
+import 'package:akasha_ui/screens/home_screen.dart';
+import 'package:akasha_ui/widgets/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
-
-import 'screens/greetings_screen.dart';
 
 /// Sets up a global client object that can be used to talk to the server from
 /// anywhere in our app. The client is generated from your server code
@@ -29,10 +28,8 @@ void main() async {
   // When you are running the app on a physical device, you need to set the
   // server URL to the IP address of your computer. You can find the IP
   // address by running `ipconfig` on Windows or `ifconfig` on Mac/Linux.
-  //
   // You can set the variable when running or building your app like this:
   // E.g. `flutter run --dart-define=SERVER_URL=https://api.example.com/`.
-  //
   // Otherwise, the server URL is fetched from the assets/config.json file or
   // defaults to http://$localhost:9090/ if not found.
   final serverUrl = await getServerUrl();
@@ -48,18 +45,33 @@ void main() async {
 
 final GoRouter _router = GoRouter(
   initialLocation: '/',
-  routes: <RouteBase>[
-    GoRoute(
-      path: '/',
-      pageBuilder: (context, state) => const NoTransitionPage(child: MyHomePage(title: 'Akasha')),
-    ),
-    GoRoute(
-      path: '/attr_tmpls',
-      pageBuilder: (context, state) => const NoTransitionPage(child: AttributeTmplsScreen()),
-    ),
-    GoRoute(
-      path: '/access_levels',
-      pageBuilder: (context, state) => const NoTransitionPage(child: AccessLevelsScreen()),
+  routes: [
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return AppShell(navigationShell: navigationShell);
+      },
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/',
+              pageBuilder: (context, state) => NoTransitionPage(child: HomeScreen(client: client)),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/attribute_templates',
+              pageBuilder: (context, state) => const NoTransitionPage(child: AttributeTmplsScreen()),
+            ),
+            GoRoute(
+              path: '/access_levels',
+              pageBuilder: (context, state) => const NoTransitionPage(child: AccessLevelsScreen()),
+            ),
+          ],
+        ),
+      ],
     ),
   ],
 );
@@ -72,34 +84,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
-      title: 'Akasha',
+      title: '',
       theme: initThemeData(),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title), backgroundColor: Colors.transparent),
-      // body: const GreetingsScreen(),
-      // This wraps the GreetingsScreen with a SignInScreen, which automatically
-      // shows a sign-in UI when the user is not authenticated and displays
-      // the GreetingsScreen once they sign in.
-      body: Center(
-        child: SignInScreen(
-          child: GreetingsScreen(
-            onSignOut: () async {
-              await client.auth.signOutDevice();
-            },
-          ),
-        ),
-      ),
     );
   }
 }

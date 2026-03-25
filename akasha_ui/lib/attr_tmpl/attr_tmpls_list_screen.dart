@@ -48,8 +48,14 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     required String title,
     required Offset offset,
     required Size size,
-    required Widget child,
+    required AttributeTemplateForm child,
   }) {
+    for (final modal in _modals) {
+      if ((modal.child as AttributeTemplateForm).item == child.item) {
+        debugPrint('That (attribute template) modal is already open.');
+        return;
+      }
+    }
     setState(() {
       _modals.add(ModalData(id: id, type: type, title: title, offset: offset, size: size, child: child));
     });

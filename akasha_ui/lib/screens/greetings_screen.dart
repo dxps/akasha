@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../main.dart';
 
@@ -45,21 +44,14 @@ class _GreetingsScreenState extends State<GreetingsScreen> {
       child: Column(
         children: [
           if (widget.onSignOut != null) ...[
-            const Text('You are connected'),
+            const Text('You are signed in.'),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
+                TextButton(
                   onPressed: widget.onSignOut,
+                  style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),
                   child: const Text('Sign out'),
-                ),
-                ElevatedButton(
-                  onPressed: () => context.go('/attr_tmpls'),
-                  child: const Text('Attribute Templates'),
-                ),
-                ElevatedButton(
-                  onPressed: () => context.go('/access_levels'),
-                  child: const Text('Access Levels'),
                 ),
               ],
             ),
