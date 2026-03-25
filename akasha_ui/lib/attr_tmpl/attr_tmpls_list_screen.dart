@@ -3,12 +3,15 @@ import 'dart:math' as math;
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_ui/attr_tmpl/attr_tmpl_form.dart';
 import 'package:akasha_ui/main.dart';
+import 'package:akasha_ui/theming/colors.dart';
+import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/string.dart';
 import 'package:akasha_ui/widgets/feedback.dart';
 import 'package:akasha_ui/widgets/modal/draggable_modal.dart';
 import 'package:akasha_ui/widgets/modal/modal_content.dart';
 import 'package:akasha_ui/widgets/top_header.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AttributeTmplsScreen extends StatefulWidget {
   const AttributeTmplsScreen({super.key});
@@ -94,64 +97,69 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
-          final addButton = IconButton(
-            onPressed: () {
-              final size = MediaQuery.of(context).size;
-              _openModal(viewportSize: size);
-            },
-            icon: const Icon(Icons.add),
-            tooltip: 'Add Attribute Template',
-          );
-          return Stack(
-            children: [
-              const TopHeader(),
-              isFetchingData
-                  ? const Center(child: CircularProgressIndicator())
-                  : attributeTmpls.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('No attribute templates yet.'),
-                          const SizedBox(height: 20),
-                          addButton,
-                        ],
-                      ),
-                    )
-                  : Center(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _buildTable(vwSize),
-                            const SizedBox(height: 20),
-                            addButton,
-                          ],
+    return BlocSelector<ThemeCubit, ThemeMode, bool>(
+      selector: (themeMode) => themeMode == ThemeMode.dark,
+      builder: (context, isDarkMode) {
+        return Scaffold(
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
+              final addButton = IconButton(
+                onPressed: () {
+                  final size = MediaQuery.of(context).size;
+                  _openModal(viewportSize: size);
+                },
+                icon: const Icon(Icons.add),
+                tooltip: 'Add Attribute Template',
+              );
+              return Stack(
+                children: [
+                  const TopHeader(),
+                  isFetchingData
+                      ? const Center(child: CircularProgressIndicator())
+                      : attributeTmpls.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('No attribute templates yet.'),
+                              const SizedBox(height: 20),
+                              addButton,
+                            ],
+                          ),
+                        )
+                      : Center(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                _buildTable(vwSize, isDarkMode),
+                                const SizedBox(height: 20),
+                                addButton,
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
 
-              for (final modal in _modals) // Render the modals.
-                DraggableModal(
-                  key: ValueKey(modal.id),
-                  data: modal,
-                  viewport: vwSize,
-                  onTap: () => _bringToFront(modal.id),
-                  onClose: () => _closeModal(modal.id),
-                  onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
-                ),
-            ],
-          );
-        },
-      ),
+                  for (final modal in _modals) // Render the modals.
+                    DraggableModal(
+                      key: ValueKey(modal.id),
+                      data: modal,
+                      viewport: vwSize,
+                      onTap: () => _bringToFront(modal.id),
+                      onClose: () => _closeModal(modal.id),
+                      onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
+                    ),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildTable(Size? viewportSize) {
-    final headerTextColor = Colors.grey[500];
+  Widget _buildTable(Size? viewportSize, bool isDarkMode) {
+    final headerTextColor = isDarkMode ? primaryDarkFgColor.withAlpha(120) : Colors.grey.shade700;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -159,7 +167,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
         Container(
           height: 30,
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[300]!)),
+            border: Border(bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -207,8 +215,11 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
             child: Container(
               height: 28,
               decoration: BoxDecoration(
-                color: isHovered ? Colors.white : Colors.transparent,
-                border: Border(bottom: BorderSide(width: 0.25, color: Colors.grey[350]!)),
+                color: isHovered ? (isDarkMode ? Colors.grey.shade700 : Colors.white) : Colors.transparent,
+                border: Border(
+                  bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade200),
+                ),
+                borderRadius: isHovered ? BorderRadius.circular(6) : null,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -257,42 +268,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                           size: 15,
                           color: isHovered ? Colors.grey[800] : Colors.grey[500],
                         ),
-                        onPressed: () async {
-                          final RenderBox button = context.findRenderObject() as RenderBox;
-                          final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-
-                          final RelativeRect position = RelativeRect.fromRect(
-                            Rect.fromPoints(
-                              button.localToGlobal(Offset.zero, ancestor: overlay),
-                              button.localToGlobal(
-                                button.size.bottomRight(Offset.zero),
-                                ancestor: overlay,
-                              ),
-                            ),
-                            Offset.zero & overlay.size,
-                          );
-
-                          final result = await showMenu<String>(
-                            context: context,
-                            items: const [
-                              PopupMenuItem(value: 'edit', height: 32, child: Text('Edit')),
-                              PopupMenuItem(value: 'delete', height: 32, child: Text('Delete')),
-                            ],
-                            color: Colors.white,
-                            clipBehavior: Clip.antiAlias,
-                            menuPadding: EdgeInsets.symmetric(vertical: 0),
-                            position: position,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          );
-
-                          if (result == 'edit') {
-                            _openModal(item: tmpl, viewportSize: viewportSize);
-                          } else if (result == 'delete') {
-                            _deleteAttributeTmpl(tmpl);
-                          }
-                        },
+                        onPressed: () => _openContextualMenu(context, tmpl, viewportSize),
                       ),
                     ),
                   ),
@@ -303,6 +279,44 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
         }),
       ],
     );
+  }
+
+  Future<void> _openContextualMenu(BuildContext context, AttributeTmpl tmpl, Size? viewportSize) async {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+    final result = await showMenu<String>(
+      context: context,
+      items: const [
+        PopupMenuItem(value: 'edit', height: 32, child: Text('Edit')),
+        PopupMenuItem(value: 'delete', height: 32, child: Text('Delete')),
+      ],
+      color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+      clipBehavior: Clip.antiAlias,
+      menuPadding: EdgeInsets.symmetric(vertical: 0),
+      position: position,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+
+    if (result == 'edit') {
+      _openModal(item: tmpl, viewportSize: viewportSize);
+    } else if (result == 'delete') {
+      _deleteAttributeTmpl(tmpl);
+    }
   }
 
   Future<void> _openModal({
@@ -404,12 +418,13 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
   }
 
   Future<void> _deleteAttributeTmpl(AttributeTmpl tmpl) async {
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Attribute Template', style: TextStyle(fontSize: 18)),
         content: Text('Are you sure you want to delete "${tmpl.name}"?'),
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.grey.shade800 : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         actions: [
           TextButton(

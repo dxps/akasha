@@ -1,4 +1,6 @@
+import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DateTimePickers {
   //
@@ -8,13 +10,19 @@ class DateTimePickers {
     DateTime? firstDate,
     DateTime? lastDate,
     BorderRadius? borderRadius,
-    Color backgroundColor = Colors.white,
-    Color headerBackgroundColor = Colors.white,
-    Color cancelButtonBackgroundColor = const Color(0xFFE0E0E0),
-    Color confirmButtonBackgroundColor = const Color(0xFFD1C4E9),
+    Color? backgroundColor,
+    Color? headerBackgroundColor,
+    Color? cancelButtonBackgroundColor,
+    Color? confirmButtonBackgroundColor,
   }) async {
     final radius = borderRadius ?? BorderRadius.circular(10);
     final now = DateTime.now();
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+
+    backgroundColor = backgroundColor ?? (isDarkMode ? Colors.grey.shade800 : Colors.white);
+    cancelButtonBackgroundColor = cancelButtonBackgroundColor ?? (isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300);
+    confirmButtonBackgroundColor = confirmButtonBackgroundColor ?? (isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300);
+    headerBackgroundColor = headerBackgroundColor ?? (isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300);
 
     return showDatePicker(
       context: context,
@@ -55,6 +63,7 @@ class DateTimePickers {
     BorderRadius? borderRadius,
   }) async {
     final now = initialDateTime ?? DateTime.now();
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
 
     final date = await pickDate(
       context,
@@ -67,9 +76,33 @@ class DateTimePickers {
     if (date == null) return null;
     if (!context.mounted) return null;
 
+    final backgroundColor = isDarkMode ? Colors.grey.shade800 : Colors.white;
+    final cancelButtonBackgroundColor = isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
+    final confirmButtonBackgroundColor = isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
+    final radius = borderRadius ?? BorderRadius.circular(10);
+
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(now),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: backgroundColor,
+              shape: RoundedRectangleBorder(borderRadius: radius),
+              cancelButtonStyle: TextButton.styleFrom(
+                backgroundColor: cancelButtonBackgroundColor,
+                shape: RoundedRectangleBorder(borderRadius: radius),
+              ),
+              confirmButtonStyle: TextButton.styleFrom(
+                backgroundColor: confirmButtonBackgroundColor,
+                shape: RoundedRectangleBorder(borderRadius: radius),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (time == null) return null;

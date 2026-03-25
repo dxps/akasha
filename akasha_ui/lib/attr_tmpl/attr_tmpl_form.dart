@@ -1,10 +1,13 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/model/attr_value_type.dart';
+import 'package:akasha_ui/theming/colors.dart';
+import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/date_time.dart';
 import 'package:akasha_ui/widgets/datetime_pickers.dart';
 import 'package:akasha_ui/widgets/feedback.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AttributeTemplateForm extends StatefulWidget {
   const AttributeTemplateForm({
@@ -237,6 +240,8 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+
     return Form(
       key: formKey,
       child: SingleChildScrollView(
@@ -371,13 +376,13 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                 child: _isReadOnly
                     ? IconButton(
                         onPressed: _isEdit ? widget.onRequestEdit : null,
-                        color: Theme.of(context).primaryColor,
+                        color: isDarkMode ? primaryDarkFgColor : Theme.of(context).primaryColor,
                         icon: const Icon(Icons.edit),
                         tooltip: 'Edit',
                       )
                     : IconButton(
                         onPressed: _isSaving ? null : onSave,
-                        color: Theme.of(context).primaryColor,
+                        color: isDarkMode ? primaryDarkFgColor : Theme.of(context).primaryColor,
                         icon: _isSaving
                             ? const SizedBox(
                                 width: 16,

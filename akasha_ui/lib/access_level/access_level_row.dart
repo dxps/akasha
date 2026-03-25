@@ -1,5 +1,7 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AccessLevelRow extends StatefulWidget {
   const AccessLevelRow({
@@ -34,7 +36,7 @@ class AccessLevelRow extends StatefulWidget {
 class _AccessLevelRowState extends State<AccessLevelRow> {
   bool _isHovered = false;
 
-  Future<void> _openMenu(BuildContext context) async {
+  Future<void> _openContextualMenu(BuildContext context) async {
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
 
@@ -49,16 +51,17 @@ class _AccessLevelRowState extends State<AccessLevelRow> {
       Offset.zero & overlay.size,
     );
 
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final result = await showMenu<String>(
       context: context,
       position: position,
-      color: Colors.white,
+      color: isDarkMode ? Colors.grey.shade900 : Colors.white,
       clipBehavior: Clip.antiAlias,
       menuPadding: const EdgeInsets.symmetric(vertical: 0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
-      items: const [
+      items: [
         PopupMenuItem(
           value: 'edit',
           height: 32,
@@ -86,70 +89,73 @@ class _AccessLevelRowState extends State<AccessLevelRow> {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: Container(
-        height: widget.height,
-        decoration: BoxDecoration(
-          color: _isHovered ? Colors.white : Colors.transparent,
-          border: Border(
-            bottom: BorderSide(
-              width: 0.25,
-              color: Colors.grey[350]!,
+    return BlocSelector<ThemeCubit, ThemeMode, bool>(
+      selector: (themeMode) => themeMode == ThemeMode.dark,
+      builder: (context, isDarkMode) {
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          child: Container(
+            height: widget.height,
+            decoration: BoxDecoration(
+              color: _isHovered ? (isDarkMode ? Colors.grey.shade700 : Colors.white) : Colors.transparent,
+              border: Border(
+                bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade200),
+              ),
+              borderRadius: _isHovered ? BorderRadius.circular(6) : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                InkWell(
+                  onTap: widget.onView,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: widget.nameWidth,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          child: Text(widget.nameText),
+                        ),
+                      ),
+                      SizedBox(
+                        width: widget.descriptionWidth,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          child: Text(widget.descriptionText),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: widget.menuWidth,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(
+                        Icons.more_vert,
+                        size: 15,
+                        color: _isHovered ? Colors.grey[800] : Colors.grey[400],
+                      ),
+                      onPressed: () => _openContextualMenu(context),
+                      tooltip: 'Actions',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            InkWell(
-              onTap: widget.onView,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: widget.nameWidth,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      child: Text(widget.nameText),
-                    ),
-                  ),
-                  SizedBox(
-                    width: widget.descriptionWidth,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      child: Text(widget.descriptionText),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: widget.menuWidth,
-              child: Builder(
-                builder: (context) => IconButton(
-                  icon: Icon(
-                    Icons.more_vert,
-                    size: 15,
-                    color: _isHovered ? Colors.grey[800] : Colors.grey[400],
-                  ),
-                  onPressed: () => _openMenu(context),
-                  tooltip: 'Actions',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

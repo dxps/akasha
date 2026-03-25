@@ -1,5 +1,8 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_ui/theming/colors.dart';
+import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AccessLevelForm extends StatefulWidget {
   const AccessLevelForm({
@@ -74,6 +77,8 @@ class _AccessLevelFormState extends State<AccessLevelForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+
     return Form(
       key: formKey,
       child: SingleChildScrollView(
@@ -116,13 +121,13 @@ class _AccessLevelFormState extends State<AccessLevelForm> {
                 child: _isReadOnly
                     ? IconButton(
                         onPressed: _isEdit ? widget.onRequestEdit : null,
-                        color: Theme.of(context).primaryColor,
+                        color: isDarkMode ? primaryDarkFgColor : Theme.of(context).primaryColor,
                         icon: const Icon(Icons.edit),
                         tooltip: 'Edit',
                       )
                     : IconButton(
                         onPressed: _isSaving ? null : onSave,
-                        color: Theme.of(context).primaryColor,
+                        color: isDarkMode ? primaryDarkFgColor : Theme.of(context).primaryColor,
                         icon: _isSaving
                             ? const SizedBox(
                                 width: 16,

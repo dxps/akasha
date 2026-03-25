@@ -4,12 +4,14 @@ import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_ui/access_level/access_level_form.dart';
 import 'package:akasha_ui/access_level/access_level_row.dart';
 import 'package:akasha_ui/main.dart';
+import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/string.dart';
 import 'package:akasha_ui/widgets/feedback.dart';
 import 'package:akasha_ui/widgets/modal/draggable_modal.dart';
 import 'package:akasha_ui/widgets/modal/modal_content.dart';
 import 'package:akasha_ui/widgets/top_header.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AccessLevelsScreen extends StatefulWidget {
   const AccessLevelsScreen({super.key});
@@ -102,55 +104,61 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
       icon: const Icon(Icons.add),
       tooltip: 'Add Access Level',
     );
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
-          return Stack(
-            children: [
-              const TopHeader(),
-              isFetchingData
-                  ? const Center(child: CircularProgressIndicator())
-                  : accessLevels.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('No access levels yet.'),
-                          const SizedBox(height: 20),
-                          addButton,
-                        ],
-                      ),
-                    )
-                  : Center(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _buildTable(vwSize),
-                            const SizedBox(height: 20),
-                            addButton,
-                          ],
-                        ),
-                      ),
-                    ),
 
-              for (final modal in _modals)
-                DraggableModal(
-                  key: ValueKey(modal.id),
-                  data: modal,
-                  viewport: vwSize,
-                  onTap: () => _bringToFront(modal.id),
-                  onClose: () => _closeModal(modal.id),
-                  onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
-                ),
-            ],
-          );
-        },
-      ),
+    return BlocSelector<ThemeCubit, ThemeMode, bool>(
+      selector: (themeMode) => themeMode == ThemeMode.dark,
+      builder: (context, isDarkMode) {
+        return Scaffold(
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
+              return Stack(
+                children: [
+                  const TopHeader(),
+                  isFetchingData
+                      ? const Center(child: CircularProgressIndicator())
+                      : accessLevels.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('No access levels yet.'),
+                              const SizedBox(height: 20),
+                              addButton,
+                            ],
+                          ),
+                        )
+                      : Center(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                _buildTable(vwSize, isDarkMode),
+                                const SizedBox(height: 20),
+                                addButton,
+                              ],
+                            ),
+                          ),
+                        ),
+
+                  for (final modal in _modals)
+                    DraggableModal(
+                      key: ValueKey(modal.id),
+                      data: modal,
+                      viewport: vwSize,
+                      onTap: () => _bringToFront(modal.id),
+                      onClose: () => _closeModal(modal.id),
+                      onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
+                    ),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildTable(Size? viewportSize) {
+  Widget _buildTable(Size? viewportSize, bool isDarkMode) {
     final size = viewportSize ?? MediaQuery.sizeOf(context);
 
     return Column(
@@ -162,7 +170,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
             border: Border(
               bottom: BorderSide(
                 width: 0.25,
-                color: Colors.grey[300]!,
+                color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade200,
               ),
             ),
           ),
@@ -314,14 +322,14 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
   }
 
   Future<void> _deleteAccessLevel(AccessLevel level) async {
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Access Level'),
         content: Text('Are you sure you want to delete "${level.name}"?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        backgroundColor: Colors.white,
-        titleTextStyle: TextStyle(fontSize: 18),
+        backgroundColor: isDarkMode ? Colors.grey.shade800 : Colors.white,
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
