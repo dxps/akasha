@@ -28,9 +28,9 @@ serverpod:
     flutter_build:
       windows: >-
         (if exist web\app rmdir /S /Q web\app)
-        & cd /D ..\akasha_flutter
+        & cd /D ..\akasha_ui
         && flutter build web --base-href /app/ --wasm
         && xcopy /E /I /Y build\web ..\akasha_server\web\app
       posix: |
-        cd ../akasha_flutter
+        cd ../akasha_ui
         flutter build web --base-href /app/ --wasm --output ../akasha_server/web/app

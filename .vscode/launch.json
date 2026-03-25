@@ -1,38 +1,33 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "akasha_flutter",
-            "cwd": "${workspaceFolder}/akasha_flutter",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart"
-        },
-        {
-            "name": "akasha_server",
-            "cwd": "${workspaceFolder}/akasha_server",
-            "request": "launch",
-            "type": "dart",
-            "preLaunchTask": "docker_compose_up",
-            "program": "bin/main.dart",
-            "env": {
-                "SERVERPOD_PASSWORD_database": "ndy0IdJXkIkfVkiFiTkBY1sFHgCTtUTe"
-            },
-            "args": [
-                "--apply-migrations"
-            ]
-        }
-    ],
-    "compounds": [
-        {
-            "name": "akasha (full stack)",
-            "configurations": [
-                "akasha_server",
-                "akasha_flutter"
-            ],
-            "presentation": {
-                "order": 1
-            }
-        }
-    ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "akasha_ui",
+			"cwd": "${workspaceFolder}/akasha_ui",
+			"request": "launch",
+			"type": "dart",
+			"program": "lib/main.dart"
+		},
+		{
+			"name": "akasha_server",
+			"cwd": "${workspaceFolder}/akasha_server",
+			"request": "launch",
+			"type": "dart",
+			"preLaunchTask": "docker_compose_up",
+			"program": "bin/main.dart",
+			"env": {
+				"SERVERPOD_PASSWORD_database": "ndy0IdJXkIkfVkiFiTkBY1sFHgCTtUTe"
+			},
+			"args": ["--apply-migrations"]
+		}
+	],
+	"compounds": [
+		{
+			"name": "akasha (fullstack)",
+			"configurations": ["akasha_server", "akasha_ui"],
+			"presentation": {
+				"order": 1
+			}
+		}
+	]
 }

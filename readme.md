@@ -71,4 +71,4 @@ Go to http://localhost:9092 to see the homepage of the Web server, and where you
 
 #### Web App
 
-To start the Web app in the browser with hot reload enabled, go to `akasha_flutter` directory and run `flutter run -d chrome` or use `./dev_web.sh` provided script.
+To start the Web app in the browser with hot reload enabled, go to `akasha_ui` directory and run `flutter run -d chrome` or use `./dev_web.sh` provided script.

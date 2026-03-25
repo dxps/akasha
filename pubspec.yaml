@@ -7,7 +7,7 @@ environment:
 workspace:
   - akasha_client
   - akasha_server
-  - akasha_flutter
+  - akasha_ui
 dependency_overrides:
   flutter_secure_storage: ^10.0.0
 
