@@ -13,20 +13,21 @@
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'access_level/access_level.dart' as _i2;
 import 'access_level/access_level_api_resp.dart' as _i3;
-import 'attr_tmpls/attr_tmpl.dart' as _i4;
-import 'attr_tmpls/attr_tmpl_api_resp.dart' as _i5;
+import 'attribute_template/attr_tmpl.dart' as _i4;
+import 'attribute_template/attr_tmpl_api_resp.dart' as _i5;
 import 'shared/api/exceptions/api_exception.dart' as _i6;
 import 'package:akasha_client/src/protocol/access_level/access_level.dart'
     as _i7;
-import 'package:akasha_client/src/protocol/attr_tmpls/attr_tmpl.dart' as _i8;
+import 'package:akasha_client/src/protocol/attribute_template/attr_tmpl.dart'
+    as _i8;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _i9;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i10;
 export 'access_level/access_level.dart';
 export 'access_level/access_level_api_resp.dart';
-export 'attr_tmpls/attr_tmpl.dart';
-export 'attr_tmpls/attr_tmpl_api_resp.dart';
+export 'attribute_template/attr_tmpl.dart';
+export 'attribute_template/attr_tmpl_api_resp.dart';
 export 'shared/api/exceptions/api_exception.dart';
 export 'client.dart';
 

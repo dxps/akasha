@@ -18,16 +18,17 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i4;
 import 'access_level/access_level.dart' as _i5;
 import 'access_level/access_level_api_resp.dart' as _i6;
-import 'attr_tmpls/attr_tmpl.dart' as _i7;
-import 'attr_tmpls/attr_tmpl_api_resp.dart' as _i8;
+import 'attribute_template/attr_tmpl.dart' as _i7;
+import 'attribute_template/attr_tmpl_api_resp.dart' as _i8;
 import 'shared/api/exceptions/api_exception.dart' as _i9;
 import 'package:akasha_server/src/generated/access_level/access_level.dart'
     as _i10;
-import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i11;
+import 'package:akasha_server/src/generated/attribute_template/attr_tmpl.dart'
+    as _i11;
 export 'access_level/access_level.dart';
 export 'access_level/access_level_api_resp.dart';
-export 'attr_tmpls/attr_tmpl.dart';
-export 'attr_tmpls/attr_tmpl_api_resp.dart';
+export 'attribute_template/attr_tmpl.dart';
+export 'attribute_template/attr_tmpl_api_resp.dart';
 export 'shared/api/exceptions/api_exception.dart';
 
 class Protocol extends _i1.SerializationManagerServer {

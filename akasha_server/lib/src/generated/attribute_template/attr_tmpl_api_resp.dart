@@ -10,11 +10,12 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import '../attr_tmpls/attr_tmpl.dart' as _i2;
-import 'package:akasha_client/src/protocol/protocol.dart' as _i3;
+import 'package:serverpod/serverpod.dart' as _i1;
+import '../attribute_template/attr_tmpl.dart' as _i2;
+import 'package:akasha_server/src/generated/protocol.dart' as _i3;
 
-abstract class AttributeTmplApiResponse implements _i1.SerializableModel {
+abstract class AttributeTmplApiResponse
+    implements _i1.SerializableModel, _i1.ProtocolSerialization {
   AttributeTmplApiResponse._({
     required this.success,
     this.data,
@@ -67,6 +68,17 @@ abstract class AttributeTmplApiResponse implements _i1.SerializableModel {
       '__className__': 'AttributeTmplApiResponse',
       'success': success,
       if (data != null) 'data': data?.toJson(),
+      if (errorCode != null) 'errorCode': errorCode,
+      if (errorMessage != null) 'errorMessage': errorMessage,
+    };
+  }
+
+  @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'AttributeTmplApiResponse',
+      'success': success,
+      if (data != null) 'data': data?.toJsonForProtocol(),
       if (errorCode != null) 'errorCode': errorCode,
       if (errorMessage != null) 'errorMessage': errorMessage,
     };

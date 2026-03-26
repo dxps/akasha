@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
-import 'package:akasha_ui/attr_tmpl/attr_tmpl_form.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpl_form.dart';
 import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/theming/colors.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';

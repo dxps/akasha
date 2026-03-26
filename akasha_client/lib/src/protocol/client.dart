@@ -16,9 +16,10 @@ import 'package:akasha_client/src/protocol/access_level/access_level_api_resp.da
     as _i3;
 import 'package:akasha_client/src/protocol/access_level/access_level.dart'
     as _i4;
-import 'package:akasha_client/src/protocol/attr_tmpls/attr_tmpl_api_resp.dart'
+import 'package:akasha_client/src/protocol/attribute_template/attr_tmpl_api_resp.dart'
     as _i5;
-import 'package:akasha_client/src/protocol/attr_tmpls/attr_tmpl.dart' as _i6;
+import 'package:akasha_client/src/protocol/attribute_template/attr_tmpl.dart'
+    as _i6;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _i7;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'

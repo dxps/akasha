@@ -12,12 +12,13 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../access_level/access_level_endpoint.dart' as _i2;
-import '../attr_tmpls/attr_tmpls_endpoint.dart' as _i3;
+import '../attribute_template/attr_tmpls_endpoint.dart' as _i3;
 import '../auth/email_idp_endpoint.dart' as _i4;
 import '../auth/jwt_refresh_endpoint.dart' as _i5;
 import 'package:akasha_server/src/generated/access_level/access_level.dart'
     as _i6;
-import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i7;
+import 'package:akasha_server/src/generated/attribute_template/attr_tmpl.dart'
+    as _i7;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i8;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
