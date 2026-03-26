@@ -15,14 +15,13 @@ import '../access_level/access_level_endpoint.dart' as _i2;
 import '../attr_tmpls/attr_tmpls_endpoint.dart' as _i3;
 import '../auth/email_idp_endpoint.dart' as _i4;
 import '../auth/jwt_refresh_endpoint.dart' as _i5;
-import '../greetings/greeting_endpoint.dart' as _i6;
 import 'package:akasha_server/src/generated/access_level/access_level.dart'
-    as _i7;
-import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i8;
+    as _i6;
+import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i7;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i9;
+    as _i8;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i10;
+    as _i9;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -52,12 +51,6 @@ class Endpoints extends _i1.EndpointDispatch {
           'jwtRefresh',
           null,
         ),
-      'greeting': _i6.GreetingEndpoint()
-        ..initialize(
-          server,
-          'greeting',
-          null,
-        ),
     };
     connectors['accessLevel'] = _i1.EndpointConnector(
       name: 'accessLevel',
@@ -68,7 +61,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'data': _i1.ParameterDescription(
               name: 'data',
-              type: _i1.getType<_i7.AccessLevel>(),
+              type: _i1.getType<_i6.AccessLevel>(),
               nullable: false,
             ),
           },
@@ -116,7 +109,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'data': _i1.ParameterDescription(
               name: 'data',
-              type: _i1.getType<_i7.AccessLevel>(),
+              type: _i1.getType<_i6.AccessLevel>(),
               nullable: false,
             ),
           },
@@ -160,7 +153,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'data': _i1.ParameterDescription(
               name: 'data',
-              type: _i1.getType<_i8.AttributeTmpl>(),
+              type: _i1.getType<_i7.AttributeTmpl>(),
               nullable: false,
             ),
           },
@@ -207,7 +200,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'data': _i1.ParameterDescription(
               name: 'data',
-              type: _i1.getType<_i8.AttributeTmpl>(),
+              type: _i1.getType<_i7.AttributeTmpl>(),
               nullable: false,
             ),
           },
@@ -446,33 +439,9 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    connectors['greeting'] = _i1.EndpointConnector(
-      name: 'greeting',
-      endpoint: endpoints['greeting']!,
-      methodConnectors: {
-        'hello': _i1.MethodConnector(
-          name: 'hello',
-          params: {
-            'name': _i1.ParameterDescription(
-              name: 'name',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-          },
-          call:
-              (
-                _i1.Session session,
-                Map<String, dynamic> params,
-              ) async => (endpoints['greeting'] as _i6.GreetingEndpoint).hello(
-                session,
-                params['name'],
-              ),
-        ),
-      },
-    );
-    modules['serverpod_auth_idp'] = _i9.Endpoints()
+    modules['serverpod_auth_idp'] = _i8.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i10.Endpoints()
+    modules['serverpod_auth_core'] = _i9.Endpoints()
       ..initializeEndpoints(server);
   }
 }

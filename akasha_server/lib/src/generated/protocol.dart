@@ -20,16 +20,14 @@ import 'access_level/access_level.dart' as _i5;
 import 'access_level/access_level_api_resp.dart' as _i6;
 import 'attr_tmpls/attr_tmpl.dart' as _i7;
 import 'attr_tmpls/attr_tmpl_api_resp.dart' as _i8;
-import 'greetings/greeting.dart' as _i9;
-import 'shared/api/exceptions/api_exception.dart' as _i10;
+import 'shared/api/exceptions/api_exception.dart' as _i9;
 import 'package:akasha_server/src/generated/access_level/access_level.dart'
-    as _i11;
-import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i12;
+    as _i10;
+import 'package:akasha_server/src/generated/attr_tmpls/attr_tmpl.dart' as _i11;
 export 'access_level/access_level.dart';
 export 'access_level/access_level_api_resp.dart';
 export 'attr_tmpls/attr_tmpl.dart';
 export 'attr_tmpls/attr_tmpl_api_resp.dart';
-export 'greetings/greeting.dart';
 export 'shared/api/exceptions/api_exception.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
@@ -237,11 +235,8 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i8.AttributeTmplApiResponse) {
       return _i8.AttributeTmplApiResponse.fromJson(data) as T;
     }
-    if (t == _i9.Greeting) {
-      return _i9.Greeting.fromJson(data) as T;
-    }
-    if (t == _i10.ApiException) {
-      return _i10.ApiException.fromJson(data) as T;
+    if (t == _i9.ApiException) {
+      return _i9.ApiException.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.AccessLevel?>()) {
       return (data != null ? _i5.AccessLevel.fromJson(data) : null) as T;
@@ -257,21 +252,18 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null ? _i8.AttributeTmplApiResponse.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i9.Greeting?>()) {
-      return (data != null ? _i9.Greeting.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.ApiException?>()) {
+      return (data != null ? _i9.ApiException.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.ApiException?>()) {
-      return (data != null ? _i10.ApiException.fromJson(data) : null) as T;
-    }
-    if (t == List<_i11.AccessLevel>) {
+    if (t == List<_i10.AccessLevel>) {
       return (data as List)
-              .map((e) => deserialize<_i11.AccessLevel>(e))
+              .map((e) => deserialize<_i10.AccessLevel>(e))
               .toList()
           as T;
     }
-    if (t == List<_i12.AttributeTmpl>) {
+    if (t == List<_i11.AttributeTmpl>) {
       return (data as List)
-              .map((e) => deserialize<_i12.AttributeTmpl>(e))
+              .map((e) => deserialize<_i11.AttributeTmpl>(e))
               .toList()
           as T;
     }
@@ -293,8 +285,7 @@ class Protocol extends _i1.SerializationManagerServer {
       _i6.AccessLevelApiResponse => 'AccessLevelApiResponse',
       _i7.AttributeTmpl => 'AttributeTmpl',
       _i8.AttributeTmplApiResponse => 'AttributeTmplApiResponse',
-      _i9.Greeting => 'Greeting',
-      _i10.ApiException => 'ApiException',
+      _i9.ApiException => 'ApiException',
       _ => null,
     };
   }
@@ -317,9 +308,7 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'AttributeTmpl';
       case _i8.AttributeTmplApiResponse():
         return 'AttributeTmplApiResponse';
-      case _i9.Greeting():
-        return 'Greeting';
-      case _i10.ApiException():
+      case _i9.ApiException():
         return 'ApiException';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -355,11 +344,8 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'AttributeTmplApiResponse') {
       return deserialize<_i8.AttributeTmplApiResponse>(data['data']);
     }
-    if (dataClassName == 'Greeting') {
-      return deserialize<_i9.Greeting>(data['data']);
-    }
     if (dataClassName == 'ApiException') {
-      return deserialize<_i10.ApiException>(data['data']);
+      return deserialize<_i9.ApiException>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
