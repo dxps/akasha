@@ -2,14 +2,14 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "ui",
+			"name": "UI",
 			"cwd": "${workspaceFolder}/akasha_ui",
 			"request": "launch",
 			"type": "dart",
 			"program": "lib/main.dart"
 		},
 		{
-			"name": "server",
+			"name": "Server",
 			"cwd": "${workspaceFolder}/akasha_server",
 			"request": "launch",
 			"type": "dart",
@@ -23,8 +23,8 @@
 	],
 	"compounds": [
 		{
-			"name": "fullstack",
-			"configurations": ["server", "ui"],
+			"name": "Fullstack",
+			"configurations": ["Server", "UI"],
 			"presentation": {
 				"order": 1
 			}

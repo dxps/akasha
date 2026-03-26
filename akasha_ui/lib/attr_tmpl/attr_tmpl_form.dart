@@ -285,28 +285,30 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                 children: [
                   SizedBox(
                     width: 140,
-                    child: DropdownButtonFormField<AttributeValueType>(
-                      initialValue: selectedType,
-                      isExpanded: true,
-                      decoration: _dropdownDecoration('Value type *'),
-                      items: AttributeValueType.values
-                          .map(
-                            (type) => DropdownMenuItem<AttributeValueType>(
-                              value: type,
-                              child: Text(type.label),
-                            ),
-                          )
+                    child: DropdownMenuFormField<AttributeValueType>(
+                      initialSelection: selectedType,
+                      label: const Text('Value type *', overflow: TextOverflow.ellipsis),
+                      dropdownMenuEntries: AttributeValueType.values
+                          .map((type) => DropdownMenuEntry<AttributeValueType>(value: type, label: type.label))
                           .toList(),
-                      onChanged: _isReadOnly
+                      onSelected: _isReadOnly
                           ? null
                           : (value) {
-                              if (value == null) return;
                               setState(() {
-                                selectedType = value;
+                                selectedType = value ?? AttributeValueType.text;
                                 defaultValueController.clear();
                                 defaultBooleanValue = false;
                               });
+                              formKey.currentState?.validate();
                             },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Value type is required';
+                        }
+                        return null;
+                      },
+                      menuHeight: 220,
+                      requestFocusOnTap: false,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -321,35 +323,25 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                           )
-                        : DropdownButtonFormField<int>(
-                            key: accessLevelFieldKey,
-                            initialValue: selectedAccessLevelId,
-                            isExpanded: true,
-                            decoration: _dropdownDecoration('Access Level *'),
-                            items: accessLevels
-                                .map(
-                                  (level) => DropdownMenuItem<int>(
-                                    value: level.id!,
-                                    child: Text(level.name),
-                                  ),
-                                )
-                                .toList(),
-                            validator: _isReadOnly
-                                ? null
-                                : (value) {
-                                    if (value == null) {
-                                      return 'Access level is required';
-                                    }
-                                    return null;
-                                  },
-                            onChanged: _isReadOnly
-                                ? null
-                                : (value) {
-                                    setState(() {
-                                      selectedAccessLevelId = value;
-                                    });
-                                    accessLevelFieldKey.currentState?.validate();
-                                  },
+                        : DropdownMenuFormField<int>(
+                            initialSelection: selectedAccessLevelId,
+                            label: const Text('Access Level *', overflow: TextOverflow.ellipsis),
+                            dropdownMenuEntries: accessLevels.map((level) => DropdownMenuEntry<int>(value: level.id!, label: level.name)).toList(),
+                            onSelected: (value) {
+                              setState(() {
+                                selectedAccessLevelId = value;
+                              });
+                              formKey.currentState?.validate();
+                            },
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Access level is required';
+                              }
+                              return null;
+                            },
+                            menuHeight: 200,
+                            width: 170,
+                            requestFocusOnTap: false,
                           ),
                   ),
                 ],
@@ -376,13 +368,13 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                 child: _isReadOnly
                     ? IconButton(
                         onPressed: _isEdit ? widget.onRequestEdit : null,
-                        color: isDarkMode ? primaryDarkFgColor : Theme.of(context).primaryColor,
+                        color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
                         icon: const Icon(Icons.edit),
                         tooltip: 'Edit',
                       )
                     : IconButton(
                         onPressed: _isSaving ? null : onSave,
-                        color: isDarkMode ? primaryDarkFgColor : Theme.of(context).primaryColor,
+                        color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
                         icon: _isSaving
                             ? const SizedBox(
                                 width: 16,

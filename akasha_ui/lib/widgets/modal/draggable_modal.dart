@@ -107,7 +107,7 @@ class _DraggableModalState extends State<DraggableModal> {
             onPanCancel: _endDrag,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: isDarkMode ? primaryModalDarkBgColor : Colors.white,
+                color: isDarkMode ? modalDarkBgColor : Colors.white,
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: const [BoxShadow(blurRadius: 22, offset: Offset(0, 0), color: Colors.black54)],
               ),
@@ -122,12 +122,12 @@ class _DraggableModalState extends State<DraggableModal> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 6, right: 4),
-                            child: Icon(Icons.drag_indicator, size: 15, color: isDarkMode ? primaryDarkFgColor : Colors.grey),
+                            child: Icon(Icons.drag_indicator, size: 15, color: isDarkMode ? darkFgColor : Colors.grey),
                           ),
                           Expanded(
                             child: Text(
                               widget.data.title,
-                              style: TextStyle(fontWeight: FontWeight.w400, color: isDarkMode ? primaryDarkFgColor : Colors.black87),
+                              style: TextStyle(fontWeight: FontWeight.w400, color: isDarkMode ? darkFgColor : Colors.black87),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -140,7 +140,7 @@ class _DraggableModalState extends State<DraggableModal> {
                               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                               visualDensity: VisualDensity.compact,
                               style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                              icon: Icon(Icons.close, size: 18, color: isDarkMode ? primaryDarkFgColor : Colors.grey),
+                              icon: Icon(Icons.close, size: 18, color: isDarkMode ? darkFgColor : Colors.grey),
                             ),
                           ),
                         ],

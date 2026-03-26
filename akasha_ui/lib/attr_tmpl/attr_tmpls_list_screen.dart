@@ -159,7 +159,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
   }
 
   Widget _buildTable(Size? viewportSize, bool isDarkMode) {
-    final headerTextColor = isDarkMode ? primaryDarkFgColor.withAlpha(120) : Colors.grey.shade700;
+    final headerTextColor = isDarkMode ? darkFgColor.withAlpha(120) : Colors.grey.shade700;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

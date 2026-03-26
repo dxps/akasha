@@ -5,7 +5,7 @@ ThemeData initThemeData(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
 
   final colorScheme = ColorScheme.fromSeed(
-    seedColor: Colors.deepPurple,
+    seedColor: isDark ? Colors.orange : Colors.purple,
     brightness: brightness,
   );
 
@@ -13,13 +13,13 @@ ThemeData initThemeData(Brightness brightness) {
     useMaterial3: true,
     brightness: brightness,
     colorScheme: colorScheme,
-    scaffoldBackgroundColor: isDark ? primaryDarkBgColor : Colors.grey.shade200,
+    scaffoldBackgroundColor: isDark ? darkBgColor : Colors.grey.shade200,
   );
 
   return base.copyWith(
     appBarTheme: AppBarTheme(
-      backgroundColor: isDark ? primaryDarkBgColor : Colors.grey.shade200,
-      foregroundColor: isDark ? primaryDarkFgColor : Colors.black87,
+      backgroundColor: isDark ? darkBgColor : Colors.grey.shade200,
+      foregroundColor: isDark ? darkFgColor : Colors.black87,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
     ),
@@ -54,6 +54,22 @@ ThemeData initThemeData(Brightness brightness) {
     dividerColor: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
 
     dropdownMenuTheme: DropdownMenuThemeData(
+      menuStyle: MenuStyle(
+        backgroundColor: WidgetStatePropertyAll(isDark ? modalDropdownMenuDarkBgColor : Colors.white),
+        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 6, horizontal: 0)),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationThemeData(
+        border: UnderlineInputBorder(),
+        enabledBorder: UnderlineInputBorder(),
+        focusedBorder: UnderlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(vertical: 4),
+        isDense: true,
+        filled: true,
+        fillColor: isDark ? modalDarkBgColor : Colors.white,
+      ),
       textStyle: TextStyle(
         fontSize: 14,
         color: isDark ? Colors.grey.shade100 : Colors.black87,
@@ -136,6 +152,23 @@ ThemeData initThemeData(Brightness brightness) {
       titleTextStyle: TextStyle(
         fontSize: 14,
         color: isDark ? Colors.grey.shade100 : Colors.black87,
+      ),
+    ),
+
+    menuButtonTheme: MenuButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStatePropertyAll(
+          isDark ? Colors.grey.shade100 : Colors.black87,
+        ),
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered) || states.contains(WidgetState.focused)) {
+            return isDark ? Colors.grey.shade800 : Colors.grey.shade100;
+          }
+          return Colors.transparent;
+        }),
+        textStyle: const WidgetStatePropertyAll(
+          TextStyle(fontSize: 14),
+        ),
       ),
     ),
 

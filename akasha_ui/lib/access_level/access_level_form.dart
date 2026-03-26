@@ -121,13 +121,13 @@ class _AccessLevelFormState extends State<AccessLevelForm> {
                 child: _isReadOnly
                     ? IconButton(
                         onPressed: _isEdit ? widget.onRequestEdit : null,
-                        color: isDarkMode ? primaryDarkFgColor : Theme.of(context).primaryColor,
+                        color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
                         icon: const Icon(Icons.edit),
                         tooltip: 'Edit',
                       )
                     : IconButton(
                         onPressed: _isSaving ? null : onSave,
-                        color: isDarkMode ? primaryDarkFgColor : Theme.of(context).primaryColor,
+                        color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
                         icon: _isSaving
                             ? const SizedBox(
                                 width: 16,
