@@ -392,15 +392,3 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
     );
   }
 }
-
-InputDecoration _dropdownDecoration(String label) {
-  return InputDecoration(
-    labelText: label,
-    isDense: true,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
-    border: const UnderlineInputBorder(),
-    enabledBorder: const UnderlineInputBorder(),
-    disabledBorder: const UnderlineInputBorder(),
-    focusedBorder: const UnderlineInputBorder(),
-  );
-}

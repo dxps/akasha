@@ -1,3 +1,4 @@
+import 'package:akasha_ui/routing.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,27 +22,27 @@ class TopHeader extends StatelessWidget {
                 const SizedBox(width: 2),
                 InkWell(
                   hoverColor: Colors.transparent,
-                  onTap: () => context.go('/'),
+                  onTap: () => context.go(Routes.home.path),
                   child: Image.asset('images/logo_o_light_grey.png', width: 34, height: 34),
                 ),
                 const Spacer(),
                 TextButton(
                   onPressed: () {
-                    context.go('/');
+                    context.go(Routes.home.path);
                   },
                   style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),
                   child: const Text('Home'),
                 ),
                 TextButton(
                   onPressed: () {
-                    context.go('/attribute_templates');
+                    context.go(Routes.attributeTemplates.path);
                   },
                   style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),
                   child: const Text('Attribute Templates'),
                 ),
                 TextButton(
                   onPressed: () {
-                    context.go('/access_levels');
+                    context.go(Routes.accessLevels.path);
                   },
                   style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),
                   child: const Text('Access Levels'),

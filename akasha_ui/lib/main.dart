@@ -1,15 +1,11 @@
 import 'package:akasha_client/akasha_client.dart';
-import 'package:akasha_ui/access_level/access_levels_screen.dart';
-import 'package:akasha_ui/attr_tmpl/attr_tmpls_list_screen.dart';
-import 'package:akasha_ui/screens/home_screen.dart';
+import 'package:akasha_ui/routing.dart';
 import 'package:akasha_ui/theming/init_theme.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
-import 'package:akasha_ui/widgets/app_shell.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
@@ -52,6 +48,8 @@ void main() async {
 
   client.auth.initialize();
 
+  initRouter(client);
+
   runApp(
     BlocProvider(
       create: (_) => ThemeCubit(),
@@ -59,39 +57,6 @@ void main() async {
     ),
   );
 }
-
-final GoRouter _router = GoRouter(
-  initialLocation: '/',
-  routes: [
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return AppShell(navigationShell: navigationShell);
-      },
-      branches: [
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/',
-              pageBuilder: (context, state) => NoTransitionPage(child: HomeScreen(client: client)),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/attribute_templates',
-              pageBuilder: (context, state) => const NoTransitionPage(child: AttributeTmplsScreen()),
-            ),
-            GoRoute(
-              path: '/access_levels',
-              pageBuilder: (context, state) => const NoTransitionPage(child: AccessLevelsScreen()),
-            ),
-          ],
-        ),
-      ],
-    ),
-  ],
-);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -102,7 +67,7 @@ class MyApp extends StatelessWidget {
       builder: (context, themeMode) {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
-          routerConfig: _router,
+          routerConfig: router,
           title: '',
           themeMode: themeMode,
           theme: initThemeData(Brightness.light),
