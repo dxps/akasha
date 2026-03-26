@@ -1,0 +1,6 @@
+class: EntityTmplApiResponse
+fields:
+    success: bool
+    data: EntityTmpl?
+    errorCode: String?
+    errorMessage: String?

@@ -1,0 +1,20 @@
+class: EntityTmplLink
+table: entity_tmpl_links
+
+fields:
+    id: UuidValue?, defaultPersist=random_v7
+
+    name: String
+    description: String?
+    orderIdx: int
+
+    ### The source of this entity link template.
+    source: EntityTmpl?, relation(name=entity_tmpl_outgoing_links)
+
+    ### The target(s) of this entity link template, this link template points to.
+    target: EntityTmpl?, relation(name=entity_tmpl_incoming_links)
+
+indexes:
+    entity_link_tmpl_source_name_uniq_idx:
+        fields: sourceId, name
+        unique: true

@@ -15,14 +15,17 @@ import '../access_level/access_level_endpoint.dart' as _i2;
 import '../attribute_template/attr_tmpls_endpoint.dart' as _i3;
 import '../auth/email_idp_endpoint.dart' as _i4;
 import '../auth/jwt_refresh_endpoint.dart' as _i5;
+import '../entity_template/entity_tmpl_endpoint.dart' as _i6;
 import 'package:akasha_server/src/generated/access_level/access_level.dart'
-    as _i6;
-import 'package:akasha_server/src/generated/attribute_template/attr_tmpl.dart'
     as _i7;
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+import 'package:akasha_server/src/generated/attribute_template/attr_tmpl.dart'
     as _i8;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+import 'package:akasha_server/src/generated/entity_template/entity_tmpl.dart'
     as _i9;
+import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+    as _i10;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i11;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -52,6 +55,12 @@ class Endpoints extends _i1.EndpointDispatch {
           'jwtRefresh',
           null,
         ),
+      'entityTmpl': _i6.EntityTmplEndpoint()
+        ..initialize(
+          server,
+          'entityTmpl',
+          null,
+        ),
     };
     connectors['accessLevel'] = _i1.EndpointConnector(
       name: 'accessLevel',
@@ -62,7 +71,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'data': _i1.ParameterDescription(
               name: 'data',
-              type: _i1.getType<_i6.AccessLevel>(),
+              type: _i1.getType<_i7.AccessLevel>(),
               nullable: false,
             ),
           },
@@ -110,7 +119,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'data': _i1.ParameterDescription(
               name: 'data',
-              type: _i1.getType<_i6.AccessLevel>(),
+              type: _i1.getType<_i7.AccessLevel>(),
               nullable: false,
             ),
           },
@@ -154,7 +163,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'data': _i1.ParameterDescription(
               name: 'data',
-              type: _i1.getType<_i7.AttributeTmpl>(),
+              type: _i1.getType<_i8.AttributeTmpl>(),
               nullable: false,
             ),
           },
@@ -201,7 +210,7 @@ class Endpoints extends _i1.EndpointDispatch {
           params: {
             'data': _i1.ParameterDescription(
               name: 'data',
-              type: _i1.getType<_i7.AttributeTmpl>(),
+              type: _i1.getType<_i8.AttributeTmpl>(),
               nullable: false,
             ),
           },
@@ -440,9 +449,82 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i8.Endpoints()
+    connectors['entityTmpl'] = _i1.EndpointConnector(
+      name: 'entityTmpl',
+      endpoint: endpoints['entityTmpl']!,
+      methodConnectors: {
+        'read': _i1.MethodConnector(
+          name: 'read',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entityTmpl'] as _i6.EntityTmplEndpoint).read(
+                    session,
+                    params['id'],
+                  ),
+        ),
+        'readAll': _i1.MethodConnector(
+          name: 'readAll',
+          params: {},
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['entityTmpl'] as _i6.EntityTmplEndpoint)
+                  .readAll(session),
+        ),
+        'create': _i1.MethodConnector(
+          name: 'create',
+          params: {
+            'data': _i1.ParameterDescription(
+              name: 'data',
+              type: _i1.getType<_i9.EntityTmpl>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entityTmpl'] as _i6.EntityTmplEndpoint).create(
+                    session,
+                    params['data'],
+                  ),
+        ),
+        'update': _i1.MethodConnector(
+          name: 'update',
+          params: {
+            'data': _i1.ParameterDescription(
+              name: 'data',
+              type: _i1.getType<_i9.EntityTmpl>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entityTmpl'] as _i6.EntityTmplEndpoint).update(
+                    session,
+                    params['data'],
+                  ),
+        ),
+      },
+    );
+    modules['serverpod_auth_idp'] = _i10.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i9.Endpoints()
+    modules['serverpod_auth_core'] = _i11.Endpoints()
       ..initializeEndpoints(server);
   }
 }

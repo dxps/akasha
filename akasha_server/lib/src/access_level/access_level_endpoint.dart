@@ -16,7 +16,7 @@ class AccessLevelEndpoint extends Endpoint {
       }
       return failureResponse('Failed to create access level.', false);
     } on DatabaseException catch (e) {
-      session.log('Failed to create access level: $e', level: LogLevel.error);
+      session.log('Failed (DatabaseException) to create access level: $e', level: LogLevel.error);
       return failureResponse(null, false);
     } catch (e) {
       session.log('Failed to create access level: $e', level: LogLevel.error);
@@ -49,11 +49,10 @@ class AccessLevelEndpoint extends Endpoint {
       }
       return failureResponse(null, true);
     } on DatabaseException catch (e) {
-      session.log('DatabaseException while updating access level: ${e.message}', level: LogLevel.error);
-
+      session.log('Failed (DatabaseException) to update access level: ${e.message}', level: LogLevel.error);
       return failureResponse(null, true);
     } catch (e) {
-      session.log('Unexpected error while updating access level: $e', level: LogLevel.error);
+      session.log('Failed to update access level: $e', level: LogLevel.error);
       return failureResponse(null, true);
     }
   }
@@ -65,6 +64,8 @@ class AccessLevelEndpoint extends Endpoint {
     );
     return deleted.isNotEmpty;
   }
+
+  // Utility methods.
 
   AccessLevelApiResponse alreadyExistsResponse() {
     return AccessLevelApiResponse(

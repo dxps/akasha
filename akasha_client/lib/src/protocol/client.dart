@@ -24,7 +24,11 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _i7;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i8;
-import 'protocol.dart' as _i9;
+import 'package:akasha_client/src/protocol/entity_template/entity_tmpl.dart'
+    as _i9;
+import 'package:akasha_client/src/protocol/entity_template/entity_tmpl_api_resp.dart'
+    as _i10;
+import 'protocol.dart' as _i11;
 
 /// {@category Endpoint}
 class EndpointAccessLevel extends _i1.EndpointRef {
@@ -331,6 +335,42 @@ class EndpointJwtRefresh extends _i8.EndpointRefreshJwtTokens {
   );
 }
 
+/// {@category Endpoint}
+class EndpointEntityTmpl extends _i1.EndpointRef {
+  EndpointEntityTmpl(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'entityTmpl';
+
+  _i2.Future<_i9.EntityTmpl?> read(_i1.UuidValue id) =>
+      caller.callServerEndpoint<_i9.EntityTmpl?>(
+        'entityTmpl',
+        'read',
+        {'id': id},
+      );
+
+  _i2.Future<List<_i9.EntityTmpl>> readAll() =>
+      caller.callServerEndpoint<List<_i9.EntityTmpl>>(
+        'entityTmpl',
+        'readAll',
+        {},
+      );
+
+  _i2.Future<_i10.EntityTmplApiResponse> create(_i9.EntityTmpl data) =>
+      caller.callServerEndpoint<_i10.EntityTmplApiResponse>(
+        'entityTmpl',
+        'create',
+        {'data': data},
+      );
+
+  _i2.Future<_i10.EntityTmplApiResponse> update(_i9.EntityTmpl data) =>
+      caller.callServerEndpoint<_i10.EntityTmplApiResponse>(
+        'entityTmpl',
+        'update',
+        {'data': data},
+      );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _i7.Caller(client);
@@ -362,7 +402,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i9.Protocol(),
+         _i11.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -375,6 +415,7 @@ class Client extends _i1.ServerpodClientShared {
     attrTmpls = EndpointAttrTmpls(this);
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    entityTmpl = EndpointEntityTmpl(this);
     modules = Modules(this);
   }
 
@@ -386,6 +427,8 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointJwtRefresh jwtRefresh;
 
+  late final EndpointEntityTmpl entityTmpl;
+
   late final Modules modules;
 
   @override
@@ -394,6 +437,7 @@ class Client extends _i1.ServerpodClientShared {
     'attrTmpls': attrTmpls,
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'entityTmpl': entityTmpl,
   };
 
   @override

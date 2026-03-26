@@ -22,12 +22,10 @@ class AttrTmplsEndpoint extends Endpoint {
 
       return failureResponse(null, false);
     } on DatabaseException catch (e) {
-      session.log('DatabaseException while creating attribute template: ${e.message}', level: LogLevel.error);
-
+      session.log('Failed (DatabaseException) to create attribute template: ${e.message}', level: LogLevel.error);
       return failureResponse(null, false);
     } catch (e) {
-      session.log('Unexpected error while creating attribute template: $e', level: LogLevel.error);
-
+      session.log('Failed to create attribute template: $e', level: LogLevel.error);
       return failureResponse(null, false);
     }
   }
@@ -66,11 +64,11 @@ class AttrTmplsEndpoint extends Endpoint {
 
       return failureResponse(null, true);
     } on DatabaseException catch (e) {
-      session.log('DatabaseException while updating attribute template: ${e.message}', level: LogLevel.error);
+      session.log('Failed (DatabaseException) to update attribute template: ${e.message}', level: LogLevel.error);
 
       return failureResponse(null, true);
     } catch (e) {
-      session.log('Unexpected error while updating attribute template: $e', level: LogLevel.error);
+      session.log('Failed to update attribute template: $e', level: LogLevel.error);
       return failureResponse(null, true);
     }
   }
@@ -82,6 +80,8 @@ class AttrTmplsEndpoint extends Endpoint {
     );
     return deleted.isNotEmpty;
   }
+
+  // Utility methods.
 
   AttributeTmplApiResponse alreadyExistsResponse() {
     return AttributeTmplApiResponse(
