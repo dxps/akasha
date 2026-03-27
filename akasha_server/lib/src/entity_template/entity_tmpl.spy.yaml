@@ -8,7 +8,7 @@ fields:
     name: String
     description: String?
 
-    attributeLinks: List<EntityTmplAttribute>?, relation(name=entity_tmpl_attributes)
+    attributes: List<EntityTmplAttribute>?, relation(name=entity_tmpl_attributes)
 
     ### The links where this entity template is the source.
     outgoingLinks: List<EntityTmplLink>?, relation(name=entity_tmpl_outgoing_links)

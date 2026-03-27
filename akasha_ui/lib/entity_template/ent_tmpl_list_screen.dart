@@ -178,7 +178,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     final id = _nextModalId++;
     final isEdit = item != null;
 
-    const modalSize = Size(340, 226);
+    const modalSize = Size(350, 520);
     final offset =
         initialOffset ??
         (viewportSize != null

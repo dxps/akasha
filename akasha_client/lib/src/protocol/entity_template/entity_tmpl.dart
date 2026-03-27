@@ -20,7 +20,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
     this.id,
     required this.name,
     this.description,
-    this.attributeLinks,
+    this.attributes,
     this.outgoingLinks,
     this.incomingLinkTargets,
   });
@@ -29,7 +29,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
     _i1.UuidValue? id,
     required String name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributeLinks,
+    List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
     List<_i3.EntityTmplLink>? incomingLinkTargets,
   }) = _EntityTmplImpl;
@@ -41,10 +41,10 @@ abstract class EntityTmpl implements _i1.SerializableModel {
           : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       description: jsonSerialization['description'] as String?,
-      attributeLinks: jsonSerialization['attributeLinks'] == null
+      attributes: jsonSerialization['attributes'] == null
           ? null
           : _i4.Protocol().deserialize<List<_i2.EntityTmplAttribute>>(
-              jsonSerialization['attributeLinks'],
+              jsonSerialization['attributes'],
             ),
       outgoingLinks: jsonSerialization['outgoingLinks'] == null
           ? null
@@ -66,7 +66,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
 
   String? description;
 
-  List<_i2.EntityTmplAttribute>? attributeLinks;
+  List<_i2.EntityTmplAttribute>? attributes;
 
   /// The links where this entity template is the source.
   List<_i3.EntityTmplLink>? outgoingLinks;
@@ -81,7 +81,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
     _i1.UuidValue? id,
     String? name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributeLinks,
+    List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
     List<_i3.EntityTmplLink>? incomingLinkTargets,
   });
@@ -92,10 +92,8 @@ abstract class EntityTmpl implements _i1.SerializableModel {
       if (id != null) 'id': id?.toJson(),
       'name': name,
       if (description != null) 'description': description,
-      if (attributeLinks != null)
-        'attributeLinks': attributeLinks?.toJson(
-          valueToJson: (v) => v.toJson(),
-        ),
+      if (attributes != null)
+        'attributes': attributes?.toJson(valueToJson: (v) => v.toJson()),
       if (outgoingLinks != null)
         'outgoingLinks': outgoingLinks?.toJson(valueToJson: (v) => v.toJson()),
       if (incomingLinkTargets != null)
@@ -118,14 +116,14 @@ class _EntityTmplImpl extends EntityTmpl {
     _i1.UuidValue? id,
     required String name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributeLinks,
+    List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
     List<_i3.EntityTmplLink>? incomingLinkTargets,
   }) : super._(
          id: id,
          name: name,
          description: description,
-         attributeLinks: attributeLinks,
+         attributes: attributes,
          outgoingLinks: outgoingLinks,
          incomingLinkTargets: incomingLinkTargets,
        );
@@ -138,7 +136,7 @@ class _EntityTmplImpl extends EntityTmpl {
     Object? id = _Undefined,
     String? name,
     Object? description = _Undefined,
-    Object? attributeLinks = _Undefined,
+    Object? attributes = _Undefined,
     Object? outgoingLinks = _Undefined,
     Object? incomingLinkTargets = _Undefined,
   }) {
@@ -146,9 +144,9 @@ class _EntityTmplImpl extends EntityTmpl {
       id: id is _i1.UuidValue? ? id : this.id,
       name: name ?? this.name,
       description: description is String? ? description : this.description,
-      attributeLinks: attributeLinks is List<_i2.EntityTmplAttribute>?
-          ? attributeLinks
-          : this.attributeLinks?.map((e0) => e0.copyWith()).toList(),
+      attributes: attributes is List<_i2.EntityTmplAttribute>?
+          ? attributes
+          : this.attributes?.map((e0) => e0.copyWith()).toList(),
       outgoingLinks: outgoingLinks is List<_i3.EntityTmplLink>?
           ? outgoingLinks
           : this.outgoingLinks?.map((e0) => e0.copyWith()).toList(),

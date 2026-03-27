@@ -1,6 +1,8 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_client/shared.dart';
 import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/theming/colors.dart';
+import 'package:akasha_ui/theming/sizes.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,18 +25,20 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   late final TextEditingController descriptionController;
 
   List<AttributeTmpl> attributeTmpls = [];
+  List<AttributeTmpl> includedAttributeTmpls = [];
+  AttributeTmpl? selectedAttributeTmpl;
 
   bool _isSaving = false;
   bool get _isEdit => widget.item != null;
   bool get _isReadOnly => widget.readOnly;
 
-  @override
-  void initState() {
-    super.initState();
-    nameController = TextEditingController(text: widget.item?.name ?? '');
-    descriptionController = TextEditingController(text: widget.item?.description ?? '');
-
-    _fetchAttributeTmpls();
+  List<AttributeTmpl> get availableAttributeTmpls {
+    final includedIds = includedAttributeTmpls.map((e) => e.id).whereType<UuidValue>().toSet();
+    return attributeTmpls.where((attr) {
+      final id = attr.id;
+      if (id == null) return true;
+      return !includedIds.contains(id);
+    }).toList();
   }
 
   Future<void> _fetchAttributeTmpls() async {
@@ -44,6 +48,34 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     } catch (e) {
       debugPrint('Failed to fetch attribute templates: $e');
     }
+  }
+
+  void _addSelectedAttributeTmpl() {
+    final attr = selectedAttributeTmpl;
+    if (attr == null) return;
+
+    final alreadyIncluded = includedAttributeTmpls.any((e) => e.id == attr.id);
+    if (alreadyIncluded) return;
+
+    setState(() {
+      includedAttributeTmpls.add(attr);
+      selectedAttributeTmpl = null;
+    });
+  }
+
+  void _removeIncludedAttributeTmpl(AttributeTmpl attr) {
+    setState(() {
+      includedAttributeTmpls.removeWhere((e) => e.id == attr.id);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController(text: widget.item?.name ?? '');
+    descriptionController = TextEditingController(text: widget.item?.description ?? '');
+    includedAttributeTmpls = [...?widget.item?.attributes?.map((link) => link.attributeTmpl)].whereType<AttributeTmpl>().toList();
+    _fetchAttributeTmpls();
   }
 
   @override
@@ -69,6 +101,16 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
         id: widget.item?.id,
         name: nameController.text.trim(),
         description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+        attributes: includedAttributeTmpls
+            .map(
+              (attr) => EntityTmplAttribute(
+                entityTmplId: widget.item?.id ?? zeroUuid, // Use existing ID for edit, generate new ID for create
+                attributeTmpl: attr,
+                attributeTmplId: attr.id ?? zeroUuid, // Use existing ID for edit, generate new ID for create
+                orderIdx: 0,
+              ),
+            )
+            .toList(),
       );
 
       await widget.onSave!(entityTmpl);
@@ -83,70 +125,199 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   Widget build(BuildContext context) {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
 
-    return Form(
-      key: formKey,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: nameController,
-                readOnly: _isReadOnly,
-                decoration: InputDecoration(
-                  labelText: _isReadOnly ? 'Name' : 'Name *',
-                  hintText: _isReadOnly ? null : 'Required',
+    return DefaultTabController(
+      length: 2,
+      child: Form(
+        key: formKey,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  readOnly: _isReadOnly,
+                  decoration: InputDecoration(
+                    labelText: _isReadOnly ? 'Name' : 'Name *',
+                    hintText: _isReadOnly ? null : 'Required',
+                  ),
+                  validator: _isReadOnly
+                      ? null
+                      : (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Name is required';
+                          }
+                          return null;
+                        },
+                  onChanged: _isReadOnly ? null : (_) => formKey.currentState?.validate(),
                 ),
-                validator: _isReadOnly
-                    ? null
-                    : (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Name is required';
-                        }
-                        return null;
-                      },
-                onChanged: _isReadOnly ? null : (_) => formKey.currentState?.validate(),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: descriptionController,
-                readOnly: _isReadOnly,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: descriptionController,
+                  readOnly: _isReadOnly,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                  ),
+                  maxLines: 1,
+                  minLines: 1,
                 ),
-                maxLines: 1,
-                minLines: 1,
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              Align(
-                alignment: Alignment.centerRight,
-                child: _isReadOnly
-                    ? IconButton(
-                        onPressed: _isEdit ? widget.onRequestEdit : null,
-                        color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
-                        icon: const Icon(Icons.edit),
-                        tooltip: 'Edit',
-                      )
-                    : IconButton(
-                        onPressed: _isSaving ? null : onSave,
-                        color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
-                        icon: _isSaving
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.save),
-                        tooltip: _isEdit ? 'Update' : 'Add',
+                const TabBar(
+                  tabs: [
+                    Tab(text: 'Attributes', height: tabHeight),
+                    Tab(text: 'Links', height: tabHeight),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Important: TabBarView needs bounded height here.
+                SizedBox(
+                  height: 250,
+                  child: TabBarView(
+                    children: [
+                      _AttributesTab(
+                        readOnly: _isReadOnly,
+                        availableAttributeTmpls: availableAttributeTmpls,
+                        includedAttributeTmpls: includedAttributeTmpls,
+                        selectedAttributeTmpl: selectedAttributeTmpl,
+                        onSelectedAttributeChanged: (value) {
+                          setState(() => selectedAttributeTmpl = value);
+                        },
+                        onAddAttribute: _addSelectedAttributeTmpl,
+                        onRemoveAttribute: _removeIncludedAttributeTmpl,
                       ),
-              ),
-            ],
+                      const _LinksTab(),
+                    ],
+                  ),
+                ),
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: _isReadOnly
+                      ? IconButton(
+                          onPressed: _isEdit ? widget.onRequestEdit : null,
+                          color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
+                          icon: const Icon(Icons.edit),
+                          tooltip: 'Edit',
+                        )
+                      : IconButton(
+                          onPressed: _isSaving ? null : onSave,
+                          color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
+                          icon: _isSaving
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.save),
+                          tooltip: _isEdit ? 'Update' : 'Add',
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AttributesTab extends StatelessWidget {
+  final bool readOnly;
+  final List<AttributeTmpl> availableAttributeTmpls;
+  final List<AttributeTmpl> includedAttributeTmpls;
+  final AttributeTmpl? selectedAttributeTmpl;
+  final ValueChanged<AttributeTmpl?> onSelectedAttributeChanged;
+  final VoidCallback onAddAttribute;
+  final ValueChanged<AttributeTmpl> onRemoveAttribute;
+
+  const _AttributesTab({
+    required this.readOnly,
+    required this.availableAttributeTmpls,
+    required this.includedAttributeTmpls,
+    required this.selectedAttributeTmpl,
+    required this.onSelectedAttributeChanged,
+    required this.onAddAttribute,
+    required this.onRemoveAttribute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: includedAttributeTmpls.isEmpty
+              ? const Center(
+                  child: Text('No included attribute templates'),
+                )
+              : ListView.separated(
+                  itemCount: includedAttributeTmpls.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final attr = includedAttributeTmpls[index];
+                    return ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(attr.name),
+                      subtitle: attr.description == null ? null : Text(attr.description!),
+                      trailing: readOnly
+                          ? null
+                          : IconButton(
+                              onPressed: () => onRemoveAttribute(attr),
+                              icon: const Icon(Icons.remove),
+                              tooltip: 'Remove',
+                            ),
+                    );
+                  },
+                ),
+        ),
+        if (!readOnly) ...[
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<AttributeTmpl>(
+                  initialValue: selectedAttributeTmpl,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Add attribute template',
+                    hintText: 'Pick one',
+                  ),
+                  items: availableAttributeTmpls
+                      .map(
+                        (attr) => DropdownMenuItem<AttributeTmpl>(
+                          value: attr,
+                          child: Text(attr.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: availableAttributeTmpls.isEmpty ? null : onSelectedAttributeChanged,
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: selectedAttributeTmpl == null ? null : onAddAttribute,
+                icon: const Icon(Icons.add),
+                tooltip: 'Add attribute template',
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+}
+
+class _LinksTab extends StatelessWidget {
+  const _LinksTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('Links tab content'),
     );
   }
 }

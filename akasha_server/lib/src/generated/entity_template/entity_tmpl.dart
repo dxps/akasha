@@ -22,7 +22,7 @@ abstract class EntityTmpl
     this.id,
     required this.name,
     this.description,
-    this.attributeLinks,
+    this.attributes,
     this.outgoingLinks,
     this.incomingLinkTargets,
   });
@@ -31,7 +31,7 @@ abstract class EntityTmpl
     _i1.UuidValue? id,
     required String name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributeLinks,
+    List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
     List<_i3.EntityTmplLink>? incomingLinkTargets,
   }) = _EntityTmplImpl;
@@ -43,10 +43,10 @@ abstract class EntityTmpl
           : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       description: jsonSerialization['description'] as String?,
-      attributeLinks: jsonSerialization['attributeLinks'] == null
+      attributes: jsonSerialization['attributes'] == null
           ? null
           : _i4.Protocol().deserialize<List<_i2.EntityTmplAttribute>>(
-              jsonSerialization['attributeLinks'],
+              jsonSerialization['attributes'],
             ),
       outgoingLinks: jsonSerialization['outgoingLinks'] == null
           ? null
@@ -72,7 +72,7 @@ abstract class EntityTmpl
 
   String? description;
 
-  List<_i2.EntityTmplAttribute>? attributeLinks;
+  List<_i2.EntityTmplAttribute>? attributes;
 
   /// The links where this entity template is the source.
   List<_i3.EntityTmplLink>? outgoingLinks;
@@ -90,7 +90,7 @@ abstract class EntityTmpl
     _i1.UuidValue? id,
     String? name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributeLinks,
+    List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
     List<_i3.EntityTmplLink>? incomingLinkTargets,
   });
@@ -101,10 +101,8 @@ abstract class EntityTmpl
       if (id != null) 'id': id?.toJson(),
       'name': name,
       if (description != null) 'description': description,
-      if (attributeLinks != null)
-        'attributeLinks': attributeLinks?.toJson(
-          valueToJson: (v) => v.toJson(),
-        ),
+      if (attributes != null)
+        'attributes': attributes?.toJson(valueToJson: (v) => v.toJson()),
       if (outgoingLinks != null)
         'outgoingLinks': outgoingLinks?.toJson(valueToJson: (v) => v.toJson()),
       if (incomingLinkTargets != null)
@@ -121,8 +119,8 @@ abstract class EntityTmpl
       if (id != null) 'id': id?.toJson(),
       'name': name,
       if (description != null) 'description': description,
-      if (attributeLinks != null)
-        'attributeLinks': attributeLinks?.toJson(
+      if (attributes != null)
+        'attributes': attributes?.toJson(
           valueToJson: (v) => v.toJsonForProtocol(),
         ),
       if (outgoingLinks != null)
@@ -137,12 +135,12 @@ abstract class EntityTmpl
   }
 
   static EntityTmplInclude include({
-    _i2.EntityTmplAttributeIncludeList? attributeLinks,
+    _i2.EntityTmplAttributeIncludeList? attributes,
     _i3.EntityTmplLinkIncludeList? outgoingLinks,
     _i3.EntityTmplLinkIncludeList? incomingLinkTargets,
   }) {
     return EntityTmplInclude._(
-      attributeLinks: attributeLinks,
+      attributes: attributes,
       outgoingLinks: outgoingLinks,
       incomingLinkTargets: incomingLinkTargets,
     );
@@ -181,14 +179,14 @@ class _EntityTmplImpl extends EntityTmpl {
     _i1.UuidValue? id,
     required String name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributeLinks,
+    List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
     List<_i3.EntityTmplLink>? incomingLinkTargets,
   }) : super._(
          id: id,
          name: name,
          description: description,
-         attributeLinks: attributeLinks,
+         attributes: attributes,
          outgoingLinks: outgoingLinks,
          incomingLinkTargets: incomingLinkTargets,
        );
@@ -201,7 +199,7 @@ class _EntityTmplImpl extends EntityTmpl {
     Object? id = _Undefined,
     String? name,
     Object? description = _Undefined,
-    Object? attributeLinks = _Undefined,
+    Object? attributes = _Undefined,
     Object? outgoingLinks = _Undefined,
     Object? incomingLinkTargets = _Undefined,
   }) {
@@ -209,9 +207,9 @@ class _EntityTmplImpl extends EntityTmpl {
       id: id is _i1.UuidValue? ? id : this.id,
       name: name ?? this.name,
       description: description is String? ? description : this.description,
-      attributeLinks: attributeLinks is List<_i2.EntityTmplAttribute>?
-          ? attributeLinks
-          : this.attributeLinks?.map((e0) => e0.copyWith()).toList(),
+      attributes: attributes is List<_i2.EntityTmplAttribute>?
+          ? attributes
+          : this.attributes?.map((e0) => e0.copyWith()).toList(),
       outgoingLinks: outgoingLinks is List<_i3.EntityTmplLink>?
           ? outgoingLinks
           : this.outgoingLinks?.map((e0) => e0.copyWith()).toList(),
@@ -255,9 +253,9 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnString description;
 
-  _i2.EntityTmplAttributeTable? ___attributeLinks;
+  _i2.EntityTmplAttributeTable? ___attributes;
 
-  _i1.ManyRelation<_i2.EntityTmplAttributeTable>? _attributeLinks;
+  _i1.ManyRelation<_i2.EntityTmplAttributeTable>? _attributes;
 
   /// The links where this entity template is the source.
   _i3.EntityTmplLinkTable? ___outgoingLinks;
@@ -271,17 +269,17 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
   /// Optional reverse traversal: links where this entity template is a target.
   _i1.ManyRelation<_i3.EntityTmplLinkTable>? _incomingLinkTargets;
 
-  _i2.EntityTmplAttributeTable get __attributeLinks {
-    if (___attributeLinks != null) return ___attributeLinks!;
-    ___attributeLinks = _i1.createRelationTable(
-      relationFieldName: '__attributeLinks',
+  _i2.EntityTmplAttributeTable get __attributes {
+    if (___attributes != null) return ___attributes!;
+    ___attributes = _i1.createRelationTable(
+      relationFieldName: '__attributes',
       field: EntityTmpl.t.id,
       foreignField: _i2.EntityTmplAttribute.t.entityTmplId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
           _i2.EntityTmplAttributeTable(tableRelation: foreignTableRelation),
     );
-    return ___attributeLinks!;
+    return ___attributes!;
   }
 
   _i3.EntityTmplLinkTable get __outgoingLinks {
@@ -310,23 +308,23 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
     return ___incomingLinkTargets!;
   }
 
-  _i1.ManyRelation<_i2.EntityTmplAttributeTable> get attributeLinks {
-    if (_attributeLinks != null) return _attributeLinks!;
+  _i1.ManyRelation<_i2.EntityTmplAttributeTable> get attributes {
+    if (_attributes != null) return _attributes!;
     var relationTable = _i1.createRelationTable(
-      relationFieldName: 'attributeLinks',
+      relationFieldName: 'attributes',
       field: EntityTmpl.t.id,
       foreignField: _i2.EntityTmplAttribute.t.entityTmplId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
           _i2.EntityTmplAttributeTable(tableRelation: foreignTableRelation),
     );
-    _attributeLinks = _i1.ManyRelation<_i2.EntityTmplAttributeTable>(
+    _attributes = _i1.ManyRelation<_i2.EntityTmplAttributeTable>(
       tableWithRelations: relationTable,
       table: _i2.EntityTmplAttributeTable(
         tableRelation: relationTable.tableRelation!.lastRelation,
       ),
     );
-    return _attributeLinks!;
+    return _attributes!;
   }
 
   _i1.ManyRelation<_i3.EntityTmplLinkTable> get outgoingLinks {
@@ -376,8 +374,8 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
 
   @override
   _i1.Table? getRelationTable(String relationField) {
-    if (relationField == 'attributeLinks') {
-      return __attributeLinks;
+    if (relationField == 'attributes') {
+      return __attributes;
     }
     if (relationField == 'outgoingLinks') {
       return __outgoingLinks;
@@ -391,16 +389,16 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
 
 class EntityTmplInclude extends _i1.IncludeObject {
   EntityTmplInclude._({
-    _i2.EntityTmplAttributeIncludeList? attributeLinks,
+    _i2.EntityTmplAttributeIncludeList? attributes,
     _i3.EntityTmplLinkIncludeList? outgoingLinks,
     _i3.EntityTmplLinkIncludeList? incomingLinkTargets,
   }) {
-    _attributeLinks = attributeLinks;
+    _attributes = attributes;
     _outgoingLinks = outgoingLinks;
     _incomingLinkTargets = incomingLinkTargets;
   }
 
-  _i2.EntityTmplAttributeIncludeList? _attributeLinks;
+  _i2.EntityTmplAttributeIncludeList? _attributes;
 
   _i3.EntityTmplLinkIncludeList? _outgoingLinks;
 
@@ -408,7 +406,7 @@ class EntityTmplInclude extends _i1.IncludeObject {
 
   @override
   Map<String, _i1.Include?> get includes => {
-    'attributeLinks': _attributeLinks,
+    'attributes': _attributes,
     'outgoingLinks': _outgoingLinks,
     'incomingLinkTargets': _incomingLinkTargets,
   };
@@ -743,7 +741,7 @@ class EntityTmplAttachRepository {
 
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplAttribute]s
   /// by setting each [EntityTmplAttribute]'s foreign key `entityTmplId` to refer to this [EntityTmpl].
-  Future<void> attributeLinks(
+  Future<void> attributes(
     _i1.DatabaseSession session,
     EntityTmpl entityTmpl,
     List<_i2.EntityTmplAttribute> entityTmplAttribute, {
@@ -822,7 +820,7 @@ class EntityTmplAttachRowRepository {
 
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplAttribute]
   /// by setting the [EntityTmplAttribute]'s foreign key `entityTmplId` to refer to this [EntityTmpl].
-  Future<void> attributeLinks(
+  Future<void> attributes(
     _i1.DatabaseSession session,
     EntityTmpl entityTmpl,
     _i2.EntityTmplAttribute entityTmplAttribute, {
@@ -900,7 +898,7 @@ class EntityTmplDetachRepository {
   ///
   /// This removes the association between the two models without deleting
   /// the related record.
-  Future<void> attributeLinks(
+  Future<void> attributes(
     _i1.DatabaseSession session,
     List<_i2.EntityTmplAttribute> entityTmplAttribute, {
     _i1.Transaction? transaction,
@@ -928,7 +926,7 @@ class EntityTmplDetachRowRepository {
   ///
   /// This removes the association between the two models without deleting
   /// the related record.
-  Future<void> attributeLinks(
+  Future<void> attributes(
     _i1.DatabaseSession session,
     _i2.EntityTmplAttribute entityTmplAttribute, {
     _i1.Transaction? transaction,
