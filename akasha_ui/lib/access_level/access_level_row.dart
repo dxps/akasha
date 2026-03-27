@@ -101,7 +101,7 @@ class _AccessLevelRowState extends State<AccessLevelRow> {
             decoration: BoxDecoration(
               color: _isHovered ? (isDarkMode ? Colors.grey.shade700 : Colors.white) : Colors.transparent,
               border: Border(
-                bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade200),
+                bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300),
               ),
               borderRadius: _isHovered ? BorderRadius.circular(6) : null,
             ),
@@ -115,20 +115,14 @@ class _AccessLevelRowState extends State<AccessLevelRow> {
                       SizedBox(
                         width: widget.nameWidth,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           child: Text(widget.nameText),
                         ),
                       ),
                       SizedBox(
                         width: widget.descriptionWidth,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           child: Text(widget.descriptionText),
                         ),
                       ),

@@ -153,15 +153,29 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
             item: template,
             nameText: limitChars(template.name, 32),
             descriptionText: template.description != null ? limitChars(template.description!, 40) : '',
-            onView: () => _openModal(
-              item: template,
-              viewportSize: size,
-              readOnly: true,
-            ),
-            onEdit: () => _openModal(
-              item: template,
-              viewportSize: size,
-            ),
+            onView: () async {
+              final item = await client.entityTmpl.read(template.id!);
+              if (item != null) {
+                debugPrint('>>> Got entity template for view: $item');
+                _openModal(item: item, viewportSize: size, readOnly: true);
+              } else {
+                debugPrint('Failed to load entity template with id ${template.id} for view.');
+                if (!mounted) return;
+                showErrorSnackbar(context, 'Failed to load entity template details.');
+              }
+            },
+            onEdit: () async {
+              debugPrint('>>> Got entity template for edit: $template');
+              final item = await client.entityTmpl.read(template.id!);
+              if (item != null) {
+                debugPrint('>>> Got entity template for edit: $item');
+                _openModal(item: item, viewportSize: size);
+              } else {
+                debugPrint('Failed to load entity template with id ${template.id} for edit.');
+                if (!mounted) return;
+                showErrorSnackbar(context, 'Failed to load entity template details for edit.');
+              }
+            },
             onDelete: () => _deleteEntityTemplate(template),
           );
         }),

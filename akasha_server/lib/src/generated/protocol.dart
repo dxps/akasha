@@ -20,10 +20,10 @@ import 'access_level/access_level.dart' as _i5;
 import 'access_level/access_level_api_resp.dart' as _i6;
 import 'attribute_template/attr_tmpl.dart' as _i7;
 import 'attribute_template/attr_tmpl_api_resp.dart' as _i8;
-import 'entity_template/entity_link_tmpl.dart' as _i9;
-import 'entity_template/entity_tmpl.dart' as _i10;
-import 'entity_template/entity_tmpl_api_resp.dart' as _i11;
-import 'entity_template/entity_tmpl_attribute.dart' as _i12;
+import 'entity_template/entity_tmpl.dart' as _i9;
+import 'entity_template/entity_tmpl_api_resp.dart' as _i10;
+import 'entity_template/entity_tmpl_attribute.dart' as _i11;
+import 'entity_template/entity_tmpl_link.dart' as _i12;
 import 'shared/api/exceptions/api_exception.dart' as _i13;
 import 'package:akasha_server/src/generated/access_level/access_level.dart'
     as _i14;
@@ -35,10 +35,10 @@ export 'access_level/access_level.dart';
 export 'access_level/access_level_api_resp.dart';
 export 'attribute_template/attr_tmpl.dart';
 export 'attribute_template/attr_tmpl_api_resp.dart';
-export 'entity_template/entity_link_tmpl.dart';
 export 'entity_template/entity_tmpl.dart';
 export 'entity_template/entity_tmpl_api_resp.dart';
 export 'entity_template/entity_tmpl_attribute.dart';
+export 'entity_template/entity_tmpl_link.dart';
 export 'shared/api/exceptions/api_exception.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
@@ -512,17 +512,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i8.AttributeTmplApiResponse) {
       return _i8.AttributeTmplApiResponse.fromJson(data) as T;
     }
-    if (t == _i9.EntityTmplLink) {
-      return _i9.EntityTmplLink.fromJson(data) as T;
+    if (t == _i9.EntityTmpl) {
+      return _i9.EntityTmpl.fromJson(data) as T;
     }
-    if (t == _i10.EntityTmpl) {
-      return _i10.EntityTmpl.fromJson(data) as T;
+    if (t == _i10.EntityTmplApiResponse) {
+      return _i10.EntityTmplApiResponse.fromJson(data) as T;
     }
-    if (t == _i11.EntityTmplApiResponse) {
-      return _i11.EntityTmplApiResponse.fromJson(data) as T;
+    if (t == _i11.EntityTmplAttribute) {
+      return _i11.EntityTmplAttribute.fromJson(data) as T;
     }
-    if (t == _i12.EntityTmplAttribute) {
-      return _i12.EntityTmplAttribute.fromJson(data) as T;
+    if (t == _i12.EntityTmplLink) {
+      return _i12.EntityTmplLink.fromJson(data) as T;
     }
     if (t == _i13.ApiException) {
       return _i13.ApiException.fromJson(data) as T;
@@ -541,47 +541,47 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null ? _i8.AttributeTmplApiResponse.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i9.EntityTmplLink?>()) {
-      return (data != null ? _i9.EntityTmplLink.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.EntityTmpl?>()) {
+      return (data != null ? _i9.EntityTmpl.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.EntityTmpl?>()) {
-      return (data != null ? _i10.EntityTmpl.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i11.EntityTmplApiResponse?>()) {
-      return (data != null ? _i11.EntityTmplApiResponse.fromJson(data) : null)
+    if (t == _i1.getType<_i10.EntityTmplApiResponse?>()) {
+      return (data != null ? _i10.EntityTmplApiResponse.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i12.EntityTmplAttribute?>()) {
-      return (data != null ? _i12.EntityTmplAttribute.fromJson(data) : null)
+    if (t == _i1.getType<_i11.EntityTmplAttribute?>()) {
+      return (data != null ? _i11.EntityTmplAttribute.fromJson(data) : null)
           as T;
+    }
+    if (t == _i1.getType<_i12.EntityTmplLink?>()) {
+      return (data != null ? _i12.EntityTmplLink.fromJson(data) : null) as T;
     }
     if (t == _i1.getType<_i13.ApiException?>()) {
       return (data != null ? _i13.ApiException.fromJson(data) : null) as T;
     }
-    if (t == List<_i12.EntityTmplAttribute>) {
+    if (t == List<_i11.EntityTmplAttribute>) {
       return (data as List)
-              .map((e) => deserialize<_i12.EntityTmplAttribute>(e))
+              .map((e) => deserialize<_i11.EntityTmplAttribute>(e))
               .toList()
           as T;
     }
-    if (t == _i1.getType<List<_i12.EntityTmplAttribute>?>()) {
+    if (t == _i1.getType<List<_i11.EntityTmplAttribute>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i12.EntityTmplAttribute>(e))
+                    .map((e) => deserialize<_i11.EntityTmplAttribute>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i9.EntityTmplLink>) {
+    if (t == List<_i12.EntityTmplLink>) {
       return (data as List)
-              .map((e) => deserialize<_i9.EntityTmplLink>(e))
+              .map((e) => deserialize<_i12.EntityTmplLink>(e))
               .toList()
           as T;
     }
-    if (t == _i1.getType<List<_i9.EntityTmplLink>?>()) {
+    if (t == _i1.getType<List<_i12.EntityTmplLink>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i9.EntityTmplLink>(e))
+                    .map((e) => deserialize<_i12.EntityTmplLink>(e))
                     .toList()
               : null)
           as T;
@@ -620,10 +620,10 @@ class Protocol extends _i1.SerializationManagerServer {
       _i6.AccessLevelApiResponse => 'AccessLevelApiResponse',
       _i7.AttributeTmpl => 'AttributeTmpl',
       _i8.AttributeTmplApiResponse => 'AttributeTmplApiResponse',
-      _i9.EntityTmplLink => 'EntityTmplLink',
-      _i10.EntityTmpl => 'EntityTmpl',
-      _i11.EntityTmplApiResponse => 'EntityTmplApiResponse',
-      _i12.EntityTmplAttribute => 'EntityTmplAttribute',
+      _i9.EntityTmpl => 'EntityTmpl',
+      _i10.EntityTmplApiResponse => 'EntityTmplApiResponse',
+      _i11.EntityTmplAttribute => 'EntityTmplAttribute',
+      _i12.EntityTmplLink => 'EntityTmplLink',
       _i13.ApiException => 'ApiException',
       _ => null,
     };
@@ -647,14 +647,14 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'AttributeTmpl';
       case _i8.AttributeTmplApiResponse():
         return 'AttributeTmplApiResponse';
-      case _i9.EntityTmplLink():
-        return 'EntityTmplLink';
-      case _i10.EntityTmpl():
+      case _i9.EntityTmpl():
         return 'EntityTmpl';
-      case _i11.EntityTmplApiResponse():
+      case _i10.EntityTmplApiResponse():
         return 'EntityTmplApiResponse';
-      case _i12.EntityTmplAttribute():
+      case _i11.EntityTmplAttribute():
         return 'EntityTmplAttribute';
+      case _i12.EntityTmplLink():
+        return 'EntityTmplLink';
       case _i13.ApiException():
         return 'ApiException';
     }
@@ -691,17 +691,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'AttributeTmplApiResponse') {
       return deserialize<_i8.AttributeTmplApiResponse>(data['data']);
     }
-    if (dataClassName == 'EntityTmplLink') {
-      return deserialize<_i9.EntityTmplLink>(data['data']);
-    }
     if (dataClassName == 'EntityTmpl') {
-      return deserialize<_i10.EntityTmpl>(data['data']);
+      return deserialize<_i9.EntityTmpl>(data['data']);
     }
     if (dataClassName == 'EntityTmplApiResponse') {
-      return deserialize<_i11.EntityTmplApiResponse>(data['data']);
+      return deserialize<_i10.EntityTmplApiResponse>(data['data']);
     }
     if (dataClassName == 'EntityTmplAttribute') {
-      return deserialize<_i12.EntityTmplAttribute>(data['data']);
+      return deserialize<_i11.EntityTmplAttribute>(data['data']);
+    }
+    if (dataClassName == 'EntityTmplLink') {
+      return deserialize<_i12.EntityTmplLink>(data['data']);
     }
     if (dataClassName == 'ApiException') {
       return deserialize<_i13.ApiException>(data['data']);
@@ -746,12 +746,12 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i5.AccessLevel.t;
       case _i7.AttributeTmpl:
         return _i7.AttributeTmpl.t;
-      case _i9.EntityTmplLink:
-        return _i9.EntityTmplLink.t;
-      case _i10.EntityTmpl:
-        return _i10.EntityTmpl.t;
-      case _i12.EntityTmplAttribute:
-        return _i12.EntityTmplAttribute.t;
+      case _i9.EntityTmpl:
+        return _i9.EntityTmpl.t;
+      case _i11.EntityTmplAttribute:
+        return _i11.EntityTmplAttribute.t;
+      case _i12.EntityTmplLink:
+        return _i12.EntityTmplLink.t;
     }
     return null;
   }

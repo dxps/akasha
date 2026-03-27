@@ -13,7 +13,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 import '../entity_template/entity_tmpl_attribute.dart' as _i2;
-import '../entity_template/entity_link_tmpl.dart' as _i3;
+import '../entity_template/entity_tmpl_link.dart' as _i3;
 import 'package:akasha_server/src/generated/protocol.dart' as _i4;
 
 abstract class EntityTmpl
@@ -24,7 +24,7 @@ abstract class EntityTmpl
     this.description,
     this.attributes,
     this.outgoingLinks,
-    this.incomingLinkTargets,
+    this.incomingLink,
   });
 
   factory EntityTmpl({
@@ -33,7 +33,7 @@ abstract class EntityTmpl
     String? description,
     List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinkTargets,
+    List<_i3.EntityTmplLink>? incomingLink,
   }) = _EntityTmplImpl;
 
   factory EntityTmpl.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -53,10 +53,10 @@ abstract class EntityTmpl
           : _i4.Protocol().deserialize<List<_i3.EntityTmplLink>>(
               jsonSerialization['outgoingLinks'],
             ),
-      incomingLinkTargets: jsonSerialization['incomingLinkTargets'] == null
+      incomingLink: jsonSerialization['incomingLink'] == null
           ? null
           : _i4.Protocol().deserialize<List<_i3.EntityTmplLink>>(
-              jsonSerialization['incomingLinkTargets'],
+              jsonSerialization['incomingLink'],
             ),
     );
   }
@@ -78,7 +78,7 @@ abstract class EntityTmpl
   List<_i3.EntityTmplLink>? outgoingLinks;
 
   /// Optional reverse traversal: links where this entity template is a target.
-  List<_i3.EntityTmplLink>? incomingLinkTargets;
+  List<_i3.EntityTmplLink>? incomingLink;
 
   @override
   _i1.Table<_i1.UuidValue?> get table => t;
@@ -92,7 +92,7 @@ abstract class EntityTmpl
     String? description,
     List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinkTargets,
+    List<_i3.EntityTmplLink>? incomingLink,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -105,10 +105,8 @@ abstract class EntityTmpl
         'attributes': attributes?.toJson(valueToJson: (v) => v.toJson()),
       if (outgoingLinks != null)
         'outgoingLinks': outgoingLinks?.toJson(valueToJson: (v) => v.toJson()),
-      if (incomingLinkTargets != null)
-        'incomingLinkTargets': incomingLinkTargets?.toJson(
-          valueToJson: (v) => v.toJson(),
-        ),
+      if (incomingLink != null)
+        'incomingLink': incomingLink?.toJson(valueToJson: (v) => v.toJson()),
     };
   }
 
@@ -127,8 +125,8 @@ abstract class EntityTmpl
         'outgoingLinks': outgoingLinks?.toJson(
           valueToJson: (v) => v.toJsonForProtocol(),
         ),
-      if (incomingLinkTargets != null)
-        'incomingLinkTargets': incomingLinkTargets?.toJson(
+      if (incomingLink != null)
+        'incomingLink': incomingLink?.toJson(
           valueToJson: (v) => v.toJsonForProtocol(),
         ),
     };
@@ -137,12 +135,12 @@ abstract class EntityTmpl
   static EntityTmplInclude include({
     _i2.EntityTmplAttributeIncludeList? attributes,
     _i3.EntityTmplLinkIncludeList? outgoingLinks,
-    _i3.EntityTmplLinkIncludeList? incomingLinkTargets,
+    _i3.EntityTmplLinkIncludeList? incomingLink,
   }) {
     return EntityTmplInclude._(
       attributes: attributes,
       outgoingLinks: outgoingLinks,
-      incomingLinkTargets: incomingLinkTargets,
+      incomingLink: incomingLink,
     );
   }
 
@@ -181,14 +179,14 @@ class _EntityTmplImpl extends EntityTmpl {
     String? description,
     List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinkTargets,
+    List<_i3.EntityTmplLink>? incomingLink,
   }) : super._(
          id: id,
          name: name,
          description: description,
          attributes: attributes,
          outgoingLinks: outgoingLinks,
-         incomingLinkTargets: incomingLinkTargets,
+         incomingLink: incomingLink,
        );
 
   /// Returns a shallow copy of this [EntityTmpl]
@@ -201,7 +199,7 @@ class _EntityTmplImpl extends EntityTmpl {
     Object? description = _Undefined,
     Object? attributes = _Undefined,
     Object? outgoingLinks = _Undefined,
-    Object? incomingLinkTargets = _Undefined,
+    Object? incomingLink = _Undefined,
   }) {
     return EntityTmpl(
       id: id is _i1.UuidValue? ? id : this.id,
@@ -213,9 +211,9 @@ class _EntityTmplImpl extends EntityTmpl {
       outgoingLinks: outgoingLinks is List<_i3.EntityTmplLink>?
           ? outgoingLinks
           : this.outgoingLinks?.map((e0) => e0.copyWith()).toList(),
-      incomingLinkTargets: incomingLinkTargets is List<_i3.EntityTmplLink>?
-          ? incomingLinkTargets
-          : this.incomingLinkTargets?.map((e0) => e0.copyWith()).toList(),
+      incomingLink: incomingLink is List<_i3.EntityTmplLink>?
+          ? incomingLink
+          : this.incomingLink?.map((e0) => e0.copyWith()).toList(),
     );
   }
 }
@@ -264,10 +262,10 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
   _i1.ManyRelation<_i3.EntityTmplLinkTable>? _outgoingLinks;
 
   /// Optional reverse traversal: links where this entity template is a target.
-  _i3.EntityTmplLinkTable? ___incomingLinkTargets;
+  _i3.EntityTmplLinkTable? ___incomingLink;
 
   /// Optional reverse traversal: links where this entity template is a target.
-  _i1.ManyRelation<_i3.EntityTmplLinkTable>? _incomingLinkTargets;
+  _i1.ManyRelation<_i3.EntityTmplLinkTable>? _incomingLink;
 
   _i2.EntityTmplAttributeTable get __attributes {
     if (___attributes != null) return ___attributes!;
@@ -295,17 +293,17 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
     return ___outgoingLinks!;
   }
 
-  _i3.EntityTmplLinkTable get __incomingLinkTargets {
-    if (___incomingLinkTargets != null) return ___incomingLinkTargets!;
-    ___incomingLinkTargets = _i1.createRelationTable(
-      relationFieldName: '__incomingLinkTargets',
+  _i3.EntityTmplLinkTable get __incomingLink {
+    if (___incomingLink != null) return ___incomingLink!;
+    ___incomingLink = _i1.createRelationTable(
+      relationFieldName: '__incomingLink',
       field: EntityTmpl.t.id,
       foreignField: _i3.EntityTmplLink.t.targetId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
           _i3.EntityTmplLinkTable(tableRelation: foreignTableRelation),
     );
-    return ___incomingLinkTargets!;
+    return ___incomingLink!;
   }
 
   _i1.ManyRelation<_i2.EntityTmplAttributeTable> get attributes {
@@ -346,23 +344,23 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
     return _outgoingLinks!;
   }
 
-  _i1.ManyRelation<_i3.EntityTmplLinkTable> get incomingLinkTargets {
-    if (_incomingLinkTargets != null) return _incomingLinkTargets!;
+  _i1.ManyRelation<_i3.EntityTmplLinkTable> get incomingLink {
+    if (_incomingLink != null) return _incomingLink!;
     var relationTable = _i1.createRelationTable(
-      relationFieldName: 'incomingLinkTargets',
+      relationFieldName: 'incomingLink',
       field: EntityTmpl.t.id,
       foreignField: _i3.EntityTmplLink.t.targetId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
           _i3.EntityTmplLinkTable(tableRelation: foreignTableRelation),
     );
-    _incomingLinkTargets = _i1.ManyRelation<_i3.EntityTmplLinkTable>(
+    _incomingLink = _i1.ManyRelation<_i3.EntityTmplLinkTable>(
       tableWithRelations: relationTable,
       table: _i3.EntityTmplLinkTable(
         tableRelation: relationTable.tableRelation!.lastRelation,
       ),
     );
-    return _incomingLinkTargets!;
+    return _incomingLink!;
   }
 
   @override
@@ -380,8 +378,8 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
     if (relationField == 'outgoingLinks') {
       return __outgoingLinks;
     }
-    if (relationField == 'incomingLinkTargets') {
-      return __incomingLinkTargets;
+    if (relationField == 'incomingLink') {
+      return __incomingLink;
     }
     return null;
   }
@@ -391,24 +389,24 @@ class EntityTmplInclude extends _i1.IncludeObject {
   EntityTmplInclude._({
     _i2.EntityTmplAttributeIncludeList? attributes,
     _i3.EntityTmplLinkIncludeList? outgoingLinks,
-    _i3.EntityTmplLinkIncludeList? incomingLinkTargets,
+    _i3.EntityTmplLinkIncludeList? incomingLink,
   }) {
     _attributes = attributes;
     _outgoingLinks = outgoingLinks;
-    _incomingLinkTargets = incomingLinkTargets;
+    _incomingLink = incomingLink;
   }
 
   _i2.EntityTmplAttributeIncludeList? _attributes;
 
   _i3.EntityTmplLinkIncludeList? _outgoingLinks;
 
-  _i3.EntityTmplLinkIncludeList? _incomingLinkTargets;
+  _i3.EntityTmplLinkIncludeList? _incomingLink;
 
   @override
   Map<String, _i1.Include?> get includes => {
     'attributes': _attributes,
     'outgoingLinks': _outgoingLinks,
-    'incomingLinkTargets': _incomingLinkTargets,
+    'incomingLink': _incomingLink,
   };
 
   @override
@@ -791,7 +789,7 @@ class EntityTmplAttachRepository {
 
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplLink]s
   /// by setting each [EntityTmplLink]'s foreign key `targetId` to refer to this [EntityTmpl].
-  Future<void> incomingLinkTargets(
+  Future<void> incomingLink(
     _i1.DatabaseSession session,
     EntityTmpl entityTmpl,
     List<_i3.EntityTmplLink> entityTmplLink, {
@@ -868,7 +866,7 @@ class EntityTmplAttachRowRepository {
 
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplLink]
   /// by setting the [EntityTmplLink]'s foreign key `targetId` to refer to this [EntityTmpl].
-  Future<void> incomingLinkTargets(
+  Future<void> incomingLink(
     _i1.DatabaseSession session,
     EntityTmpl entityTmpl,
     _i3.EntityTmplLink entityTmplLink, {
@@ -916,6 +914,54 @@ class EntityTmplDetachRepository {
       transaction: transaction,
     );
   }
+
+  /// Detaches the relation between this [EntityTmpl] and the given [EntityTmplLink]
+  /// by setting the [EntityTmplLink]'s foreign key `sourceId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> outgoingLinks(
+    _i1.DatabaseSession session,
+    List<_i3.EntityTmplLink> entityTmplLink, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (entityTmplLink.any((e) => e.id == null)) {
+      throw ArgumentError.notNull('entityTmplLink.id');
+    }
+
+    var $entityTmplLink = entityTmplLink
+        .map((e) => e.copyWith(sourceId: null))
+        .toList();
+    await session.db.update<_i3.EntityTmplLink>(
+      $entityTmplLink,
+      columns: [_i3.EntityTmplLink.t.sourceId],
+      transaction: transaction,
+    );
+  }
+
+  /// Detaches the relation between this [EntityTmpl] and the given [EntityTmplLink]
+  /// by setting the [EntityTmplLink]'s foreign key `targetId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> incomingLink(
+    _i1.DatabaseSession session,
+    List<_i3.EntityTmplLink> entityTmplLink, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (entityTmplLink.any((e) => e.id == null)) {
+      throw ArgumentError.notNull('entityTmplLink.id');
+    }
+
+    var $entityTmplLink = entityTmplLink
+        .map((e) => e.copyWith(targetId: null))
+        .toList();
+    await session.db.update<_i3.EntityTmplLink>(
+      $entityTmplLink,
+      columns: [_i3.EntityTmplLink.t.targetId],
+      transaction: transaction,
+    );
+  }
 }
 
 class EntityTmplDetachRowRepository {
@@ -939,6 +985,50 @@ class EntityTmplDetachRowRepository {
     await session.db.updateRow<_i2.EntityTmplAttribute>(
       $entityTmplAttribute,
       columns: [_i2.EntityTmplAttribute.t.entityTmplId],
+      transaction: transaction,
+    );
+  }
+
+  /// Detaches the relation between this [EntityTmpl] and the given [EntityTmplLink]
+  /// by setting the [EntityTmplLink]'s foreign key `sourceId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> outgoingLinks(
+    _i1.DatabaseSession session,
+    _i3.EntityTmplLink entityTmplLink, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (entityTmplLink.id == null) {
+      throw ArgumentError.notNull('entityTmplLink.id');
+    }
+
+    var $entityTmplLink = entityTmplLink.copyWith(sourceId: null);
+    await session.db.updateRow<_i3.EntityTmplLink>(
+      $entityTmplLink,
+      columns: [_i3.EntityTmplLink.t.sourceId],
+      transaction: transaction,
+    );
+  }
+
+  /// Detaches the relation between this [EntityTmpl] and the given [EntityTmplLink]
+  /// by setting the [EntityTmplLink]'s foreign key `targetId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> incomingLink(
+    _i1.DatabaseSession session,
+    _i3.EntityTmplLink entityTmplLink, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (entityTmplLink.id == null) {
+      throw ArgumentError.notNull('entityTmplLink.id');
+    }
+
+    var $entityTmplLink = entityTmplLink.copyWith(targetId: null);
+    await session.db.updateRow<_i3.EntityTmplLink>(
+      $entityTmplLink,
+      columns: [_i3.EntityTmplLink.t.targetId],
       transaction: transaction,
     );
   }

@@ -170,7 +170,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
             border: Border(
               bottom: BorderSide(
                 width: 0.25,
-                color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade200,
+                color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade400,
               ),
             ),
           ),

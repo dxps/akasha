@@ -75,7 +75,19 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     nameController = TextEditingController(text: widget.item?.name ?? '');
     descriptionController = TextEditingController(text: widget.item?.description ?? '');
     includedAttributeTmpls = [...?widget.item?.attributes?.map((link) => link.attributeTmpl)].whereType<AttributeTmpl>().toList();
-    _fetchAttributeTmpls();
+    _fetchAttributeTmpls().then(
+      (_) {
+        if (widget.item?.attributes != null) {
+          widget.item?.attributes?.forEach((entTmplAttr) {
+            for (var attr in attributeTmpls) {
+              if (attr.id == entTmplAttr.attributeTmplId) {
+                includedAttributeTmpls.add(attr);
+              }
+            }
+          });
+        }
+      },
+    );
   }
 
   @override
@@ -97,6 +109,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     setState(() => _isSaving = true);
 
     try {
+      int orderIdx = -1;
       final entityTmpl = EntityTmpl(
         id: widget.item?.id,
         name: nameController.text.trim(),
@@ -104,10 +117,9 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
         attributes: includedAttributeTmpls
             .map(
               (attr) => EntityTmplAttribute(
-                entityTmplId: widget.item?.id ?? zeroUuid, // Use existing ID for edit, generate new ID for create
-                attributeTmpl: attr,
-                attributeTmplId: attr.id ?? zeroUuid, // Use existing ID for edit, generate new ID for create
-                orderIdx: 0,
+                entityTmplId: widget.item?.id ?? zeroUuid,
+                attributeTmplId: attr.id ?? zeroUuid,
+                orderIdx: ++orderIdx,
               ),
             )
             .toList(),

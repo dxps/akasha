@@ -58,9 +58,7 @@ class _EntityTmplRowState extends State<EntityTmplRow> {
       color: isDarkMode ? Colors.grey.shade900 : Colors.white,
       clipBehavior: Clip.antiAlias,
       menuPadding: const EdgeInsets.symmetric(vertical: 0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       items: [
         PopupMenuItem(
           value: 'edit',
@@ -115,20 +113,14 @@ class _EntityTmplRowState extends State<EntityTmplRow> {
                       SizedBox(
                         width: widget.nameWidth,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           child: Text(widget.nameText),
                         ),
                       ),
                       SizedBox(
                         width: widget.descriptionWidth,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           child: Text(widget.descriptionText),
                         ),
                       ),

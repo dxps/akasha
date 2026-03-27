@@ -822,9 +822,9 @@ ALTER TABLE ONLY "serverpod_auth_core_session"
 -- MIGRATION VERSION FOR akasha
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('akasha', '20260326170937357-entity-tmpls', now())
+    VALUES ('akasha', '20260327193432896-entity-tmpl', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20260326170937357-entity-tmpls', "timestamp" = now();
+    DO UPDATE SET "version" = '20260327193432896-entity-tmpl', "timestamp" = now();
 
 --
 -- MIGRATION VERSION FOR serverpod

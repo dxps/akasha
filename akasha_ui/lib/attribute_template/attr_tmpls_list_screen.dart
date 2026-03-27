@@ -217,7 +217,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
               decoration: BoxDecoration(
                 color: isHovered ? (isDarkMode ? Colors.grey.shade700 : Colors.white) : Colors.transparent,
                 border: Border(
-                  bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade200),
+                  bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300),
                 ),
                 borderRadius: isHovered ? BorderRadius.circular(6) : null,
               ),

@@ -2,8 +2,12 @@ class: EntityTmplAttribute
 table: entity_tmpl_attributes
 
 fields:
-    entityTmpl: EntityTmpl?, relation(name=entity_tmpl_attributes)
-    attributeTmpl: AttributeTmpl?, relation
+    entityTmplId: UuidValue
+    entityTmpl: EntityTmpl?, relation(name=entity_tmpl_attributes, field=entityTmplId)
+
+    attributeTmplId: UuidValue
+    attributeTmpl: AttributeTmpl?, relation(field=attributeTmplId)
+
     orderIdx: int
 
 indexes:

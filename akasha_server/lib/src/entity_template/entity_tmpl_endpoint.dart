@@ -4,7 +4,29 @@ import 'package:serverpod/serverpod.dart';
 class EntityTmplEndpoint extends Endpoint {
   //
   Future<EntityTmpl?> read(Session session, UuidValue id) async {
-    return EntityTmpl.db.findById(session, id);
+    final item = await EntityTmpl.db.findById(session, id);
+    session.log('Got entity template: $item');
+    await EntityTmplAttribute.db
+        .find(
+          session,
+          where: (t) => t.entityTmplId.equals(id),
+          orderBy: (t) => t.orderIdx,
+        )
+        .then((attributes) {
+          item?.attributes = attributes;
+        });
+    if (item != null) {
+      await EntityTmplAttribute.db
+          .find(
+            session,
+            where: (t) => t.entityTmplId.equals(id),
+            orderBy: (t) => t.orderIdx,
+          )
+          .then((attributes) {
+            item.attributes = attributes;
+          });
+    }
+    return item;
   }
 
   Future<List<EntityTmpl>> readAll(Session session) async {
@@ -16,7 +38,21 @@ class EntityTmplEndpoint extends Endpoint {
 
   Future<EntityTmplApiResponse> create(Session session, EntityTmpl data) async {
     try {
+      // Persist the item first.
       final created = await EntityTmpl.db.insertRow(session, data);
+      // Then persist the attributes, if any.
+      if (data.attributes != null) {
+        for (final attr in data.attributes!) {
+          await EntityTmplAttribute.db.insertRow(
+            session,
+            EntityTmplAttribute(
+              entityTmplId: created.id!,
+              attributeTmplId: attr.attributeTmplId,
+              orderIdx: attr.orderIdx,
+            ),
+          );
+        }
+      }
 
       return EntityTmplApiResponse(success: true, data: created);
     } on DatabaseQueryException catch (e) {

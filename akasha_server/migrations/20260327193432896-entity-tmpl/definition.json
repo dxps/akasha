@@ -3631,7 +3631,7 @@
     {
       "__className__": "serverpod.DatabaseMigrationVersion",
       "module": "akasha",
-      "version": "20260326170937357-entity-tmpls"
+      "version": "20260327193432896-entity-tmpl"
     },
     {
       "__className__": "serverpod.DatabaseMigrationVersion",
