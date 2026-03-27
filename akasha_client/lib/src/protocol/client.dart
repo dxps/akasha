@@ -369,6 +369,12 @@ class EndpointEntityTmpl extends _i1.EndpointRef {
         'update',
         {'data': data},
       );
+
+  _i2.Future<bool> delete(_i1.UuidValue id) => caller.callServerEndpoint<bool>(
+    'entityTmpl',
+    'delete',
+    {'id': id},
+  );
 }
 
 class Modules {

@@ -72,8 +72,17 @@ class EntityTmplEndpoint extends Endpoint {
     }
   }
 
-  // Utility methods.
+  Future<bool> delete(Session session, UuidValue id) async {
+    final deleted = await EntityTmpl.db.deleteWhere(
+      session,
+      where: (t) => t.id.equals(id),
+    );
+    return deleted.isNotEmpty;
+  }
+}
 
+/// Utility methods for creating API responses.
+extension _ApiResponseHelpers on EntityTmplEndpoint {
   EntityTmplApiResponse alreadyExistsResponse() {
     return EntityTmplApiResponse(
       success: false,

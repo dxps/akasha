@@ -520,6 +520,25 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['data'],
                   ),
         ),
+        'delete': _i1.MethodConnector(
+          name: 'delete',
+          params: {
+            'id': _i1.ParameterDescription(
+              name: 'id',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entityTmpl'] as _i6.EntityTmplEndpoint).delete(
+                    session,
+                    params['id'],
+                  ),
+        ),
       },
     );
     modules['serverpod_auth_idp'] = _i10.Endpoints()

@@ -27,7 +27,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
   final List<ModalData> _modals = [];
   int _nextModalId = 1;
 
-  Future<void> _getAttributeTmpls() async {
+  Future<void> getAttributeTmpls() async {
     setState(() => isFetchingData = true);
     final items = await client.attrTmpls.readAll();
     debugPrint("Got ${items.length} attribute templates.");
@@ -40,7 +40,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
   @override
   void initState() {
     super.initState();
-    _getAttributeTmpls();
+    getAttributeTmpls();
   }
 
   // -----------------------
@@ -384,7 +384,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
               if (response.success && mounted) {
                 _closeModal(id);
-                await _getAttributeTmpls();
+                await getAttributeTmpls();
               } else if (!response.success) {
                 if (!mounted) return;
                 showErrorSnackbar(
@@ -399,7 +399,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
             if (response.success && mounted) {
               _closeModal(id);
-              await _getAttributeTmpls();
+              await getAttributeTmpls();
             } else if (!response.success) {
               if (!mounted) return;
               showErrorSnackbar(
@@ -443,7 +443,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     if (confirmed == true) {
       try {
         await client.attrTmpls.delete(tmpl.id!);
-        await _getAttributeTmpls();
+        await getAttributeTmpls();
       } catch (e) {
         debugPrint('Error deleting attribute template: $e');
         if (mounted) {
