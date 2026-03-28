@@ -188,9 +188,7 @@ ThemeData initThemeData(Brightness brightness) {
       style: TextButton.styleFrom(
         backgroundColor: isDark ? const Color(0xFF2A2D2E) : Colors.white,
         foregroundColor: isDark ? Colors.grey.shade100 : Colors.black87,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     ),
 

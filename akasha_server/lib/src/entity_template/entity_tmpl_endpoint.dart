@@ -61,8 +61,7 @@ class EntityTmplEndpoint extends Endpoint {
       }
 
       session.log(
-        'DB error while creating entity template: '
-        'code=${e.code}, constraint=${e.constraintName}, '
+        'DB error while creating entity template: code=${e.code}, constraint=${e.constraintName}, '
         'detail=${e.detail}, message=${e.message}',
         level: LogLevel.error,
       );
@@ -80,20 +79,34 @@ class EntityTmplEndpoint extends Endpoint {
   Future<EntityTmplApiResponse> update(Session session, EntityTmpl data) async {
     try {
       session.log('Updating entity template with id ${data.id}', level: LogLevel.info);
+      // Update the item first.
       final updated = await EntityTmpl.db.updateRow(session, data);
-
-      return EntityTmplApiResponse(
-        success: true,
-        data: updated,
+      // Then update the attributes, by removing existing ones and inserting the new ones.
+      await EntityTmplAttribute.db.deleteWhere(
+        session,
+        where: (t) => t.entityTmplId.equals(data.id!),
       );
+      if (data.attributes != null) {
+        for (final attr in data.attributes!) {
+          await EntityTmplAttribute.db.insertRow(
+            session,
+            EntityTmplAttribute(
+              entityTmplId: data.id!,
+              attributeTmplId: attr.attributeTmplId,
+              orderIdx: attr.orderIdx,
+            ),
+          );
+        }
+      }
+
+      return EntityTmplApiResponse(success: true, data: updated);
     } on DatabaseQueryException catch (e) {
       if (e.code == PgErrorCode.uniqueViolation && e.constraintName == 'entity_tmpl_name_desc_uniq_idx') {
         return alreadyExistsResponse();
       }
 
       session.log(
-        'DB error while updating entity template: '
-        'code=${e.code}, constraint=${e.constraintName}, '
+        'DB error while updating entity template: code=${e.code}, constraint=${e.constraintName}, '
         'detail=${e.detail}, message=${e.message}',
         level: LogLevel.error,
       );

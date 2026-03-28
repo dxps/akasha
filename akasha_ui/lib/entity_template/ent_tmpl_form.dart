@@ -50,6 +50,17 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     }
   }
 
+  void _onReorderAttributes(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+
+      final item = includedAttributeTmpls.removeAt(oldIndex);
+      includedAttributeTmpls.insert(newIndex, item);
+    });
+  }
+
   void _addSelectedAttributeTmpl() {
     final attr = selectedAttributeTmpl;
     if (attr == null) return;
@@ -169,9 +180,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                 TextFormField(
                   controller: descriptionController,
                   readOnly: _isReadOnly,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Description'),
                   maxLines: 1,
                   minLines: 1,
                 ),
@@ -195,11 +204,10 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                         availableAttributeTmpls: availableAttributeTmpls,
                         includedAttributeTmpls: includedAttributeTmpls,
                         selectedAttributeTmpl: selectedAttributeTmpl,
-                        onSelectedAttributeChanged: (value) {
-                          setState(() => selectedAttributeTmpl = value);
-                        },
+                        onSelectedAttributeChanged: (value) => setState(() => selectedAttributeTmpl = value),
                         onAddAttribute: _addSelectedAttributeTmpl,
                         onRemoveAttribute: _removeIncludedAttributeTmpl,
+                        onReorderAttributes: _onReorderAttributes,
                       ),
                       const _LinksTab(),
                     ],
@@ -238,14 +246,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
 }
 
 class _AttributesTab extends StatelessWidget {
-  final bool readOnly;
-  final List<AttributeTmpl> availableAttributeTmpls;
-  final List<AttributeTmpl> includedAttributeTmpls;
-  final AttributeTmpl? selectedAttributeTmpl;
-  final ValueChanged<AttributeTmpl?> onSelectedAttributeChanged;
-  final VoidCallback onAddAttribute;
-  final ValueChanged<AttributeTmpl> onRemoveAttribute;
-
   const _AttributesTab({
     required this.readOnly,
     required this.availableAttributeTmpls,
@@ -254,34 +254,80 @@ class _AttributesTab extends StatelessWidget {
     required this.onSelectedAttributeChanged,
     required this.onAddAttribute,
     required this.onRemoveAttribute,
+    required this.onReorderAttributes,
   });
+
+  final bool readOnly;
+  final List<AttributeTmpl> availableAttributeTmpls;
+  final List<AttributeTmpl> includedAttributeTmpls;
+  final AttributeTmpl? selectedAttributeTmpl;
+  final ValueChanged<AttributeTmpl?> onSelectedAttributeChanged;
+  final VoidCallback onAddAttribute;
+  final ValueChanged<AttributeTmpl> onRemoveAttribute;
+  final void Function(int oldIndex, int newIndex) onReorderAttributes;
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     return Column(
       children: [
         Expanded(
           child: includedAttributeTmpls.isEmpty
-              ? const Center(
-                  child: Text('No included attribute templates'),
+              ? Center(
+                  child: Text(
+                    'No attribute templates included',
+                    style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                  ),
                 )
-              : ListView.separated(
+              : readOnly
+              ? ListView.separated(
                   itemCount: includedAttributeTmpls.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 0),
                   itemBuilder: (context, index) {
                     final attr = includedAttributeTmpls[index];
                     return ListTile(
+                      key: ValueKey(attr.id),
                       dense: true,
+                      minTileHeight: 40,
+                      minVerticalPadding: 4,
+                      visualDensity: VisualDensity.compact,
                       contentPadding: EdgeInsets.zero,
                       title: Text(attr.name),
-                      subtitle: attr.description == null ? null : Text(attr.description!),
-                      trailing: readOnly
-                          ? null
-                          : IconButton(
-                              onPressed: () => onRemoveAttribute(attr),
-                              icon: const Icon(Icons.remove),
-                              tooltip: 'Remove',
-                            ),
+                      subtitle: Text(
+                        attr.description == null || attr.description!.isEmpty ? '-' : attr.description!,
+                        style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                      ),
+                    );
+                  },
+                )
+              : ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
+                  itemCount: includedAttributeTmpls.length,
+                  onReorder: onReorderAttributes,
+                  itemBuilder: (context, index) {
+                    final attr = includedAttributeTmpls[index];
+                    return ReorderableDragStartListener(
+                      key: ValueKey(attr.id), // must be stable and unique
+                      index: index,
+                      child: ListTile(
+                        mouseCursor: SystemMouseCursors.resizeUpDown,
+                        dense: true,
+                        minTileHeight: 40,
+                        minVerticalPadding: 4,
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(attr.name),
+                        subtitle: Text(
+                          attr.description == null || attr.description!.isEmpty ? '-' : attr.description!,
+                          style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                        ),
+                        trailing: IconButton(
+                          onPressed: () => onRemoveAttribute(attr),
+                          icon: const Icon(Icons.remove, size: 14),
+                          visualDensity: VisualDensity.compact,
+                          tooltip: 'Remove',
+                        ),
+                      ),
                     );
                   },
                 ),
