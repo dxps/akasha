@@ -14,7 +14,7 @@ fields:
     outgoingLinks: List<EntityTmplLink>?, relation(name=entity_tmpl_outgoing_links)
 
     ### Optional reverse traversal: links where this entity template is a target.
-    incomingLink: List<EntityTmplLink>?, relation(name=entity_tmpl_incoming_links)
+    incomingLinks: List<EntityTmplLink>?, relation(name=entity_tmpl_incoming_links)
 
 indexes:
     entity_tmpl_name_desc_uniq_idx:

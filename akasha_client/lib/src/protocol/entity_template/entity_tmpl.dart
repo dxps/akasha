@@ -22,7 +22,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
     this.description,
     this.attributes,
     this.outgoingLinks,
-    this.incomingLink,
+    this.incomingLinks,
   });
 
   factory EntityTmpl({
@@ -31,7 +31,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
     String? description,
     List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLink,
+    List<_i3.EntityTmplLink>? incomingLinks,
   }) = _EntityTmplImpl;
 
   factory EntityTmpl.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -51,10 +51,10 @@ abstract class EntityTmpl implements _i1.SerializableModel {
           : _i4.Protocol().deserialize<List<_i3.EntityTmplLink>>(
               jsonSerialization['outgoingLinks'],
             ),
-      incomingLink: jsonSerialization['incomingLink'] == null
+      incomingLinks: jsonSerialization['incomingLinks'] == null
           ? null
           : _i4.Protocol().deserialize<List<_i3.EntityTmplLink>>(
-              jsonSerialization['incomingLink'],
+              jsonSerialization['incomingLinks'],
             ),
     );
   }
@@ -72,7 +72,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
   List<_i3.EntityTmplLink>? outgoingLinks;
 
   /// Optional reverse traversal: links where this entity template is a target.
-  List<_i3.EntityTmplLink>? incomingLink;
+  List<_i3.EntityTmplLink>? incomingLinks;
 
   /// Returns a shallow copy of this [EntityTmpl]
   /// with some or all fields replaced by the given arguments.
@@ -83,7 +83,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
     String? description,
     List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLink,
+    List<_i3.EntityTmplLink>? incomingLinks,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -96,8 +96,8 @@ abstract class EntityTmpl implements _i1.SerializableModel {
         'attributes': attributes?.toJson(valueToJson: (v) => v.toJson()),
       if (outgoingLinks != null)
         'outgoingLinks': outgoingLinks?.toJson(valueToJson: (v) => v.toJson()),
-      if (incomingLink != null)
-        'incomingLink': incomingLink?.toJson(valueToJson: (v) => v.toJson()),
+      if (incomingLinks != null)
+        'incomingLinks': incomingLinks?.toJson(valueToJson: (v) => v.toJson()),
     };
   }
 
@@ -116,14 +116,14 @@ class _EntityTmplImpl extends EntityTmpl {
     String? description,
     List<_i2.EntityTmplAttribute>? attributes,
     List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLink,
+    List<_i3.EntityTmplLink>? incomingLinks,
   }) : super._(
          id: id,
          name: name,
          description: description,
          attributes: attributes,
          outgoingLinks: outgoingLinks,
-         incomingLink: incomingLink,
+         incomingLinks: incomingLinks,
        );
 
   /// Returns a shallow copy of this [EntityTmpl]
@@ -136,7 +136,7 @@ class _EntityTmplImpl extends EntityTmpl {
     Object? description = _Undefined,
     Object? attributes = _Undefined,
     Object? outgoingLinks = _Undefined,
-    Object? incomingLink = _Undefined,
+    Object? incomingLinks = _Undefined,
   }) {
     return EntityTmpl(
       id: id is _i1.UuidValue? ? id : this.id,
@@ -148,9 +148,9 @@ class _EntityTmplImpl extends EntityTmpl {
       outgoingLinks: outgoingLinks is List<_i3.EntityTmplLink>?
           ? outgoingLinks
           : this.outgoingLinks?.map((e0) => e0.copyWith()).toList(),
-      incomingLink: incomingLink is List<_i3.EntityTmplLink>?
-          ? incomingLink
-          : this.incomingLink?.map((e0) => e0.copyWith()).toList(),
+      incomingLinks: incomingLinks is List<_i3.EntityTmplLink>?
+          ? incomingLinks
+          : this.incomingLinks?.map((e0) => e0.copyWith()).toList(),
     );
   }
 }

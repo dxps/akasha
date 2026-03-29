@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class EntityTmplForm extends StatefulWidget {
+  //
   final EntityTmpl? item;
   final Future<void> Function(EntityTmpl)? onSave;
   final VoidCallback? onRequestEdit;
@@ -28,9 +29,28 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   List<AttributeTmpl> includedAttributeTmpls = [];
   AttributeTmpl? selectedAttributeTmpl;
 
+  List<EntityTmpl> entityTmpls = [];
+  List<EntityTmpl> includedEntityTmpls = [];
+  EntityTmpl? selectedEntityTmpl;
+  UuidValue? selectedLinkId;
+  late final TextEditingController linkNameCtrl;
+  late final TextEditingController linkDescCtrl;
+
   bool _isSaving = false;
   bool get _isEdit => widget.item != null;
   bool get _isReadOnly => widget.readOnly;
+
+  // ------------------------
+  // attributes related logic
+
+  Future<void> _fetchAttributeTmpls() async {
+    try {
+      final entries = await client.attrTmpls.readAll();
+      setState(() => attributeTmpls = entries);
+    } catch (e) {
+      debugPrint('>>> Failed to fetch attribute templates: $e');
+    }
+  }
 
   List<AttributeTmpl> get availableAttributeTmpls {
     final includedIds = includedAttributeTmpls.map((e) => e.id).whereType<UuidValue>().toSet();
@@ -39,26 +59,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
       if (id == null) return true;
       return !includedIds.contains(id);
     }).toList();
-  }
-
-  Future<void> _fetchAttributeTmpls() async {
-    try {
-      final entries = await client.attrTmpls.readAll();
-      setState(() => attributeTmpls = entries);
-    } catch (e) {
-      debugPrint('Failed to fetch attribute templates: $e');
-    }
-  }
-
-  void _onReorderAttributes(int oldIndex, int newIndex) {
-    setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-
-      final item = includedAttributeTmpls.removeAt(oldIndex);
-      includedAttributeTmpls.insert(newIndex, item);
-    });
   }
 
   void _addSelectedAttributeTmpl() {
@@ -80,11 +80,86 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     });
   }
 
+  void _onReorderAttributes(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+
+      final item = includedAttributeTmpls.removeAt(oldIndex);
+      includedAttributeTmpls.insert(newIndex, item);
+    });
+  }
+
+  // -----------------------
+  // links related logic
+
+  Future<void> _fetchEntityTmpls() async {
+    try {
+      final entries = await client.entityTmpl.readAll();
+      setState(() => entityTmpls = entries);
+    } catch (e) {
+      debugPrint('>>> Failed to fetch entity templates: $e');
+    }
+  }
+
+  void _addSelectedLinkAsOutgoing() {
+    final linkId = selectedLinkId;
+    if (linkId == null) return;
+
+    final alreadyIncluded = widget.item?.outgoingLinks?.any((e) => e.id == linkId) ?? false;
+    if (alreadyIncluded) return;
+
+    setState(() {
+      // TODO
+      widget.item?.outgoingLinks?.add(
+        EntityTmplLink(
+          id: linkId,
+          targetId: linkId,
+          name: linkNameCtrl.text.trim(),
+          description: linkDescCtrl.text.trim(),
+          orderIdx: 0,
+          sourceId: widget.item?.id ?? zeroUuid,
+        ),
+      );
+      selectedLinkId = null;
+      linkNameCtrl.clear();
+      linkDescCtrl.clear();
+    });
+  }
+
+  void _removeIncludedOutgoingLink(UuidValue linkId) {
+    setState(() {
+      widget.item?.outgoingLinks?.removeWhere((e) => e.id == linkId);
+    });
+  }
+
+  void _onReorderOutgoingLinks(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+
+      final item = widget.item?.outgoingLinks?.removeAt(oldIndex);
+      if (item != null) {
+        widget.item?.outgoingLinks?.insert(newIndex, item);
+      }
+    });
+  }
+
+  // -------------------
+  // lifecycle and build
+
   @override
   void initState() {
     super.initState();
+
     nameController = TextEditingController(text: widget.item?.name ?? '');
     descriptionController = TextEditingController(text: widget.item?.description ?? '');
+
+    linkNameCtrl = TextEditingController();
+    linkDescCtrl = TextEditingController();
+
     includedAttributeTmpls = [...?widget.item?.attributes?.map((link) => link.attributeTmpl)].whereType<AttributeTmpl>().toList();
     _fetchAttributeTmpls().then(
       (_) {
@@ -99,12 +174,15 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
         }
       },
     );
+    _fetchEntityTmpls();
   }
 
   @override
   void dispose() {
     nameController.dispose();
     descriptionController.dispose();
+    linkNameCtrl.dispose();
+    linkDescCtrl.dispose();
     super.dispose();
   }
 
@@ -209,7 +287,23 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                         onRemoveAttribute: _removeIncludedAttributeTmpl,
                         onReorderAttributes: _onReorderAttributes,
                       ),
-                      const _LinksTab(),
+                      _LinksTab(
+                        formKey: formKey,
+                        readOnly: _isReadOnly,
+                        outgoingLinks: widget.item?.outgoingLinks ?? [],
+                        incomingLinks: widget.item?.incomingLinks ?? [],
+                        entityTmpls: entityTmpls,
+                        linkNameCtrl: linkNameCtrl,
+                        linkDescCtrl: linkDescCtrl,
+                        selectedLinkId: selectedLinkId,
+                        onSelectedLinkChanged: (linkId) {
+                          debugPrint('>>> Selected link changed: linkId=$linkId.');
+                          setState(() => selectedLinkId = linkId);
+                        },
+                        onAddLink: _addSelectedLinkAsOutgoing,
+                        onRemoveLink: _removeIncludedOutgoingLink,
+                        onReorderLinks: _onReorderOutgoingLinks,
+                      ),
                     ],
                   ),
                 ),
@@ -244,6 +338,10 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     );
   }
 }
+
+// --------------
+// Attributes tab
+// --------------
 
 class _AttributesTab extends StatelessWidget {
   const _AttributesTab({
@@ -369,13 +467,178 @@ class _AttributesTab extends StatelessWidget {
   }
 }
 
+// ---------
+// Links tab
+// ---------
+
 class _LinksTab extends StatelessWidget {
-  const _LinksTab();
+  const _LinksTab({
+    required this.formKey,
+    required this.readOnly,
+    required this.entityTmpls,
+    required this.outgoingLinks,
+    required this.incomingLinks,
+    required this.selectedLinkId,
+    required this.linkNameCtrl,
+    required this.linkDescCtrl,
+    required this.onSelectedLinkChanged,
+    required this.onAddLink,
+    required this.onRemoveLink,
+    required this.onReorderLinks,
+  });
+
+  final GlobalKey<FormState> formKey;
+  final bool readOnly;
+  final List<EntityTmpl> entityTmpls;
+  final List<EntityTmplLink> outgoingLinks;
+  final List<EntityTmplLink> incomingLinks;
+  final UuidValue? selectedLinkId;
+  final TextEditingController linkNameCtrl;
+  final TextEditingController linkDescCtrl;
+  final ValueChanged<UuidValue?> onSelectedLinkChanged;
+  final VoidCallback onAddLink;
+  final ValueChanged<UuidValue> onRemoveLink;
+  final void Function(int oldIndex, int newIndex) onReorderLinks;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Links tab content'),
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+    return Column(
+      children: [
+        Expanded(
+          child: outgoingLinks.isEmpty && incomingLinks.isEmpty
+              ? Center(
+                  child: Text(
+                    'No links',
+                    style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                  ),
+                )
+              : readOnly
+              ? ListView(
+                  children: [
+                    if (outgoingLinks.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        child: Text('Outgoing Links', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      ...outgoingLinks.map(
+                        (link) => ListTile(
+                          title: Text(link.target?.name ?? 'Unknown'),
+                          subtitle: Text(
+                            'outgoing',
+                            style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (incomingLinks.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        child: Text('Incoming Links', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      ...incomingLinks.map(
+                        (link) => ListTile(
+                          title: Text(link.source?.name ?? 'Unknown'),
+                          subtitle: Text(
+                            'incoming',
+                            style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                )
+              : ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
+                  itemCount: outgoingLinks.length,
+                  onReorder: onReorderLinks,
+                  itemBuilder: (context, index) {
+                    final link = outgoingLinks[index];
+                    return ReorderableDragStartListener(
+                      key: ValueKey(link.id), // must be stable and unique
+                      index: index,
+                      child: ListTile(
+                        mouseCursor: SystemMouseCursors.resizeUpDown,
+                        title: Text(link.target?.name ?? 'Unknown'),
+                        subtitle: Text(
+                          'outgoing',
+                          style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                        ),
+                        trailing: IconButton(
+                          onPressed: () => onRemoveLink(link.id ?? zeroUuid),
+                          icon: const Icon(Icons.remove, size: 14),
+                          visualDensity: VisualDensity.compact,
+                          tooltip: 'Remove',
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        if (!readOnly) ...[
+          TextFormField(
+            controller: linkNameCtrl,
+            readOnly: readOnly,
+            decoration: InputDecoration(
+              labelText: readOnly ? 'Name' : 'Name *',
+              hintText: readOnly ? null : 'Required',
+            ),
+            validator: readOnly
+                ? null
+                : (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Name is required';
+                    }
+                    return null;
+                  },
+            onChanged: readOnly ? null : (_) => formKey.currentState?.validate(),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: linkDescCtrl,
+            readOnly: readOnly,
+            decoration: const InputDecoration(labelText: 'Description'),
+            maxLines: 1,
+            minLines: 1,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<UuidValue>(
+                  initialValue: selectedLinkId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Add outgoing link',
+                    hintText: 'Pick one',
+                  ),
+                  items: entityTmpls.map(
+                    (ent) {
+                      debugPrint('>>> Mapping entity tmpl w/ id=${ent.id} name=${ent.name} to dropdown item.');
+                      return DropdownMenuItem<UuidValue>(
+                        value: ent.id ?? zeroUuid,
+                        child: Text(ent.name),
+                      );
+                    },
+                  ).toList(),
+                  onChanged: entityTmpls.isEmpty
+                      ? null
+                      : (targetId) {
+                          if (targetId == null) return;
+                          debugPrint('>>> Selected link changed: targetId=$targetId.');
+                          onSelectedLinkChanged(targetId);
+                        },
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            onPressed: selectedLinkId == null ? null : onAddLink,
+            icon: const Icon(Icons.add),
+            tooltip: 'Add link',
+          ),
+          const SizedBox(height: 12),
+        ],
+      ],
     );
   }
 }
