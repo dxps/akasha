@@ -30,7 +30,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   AttributeTmpl? selectedAttributeTmpl;
 
   List<EntityTmpl> entityTmpls = [];
-  List<EntityTmpl> includedEntityTmpls = [];
+  List<EntityTmplLink> includedOutLinks = [];
   EntityTmpl? selectedEntityTmpl;
   UuidValue? selectedLinkId;
   late final TextEditingController linkNameCtrl;
@@ -103,7 +103,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     }
   }
 
-  void _addSelectedLinkAsOutgoing() {
+  void _addSelectedOutLink() {
     final linkId = selectedLinkId;
     if (linkId == null) return;
 
@@ -111,8 +111,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     if (alreadyIncluded) return;
 
     setState(() {
-      // TODO
-      widget.item?.outgoingLinks?.add(
+      includedOutLinks.add(
         EntityTmplLink(
           id: linkId,
           targetId: linkId,
@@ -130,7 +129,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
 
   void _removeIncludedOutgoingLink(UuidValue linkId) {
     setState(() {
-      widget.item?.outgoingLinks?.removeWhere((e) => e.id == linkId);
+      includedOutLinks.removeWhere((e) => e.id == linkId);
     });
   }
 
@@ -139,11 +138,8 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
       if (newIndex > oldIndex) {
         newIndex -= 1;
       }
-
-      final item = widget.item?.outgoingLinks?.removeAt(oldIndex);
-      if (item != null) {
-        widget.item?.outgoingLinks?.insert(newIndex, item);
-      }
+      final item = includedOutLinks.removeAt(oldIndex);
+      includedOutLinks.insert(newIndex, item);
     });
   }
 
@@ -175,6 +171,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
       },
     );
     _fetchEntityTmpls();
+    includedOutLinks = [...?widget.item?.outgoingLinks];
   }
 
   @override
@@ -290,7 +287,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                       _LinksTab(
                         formKey: formKey,
                         readOnly: _isReadOnly,
-                        outgoingLinks: widget.item?.outgoingLinks ?? [],
+                        outgoingLinks: includedOutLinks,
                         incomingLinks: widget.item?.incomingLinks ?? [],
                         entityTmpls: entityTmpls,
                         linkNameCtrl: linkNameCtrl,
@@ -300,7 +297,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                           debugPrint('>>> Selected link changed: linkId=$linkId.');
                           setState(() => selectedLinkId = linkId);
                         },
-                        onAddLink: _addSelectedLinkAsOutgoing,
+                        onAddOutLink: _addSelectedOutLink,
                         onRemoveLink: _removeIncludedOutgoingLink,
                         onReorderLinks: _onReorderOutgoingLinks,
                       ),
@@ -482,7 +479,7 @@ class _LinksTab extends StatelessWidget {
     required this.linkNameCtrl,
     required this.linkDescCtrl,
     required this.onSelectedLinkChanged,
-    required this.onAddLink,
+    required this.onAddOutLink,
     required this.onRemoveLink,
     required this.onReorderLinks,
   });
@@ -496,7 +493,7 @@ class _LinksTab extends StatelessWidget {
   final TextEditingController linkNameCtrl;
   final TextEditingController linkDescCtrl;
   final ValueChanged<UuidValue?> onSelectedLinkChanged;
-  final VoidCallback onAddLink;
+  final VoidCallback onAddOutLink;
   final ValueChanged<UuidValue> onRemoveLink;
   final void Function(int oldIndex, int newIndex) onReorderLinks;
 
@@ -522,13 +519,17 @@ class _LinksTab extends StatelessWidget {
                         child: Text('Outgoing Links', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       ...outgoingLinks.map(
-                        (link) => ListTile(
-                          title: Text(link.target?.name ?? 'Unknown'),
-                          subtitle: Text(
-                            'outgoing',
-                            style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                          ),
-                        ),
+                        (link) {
+                          debugPrint('>>> out link: $link');
+                          final title = link.name;
+                          return ListTile(
+                            title: Text(title),
+                            subtitle: Text(
+                              link.description ?? '',
+                              style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                            ),
+                          );
+                        },
                       ),
                     ],
                     if (incomingLinks.isNotEmpty) ...[
@@ -537,13 +538,16 @@ class _LinksTab extends StatelessWidget {
                         child: Text('Incoming Links', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       ...incomingLinks.map(
-                        (link) => ListTile(
-                          title: Text(link.source?.name ?? 'Unknown'),
-                          subtitle: Text(
-                            'incoming',
-                            style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                          ),
-                        ),
+                        (link) {
+                          final title = '${link.source?.name ?? 'Unknown'} -> ${link.name}';
+                          return ListTile(
+                            title: Text(title),
+                            subtitle: Text(
+                              link.description ?? '',
+                              style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ],
@@ -554,14 +558,16 @@ class _LinksTab extends StatelessWidget {
                   onReorder: onReorderLinks,
                   itemBuilder: (context, index) {
                     final link = outgoingLinks[index];
+                    final linkLabel =
+                        '${link.name} -> ${entityTmpls.firstWhere((ent) => ent.id == link.targetId, orElse: () => EntityTmpl(name: 'Unknown')).name}';
                     return ReorderableDragStartListener(
                       key: ValueKey(link.id), // must be stable and unique
                       index: index,
                       child: ListTile(
                         mouseCursor: SystemMouseCursors.resizeUpDown,
-                        title: Text(link.target?.name ?? 'Unknown'),
+                        title: Text(linkLabel),
                         subtitle: Text(
-                          'outgoing',
+                          link.description ?? '',
                           style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
                         ),
                         trailing: IconButton(
@@ -591,7 +597,7 @@ class _LinksTab extends StatelessWidget {
                     }
                     return null;
                   },
-            onChanged: readOnly ? null : (_) => formKey.currentState?.validate(),
+            onChanged: readOnly ? null : (_) => linkNameCtrl.text.trim().isEmpty,
           ),
           const SizedBox(height: 12),
           TextFormField(
@@ -608,8 +614,8 @@ class _LinksTab extends StatelessWidget {
                   initialValue: selectedLinkId,
                   isExpanded: true,
                   decoration: const InputDecoration(
-                    labelText: 'Add outgoing link',
-                    hintText: 'Pick one',
+                    labelText: 'Add target',
+                    hintText: 'Pick an entity template',
                   ),
                   items: entityTmpls.map(
                     (ent) {
@@ -629,13 +635,14 @@ class _LinksTab extends StatelessWidget {
                         },
                 ),
               ),
+              IconButton(
+                onPressed: selectedLinkId == null ? null : onAddOutLink,
+                icon: const Icon(Icons.add, size: 16),
+                tooltip: 'Add link',
+              ),
             ],
           ),
-          IconButton(
-            onPressed: selectedLinkId == null ? null : onAddLink,
-            icon: const Icon(Icons.add),
-            tooltip: 'Add link',
-          ),
+
           const SizedBox(height: 12),
         ],
       ],
