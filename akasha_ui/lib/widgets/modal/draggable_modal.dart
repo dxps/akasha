@@ -121,8 +121,7 @@ class _DraggableModalState extends State<DraggableModal> {
                       child: Row(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(left: 6, right: 4),
-                            child: Icon(Icons.drag_indicator, size: 15, color: isDarkMode ? darkFgColor : Colors.grey),
+                            padding: const EdgeInsets.only(left: 14),
                           ),
                           Expanded(
                             child: Text(
@@ -140,7 +139,7 @@ class _DraggableModalState extends State<DraggableModal> {
                               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                               visualDensity: VisualDensity.compact,
                               style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                              icon: Icon(Icons.close, size: 18, color: isDarkMode ? darkFgColor : Colors.grey),
+                              icon: Icon(Icons.close, size: 18, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
                             ),
                           ),
                         ],

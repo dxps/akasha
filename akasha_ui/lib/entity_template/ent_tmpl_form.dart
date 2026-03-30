@@ -26,7 +26,8 @@ class EntityTmplForm extends StatefulWidget {
 
 class _EntityTmplFormState extends State<EntityTmplForm> {
   final formKey = GlobalKey<FormState>();
-  late final TextEditingController nameController;
+  final nameFieldKey = GlobalKey<FormFieldState<String>>();
+  late final TextEditingController nameCtrl;
   late final TextEditingController descriptionController;
 
   List<AttributeTmpl> attributeTmpls = [];
@@ -154,7 +155,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   void initState() {
     super.initState();
 
-    nameController = TextEditingController(text: widget.item?.name ?? '');
+    nameCtrl = TextEditingController(text: widget.item?.name ?? '');
     descriptionController = TextEditingController(text: widget.item?.description ?? '');
 
     linkNameCtrl = TextEditingController();
@@ -180,7 +181,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
 
   @override
   void dispose() {
-    nameController.dispose();
+    nameCtrl.dispose();
     descriptionController.dispose();
     linkNameCtrl.dispose();
     linkDescCtrl.dispose();
@@ -195,12 +196,12 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     // We don't do the whole form validation, since in the Links tab, the name is empty most of the time.
     // if (!formKey.currentState!.validate()) { return; }
 
-    if (nameController.text.trim().isEmpty) {
-      showErrorSnackbar(context, 'Name is required.');
+    if (nameCtrl.text.trim().isEmpty) {
+      nameFieldKey.currentState?.validate();
       return;
     }
     if (includedAttributeTmpls.isEmpty) {
-      showErrorSnackbar(context, 'At least one attribute template must be included.');
+      showErrorSnackbar(context, 'An entity template must have at least one attribute template.');
       return;
     }
 
@@ -210,7 +211,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
       int orderIdx = -1;
       final entityTmpl = EntityTmpl(
         id: widget.item?.id,
-        name: nameController.text.trim(),
+        name: nameCtrl.text.trim(),
         description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
         attributes: includedAttributeTmpls
             .map(
@@ -246,7 +247,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
-
     return DefaultTabController(
       length: 2,
       child: Form(
@@ -259,7 +259,8 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  controller: nameController,
+                  key: nameFieldKey,
+                  controller: nameCtrl,
                   readOnly: _isReadOnly,
                   decoration: InputDecoration(
                     labelText: _isReadOnly ? 'Name' : 'Name *',
@@ -273,7 +274,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                           }
                           return null;
                         },
-                  onChanged: _isReadOnly ? null : (_) => formKey.currentState?.validate(),
+                  onChanged: _isReadOnly ? null : (_) => nameFieldKey.currentState?.validate(),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(

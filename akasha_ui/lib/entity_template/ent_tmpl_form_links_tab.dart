@@ -96,7 +96,7 @@ class _LinksTab extends StatelessWidget {
                   itemCount: outgoingLinks.length,
                   onReorder: onReorderLinks,
                   header: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 2),
+                    padding: EdgeInsets.only(top: 10, bottom: 6),
                     child: Text(
                       'Outgoing Links',
                       style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor, fontSize: 13),
@@ -107,15 +107,13 @@ class _LinksTab extends StatelessWidget {
                     final linkLabel =
                         '${link.name} -> ${entityTmpls.firstWhere((ent) => ent.id == link.targetId, orElse: () => EntityTmpl(name: 'Unknown')).name}';
                     return ReorderableDragStartListener(
-                      key: ValueKey(link.id), // must be stable and unique
+                      key: ValueKey(link.id),
                       index: index,
                       child: ListTile(
                         mouseCursor: SystemMouseCursors.resizeUpDown,
+                        leading: Text('•'),
                         title: Text(linkLabel),
-                        subtitle: Text(
-                          link.description ?? '-',
-                          style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                        ),
+                        subtitle: link.description != null && link.description!.isNotEmpty ? Text(link.description!) : null,
                         trailing: IconButton(
                           onPressed: () => onRemoveLink(link.id ?? zeroUuid),
                           icon: const Icon(Icons.remove, size: 14),

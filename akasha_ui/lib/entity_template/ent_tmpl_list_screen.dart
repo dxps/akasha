@@ -196,10 +196,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     final offset =
         initialOffset ??
         (viewportSize != null
-            ? Offset(
-                (viewportSize.width - modalSize.width) / 2,
-                (viewportSize.height - modalSize.height) / 2,
-              )
+            ? Offset((viewportSize.width - modalSize.width) / 2, (viewportSize.height - modalSize.height) / 2)
             : const Offset(24, 80));
 
     _addModal(
@@ -208,8 +205,8 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
       title: readOnly
           ? 'Entity Template'
           : isEdit
-          ? 'Edit Entity Template'
-          : 'New Entity Template',
+          ? 'Entity Template :: Edit'
+          : 'Entity Template :: New',
       offset: offset,
       size: modalSize,
       child: EntityTmplForm(
@@ -245,10 +242,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
                 await _getEntries();
               } else if (!response.success) {
                 if (!mounted) return;
-                showErrorSnackbar(
-                  context,
-                  response.errorMessage ?? 'Failed to save entity template: ${response.errorCode}',
-                );
+                showErrorSnackbar(context, response.errorMessage ?? 'Failed to save entity template: ${response.errorCode}');
               }
               return;
             }
@@ -260,10 +254,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
               await _getEntries();
             } else if (!response.success) {
               if (!mounted) return;
-              showErrorSnackbar(
-                context,
-                response.errorMessage ?? 'Failed to create entity template: ${response.errorCode}',
-              );
+              showErrorSnackbar(context, response.errorMessage ?? 'Failed to create entity template: ${response.errorCode}');
             }
           } catch (e) {
             debugPrint('Failed to save entity template: $e.');
