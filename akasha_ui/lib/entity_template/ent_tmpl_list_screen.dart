@@ -320,7 +320,7 @@ mixin _ModalHelpers on State<EntityTemplatesScreen> {
     required EntityTmplForm child,
   }) {
     for (final modal in modals) {
-      if ((modal.child as EntityTmplForm).item == child.item) {
+      if ((modal.child as EntityTmplForm).item?.id == child.item?.id) {
         debugPrint('That (entity template) modal is already open.');
         return;
       }
