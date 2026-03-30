@@ -149,10 +149,14 @@ ThemeData initThemeData(Brightness brightness) {
     ),
 
     listTileTheme: ListTileThemeData(
-      titleTextStyle: TextStyle(
-        fontSize: 14,
-        color: isDark ? Colors.grey.shade100 : Colors.black87,
-      ),
+      dense: true,
+      minTileHeight: 16,
+      minVerticalPadding: 2,
+      minLeadingWidth: 0,
+      visualDensity: VisualDensity.compact,
+      contentPadding: EdgeInsets.zero,
+      titleTextStyle: TextStyle(fontSize: 18, color: isDark ? Colors.grey.shade100 : Colors.black87),
+      subtitleTextStyle: TextStyle(fontSize: 13, color: isDark ? darkFgFadedColor : lightFgFadedColor, fontStyle: FontStyle.italic),
     ),
 
     menuButtonTheme: MenuButtonThemeData(
@@ -193,26 +197,11 @@ ThemeData initThemeData(Brightness brightness) {
     ),
 
     textTheme: base.textTheme.copyWith(
-      bodyLarge: TextStyle(
-        fontSize: 15,
-        color: isDark ? Colors.grey.shade100 : Colors.black87,
-      ),
-      bodyMedium: TextStyle(
-        fontSize: 14,
-        color: isDark ? Colors.grey.shade100 : Colors.black87,
-      ),
-      titleMedium: TextStyle(
-        fontSize: 14,
-        color: isDark ? Colors.grey.shade100 : Colors.black87,
-      ),
-      labelLarge: TextStyle(
-        fontSize: 14,
-        color: isDark ? Colors.grey.shade100 : Colors.black87,
-      ),
-      labelMedium: TextStyle(
-        fontSize: 14,
-        color: isDark ? Colors.grey.shade100 : Colors.black87,
-      ),
+      bodyLarge: TextStyle(fontSize: 15, color: isDark ? Colors.grey.shade100 : Colors.black87),
+      bodyMedium: TextStyle(fontSize: 14, color: isDark ? Colors.grey.shade100 : Colors.black87),
+      titleMedium: TextStyle(fontSize: 14, color: isDark ? Colors.grey.shade100 : Colors.black87),
+      labelLarge: TextStyle(fontSize: 14, color: isDark ? Colors.grey.shade100 : Colors.black87),
+      labelMedium: TextStyle(fontSize: 14, color: isDark ? Colors.grey.shade100 : Colors.black87),
     ),
   );
 }

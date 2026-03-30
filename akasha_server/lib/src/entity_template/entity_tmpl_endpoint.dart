@@ -5,7 +5,10 @@ class EntityTmplEndpoint extends Endpoint {
   //
   Future<EntityTmpl?> read(Session session, UuidValue id) async {
     final item = await EntityTmpl.db.findById(session, id);
-    session.log('Got entity template: $item');
+    if (item == null) {
+      return null;
+    }
+
     await EntityTmplAttribute.db
         .find(
           session,
@@ -13,19 +16,38 @@ class EntityTmplEndpoint extends Endpoint {
           orderBy: (t) => t.orderIdx,
         )
         .then((attributes) {
-          item?.attributes = attributes;
+          item.attributes = attributes;
         });
-    if (item != null) {
-      await EntityTmplAttribute.db
-          .find(
-            session,
-            where: (t) => t.entityTmplId.equals(id),
-            orderBy: (t) => t.orderIdx,
-          )
-          .then((attributes) {
-            item.attributes = attributes;
-          });
-    }
+
+    await EntityTmplAttribute.db
+        .find(
+          session,
+          where: (t) => t.entityTmplId.equals(id),
+          orderBy: (t) => t.orderIdx,
+        )
+        .then((attributes) {
+          item.attributes = attributes;
+        });
+    await EntityTmplLink.db
+        .find(
+          session,
+          where: (t) => t.sourceId.equals(id),
+          orderBy: (t) => t.orderIdx,
+        )
+        .then((links) {
+          item.outgoingLinks = links;
+        });
+    await EntityTmplLink.db
+        .find(
+          session,
+          where: (t) => t.targetId.equals(id),
+          orderBy: (t) => t.orderIdx,
+        )
+        .then((links) {
+          item.incomingLinks = links;
+        });
+
+    session.log('>>> Read entity template: $item');
     return item;
   }
 
@@ -36,13 +58,13 @@ class EntityTmplEndpoint extends Endpoint {
     );
   }
 
-  Future<EntityTmplApiResponse> create(Session session, EntityTmpl data) async {
+  Future<EntityTmplApiResponse> create(Session session, EntityTmpl item) async {
     try {
       // Persist the item first.
-      final created = await EntityTmpl.db.insertRow(session, data);
+      final created = await EntityTmpl.db.insertRow(session, item);
       // Then persist the attributes, if any.
-      if (data.attributes != null) {
-        for (final attr in data.attributes!) {
+      if (item.attributes != null) {
+        for (final attr in item.attributes!) {
           await EntityTmplAttribute.db.insertRow(
             session,
             EntityTmplAttribute(
@@ -51,6 +73,20 @@ class EntityTmplEndpoint extends Endpoint {
               orderIdx: attr.orderIdx,
             ),
           );
+        }
+        // And persist the links, if any.
+        if (item.outgoingLinks != null) {
+          for (final link in item.outgoingLinks!) {
+            await EntityTmplLink.db.insertRow(
+              session,
+              EntityTmplLink(
+                name: link.name,
+                sourceId: created.id!,
+                targetId: link.targetId,
+                orderIdx: link.orderIdx,
+              ),
+            );
+          }
         }
       }
 
@@ -76,24 +112,45 @@ class EntityTmplEndpoint extends Endpoint {
     }
   }
 
-  Future<EntityTmplApiResponse> update(Session session, EntityTmpl data) async {
+  Future<EntityTmplApiResponse> update(Session session, EntityTmpl item) async {
     try {
-      session.log('Updating entity template with id ${data.id}', level: LogLevel.info);
+      session.log('Updating entity template with id ${item.id}', level: LogLevel.info);
       // Update the item first.
-      final updated = await EntityTmpl.db.updateRow(session, data);
+      final updated = await EntityTmpl.db.updateRow(session, item);
+
       // Then update the attributes, by removing existing ones and inserting the new ones.
       await EntityTmplAttribute.db.deleteWhere(
         session,
-        where: (t) => t.entityTmplId.equals(data.id!),
+        where: (t) => t.entityTmplId.equals(item.id!),
       );
-      if (data.attributes != null) {
-        for (final attr in data.attributes!) {
+
+      if (item.attributes != null) {
+        for (final attr in item.attributes!) {
           await EntityTmplAttribute.db.insertRow(
             session,
             EntityTmplAttribute(
-              entityTmplId: data.id!,
+              entityTmplId: item.id!,
               attributeTmplId: attr.attributeTmplId,
               orderIdx: attr.orderIdx,
+            ),
+          );
+        }
+      }
+
+      // Then update the links, by removing existing ones and inserting the new ones.
+      await EntityTmplLink.db.deleteWhere(
+        session,
+        where: (t) => t.sourceId.equals(item.id!),
+      );
+      if (item.outgoingLinks != null) {
+        for (final link in item.outgoingLinks!) {
+          await EntityTmplLink.db.insertRow(
+            session,
+            EntityTmplLink(
+              name: link.name,
+              sourceId: item.id!,
+              targetId: link.targetId,
+              orderIdx: link.orderIdx,
             ),
           );
         }

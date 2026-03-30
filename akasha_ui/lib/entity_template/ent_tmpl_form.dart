@@ -4,8 +4,12 @@ import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/theming/colors.dart';
 import 'package:akasha_ui/theming/sizes.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
+import 'package:akasha_ui/widgets/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+part 'ent_tmpl_form_attrs_tab.dart';
+part 'ent_tmpl_form_links_tab.dart';
 
 class EntityTmplForm extends StatefulWidget {
   //
@@ -188,7 +192,15 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
       return;
     }
 
-    if (!formKey.currentState!.validate()) {
+    // We don't do the whole form validation, since in the Links tab, the name is empty most of the time.
+    // if (!formKey.currentState!.validate()) { return; }
+
+    if (nameController.text.trim().isEmpty) {
+      showErrorSnackbar(context, 'Name is required.');
+      return;
+    }
+    if (includedAttributeTmpls.isEmpty) {
+      showErrorSnackbar(context, 'At least one attribute template must be included.');
       return;
     }
 
@@ -209,8 +221,20 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
               ),
             )
             .toList(),
+        outgoingLinks: includedOutLinks
+            .map(
+              (link) => EntityTmplLink(
+                id: link.id,
+                sourceId: widget.item?.id ?? zeroUuid,
+                targetId: link.targetId,
+                name: link.name,
+                description: link.description,
+                orderIdx: includedOutLinks.indexOf(link),
+              ),
+            )
+            .toList(),
       );
-
+      debugPrint('>>> Prepared entity template for saving: $entityTmpl');
       await widget.onSave!(entityTmpl);
     } finally {
       if (mounted) {
@@ -271,7 +295,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
 
                 // Important: TabBarView needs bounded height here.
                 SizedBox(
-                  height: 250,
+                  height: 330,
                   child: TabBarView(
                     children: [
                       _AttributesTab(
@@ -285,7 +309,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                         onReorderAttributes: _onReorderAttributes,
                       ),
                       _LinksTab(
-                        formKey: formKey,
                         readOnly: _isReadOnly,
                         outgoingLinks: includedOutLinks,
                         incomingLinks: widget.item?.incomingLinks ?? [],
@@ -310,20 +333,20 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                   child: _isReadOnly
                       ? IconButton(
                           onPressed: _isEdit ? widget.onRequestEdit : null,
-                          color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
-                          icon: const Icon(Icons.edit),
+                          color: isDarkMode ? darkFgFadedColor : lightFgFadedColor,
+                          icon: const Icon(Icons.edit, size: 22),
                           tooltip: 'Edit',
                         )
                       : IconButton(
                           onPressed: _isSaving ? null : onSave,
-                          color: isDarkMode ? darkFgColor : Theme.of(context).primaryColor,
+                          color: isDarkMode ? darkFgColor : lightFgColor,
                           icon: _isSaving
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
                                   child: CircularProgressIndicator(strokeWidth: 2),
                                 )
-                              : const Icon(Icons.save),
+                              : const Icon(Icons.save, size: 22),
                           tooltip: _isEdit ? 'Update' : 'Add',
                         ),
                 ),
@@ -332,320 +355,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
           ),
         ),
       ),
-    );
-  }
-}
-
-// --------------
-// Attributes tab
-// --------------
-
-class _AttributesTab extends StatelessWidget {
-  const _AttributesTab({
-    required this.readOnly,
-    required this.availableAttributeTmpls,
-    required this.includedAttributeTmpls,
-    required this.selectedAttributeTmpl,
-    required this.onSelectedAttributeChanged,
-    required this.onAddAttribute,
-    required this.onRemoveAttribute,
-    required this.onReorderAttributes,
-  });
-
-  final bool readOnly;
-  final List<AttributeTmpl> availableAttributeTmpls;
-  final List<AttributeTmpl> includedAttributeTmpls;
-  final AttributeTmpl? selectedAttributeTmpl;
-  final ValueChanged<AttributeTmpl?> onSelectedAttributeChanged;
-  final VoidCallback onAddAttribute;
-  final ValueChanged<AttributeTmpl> onRemoveAttribute;
-  final void Function(int oldIndex, int newIndex) onReorderAttributes;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
-    return Column(
-      children: [
-        Expanded(
-          child: includedAttributeTmpls.isEmpty
-              ? Center(
-                  child: Text(
-                    'No attribute templates included',
-                    style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                  ),
-                )
-              : readOnly
-              ? ListView.separated(
-                  itemCount: includedAttributeTmpls.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 0),
-                  itemBuilder: (context, index) {
-                    final attr = includedAttributeTmpls[index];
-                    return ListTile(
-                      key: ValueKey(attr.id),
-                      dense: true,
-                      minTileHeight: 40,
-                      minVerticalPadding: 4,
-                      visualDensity: VisualDensity.compact,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(attr.name),
-                      subtitle: Text(
-                        attr.description == null || attr.description!.isEmpty ? '-' : attr.description!,
-                        style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                      ),
-                    );
-                  },
-                )
-              : ReorderableListView.builder(
-                  buildDefaultDragHandles: false,
-                  itemCount: includedAttributeTmpls.length,
-                  onReorder: onReorderAttributes,
-                  itemBuilder: (context, index) {
-                    final attr = includedAttributeTmpls[index];
-                    return ReorderableDragStartListener(
-                      key: ValueKey(attr.id), // must be stable and unique
-                      index: index,
-                      child: ListTile(
-                        mouseCursor: SystemMouseCursors.resizeUpDown,
-                        dense: true,
-                        minTileHeight: 40,
-                        minVerticalPadding: 4,
-                        visualDensity: VisualDensity.compact,
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(attr.name),
-                        subtitle: Text(
-                          attr.description == null || attr.description!.isEmpty ? '-' : attr.description!,
-                          style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                        ),
-                        trailing: IconButton(
-                          onPressed: () => onRemoveAttribute(attr),
-                          icon: const Icon(Icons.remove, size: 14),
-                          visualDensity: VisualDensity.compact,
-                          tooltip: 'Remove',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
-        if (!readOnly) ...[
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<AttributeTmpl>(
-                  initialValue: selectedAttributeTmpl,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Add attribute template',
-                    hintText: 'Pick one',
-                  ),
-                  items: availableAttributeTmpls
-                      .map(
-                        (attr) => DropdownMenuItem<AttributeTmpl>(
-                          value: attr,
-                          child: Text(attr.name),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: availableAttributeTmpls.isEmpty ? null : onSelectedAttributeChanged,
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: selectedAttributeTmpl == null ? null : onAddAttribute,
-                icon: const Icon(Icons.add),
-                tooltip: 'Add attribute template',
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
-      ],
-    );
-  }
-}
-
-// ---------
-// Links tab
-// ---------
-
-class _LinksTab extends StatelessWidget {
-  const _LinksTab({
-    required this.formKey,
-    required this.readOnly,
-    required this.entityTmpls,
-    required this.outgoingLinks,
-    required this.incomingLinks,
-    required this.selectedLinkId,
-    required this.linkNameCtrl,
-    required this.linkDescCtrl,
-    required this.onSelectedLinkChanged,
-    required this.onAddOutLink,
-    required this.onRemoveLink,
-    required this.onReorderLinks,
-  });
-
-  final GlobalKey<FormState> formKey;
-  final bool readOnly;
-  final List<EntityTmpl> entityTmpls;
-  final List<EntityTmplLink> outgoingLinks;
-  final List<EntityTmplLink> incomingLinks;
-  final UuidValue? selectedLinkId;
-  final TextEditingController linkNameCtrl;
-  final TextEditingController linkDescCtrl;
-  final ValueChanged<UuidValue?> onSelectedLinkChanged;
-  final VoidCallback onAddOutLink;
-  final ValueChanged<UuidValue> onRemoveLink;
-  final void Function(int oldIndex, int newIndex) onReorderLinks;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
-    return Column(
-      children: [
-        Expanded(
-          child: outgoingLinks.isEmpty && incomingLinks.isEmpty
-              ? Center(
-                  child: Text(
-                    'No links',
-                    style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                  ),
-                )
-              : readOnly
-              ? ListView(
-                  children: [
-                    if (outgoingLinks.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4),
-                        child: Text('Outgoing Links', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      ...outgoingLinks.map(
-                        (link) {
-                          debugPrint('>>> out link: $link');
-                          final title = link.name;
-                          return ListTile(
-                            title: Text(title),
-                            subtitle: Text(
-                              link.description ?? '',
-                              style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                    if (incomingLinks.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4),
-                        child: Text('Incoming Links', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      ...incomingLinks.map(
-                        (link) {
-                          final title = '${link.source?.name ?? 'Unknown'} -> ${link.name}';
-                          return ListTile(
-                            title: Text(title),
-                            subtitle: Text(
-                              link.description ?? '',
-                              style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ],
-                )
-              : ReorderableListView.builder(
-                  buildDefaultDragHandles: false,
-                  itemCount: outgoingLinks.length,
-                  onReorder: onReorderLinks,
-                  itemBuilder: (context, index) {
-                    final link = outgoingLinks[index];
-                    final linkLabel =
-                        '${link.name} -> ${entityTmpls.firstWhere((ent) => ent.id == link.targetId, orElse: () => EntityTmpl(name: 'Unknown')).name}';
-                    return ReorderableDragStartListener(
-                      key: ValueKey(link.id), // must be stable and unique
-                      index: index,
-                      child: ListTile(
-                        mouseCursor: SystemMouseCursors.resizeUpDown,
-                        title: Text(linkLabel),
-                        subtitle: Text(
-                          link.description ?? '',
-                          style: TextStyle(fontStyle: FontStyle.italic, color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                        ),
-                        trailing: IconButton(
-                          onPressed: () => onRemoveLink(link.id ?? zeroUuid),
-                          icon: const Icon(Icons.remove, size: 14),
-                          visualDensity: VisualDensity.compact,
-                          tooltip: 'Remove',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
-        if (!readOnly) ...[
-          TextFormField(
-            controller: linkNameCtrl,
-            readOnly: readOnly,
-            decoration: InputDecoration(
-              labelText: readOnly ? 'Name' : 'Name *',
-              hintText: readOnly ? null : 'Required',
-            ),
-            validator: readOnly
-                ? null
-                : (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Name is required';
-                    }
-                    return null;
-                  },
-            onChanged: readOnly ? null : (_) => linkNameCtrl.text.trim().isEmpty,
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: linkDescCtrl,
-            readOnly: readOnly,
-            decoration: const InputDecoration(labelText: 'Description'),
-            maxLines: 1,
-            minLines: 1,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<UuidValue>(
-                  initialValue: selectedLinkId,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Add target',
-                    hintText: 'Pick an entity template',
-                  ),
-                  items: entityTmpls.map(
-                    (ent) {
-                      debugPrint('>>> Mapping entity tmpl w/ id=${ent.id} name=${ent.name} to dropdown item.');
-                      return DropdownMenuItem<UuidValue>(
-                        value: ent.id ?? zeroUuid,
-                        child: Text(ent.name),
-                      );
-                    },
-                  ).toList(),
-                  onChanged: entityTmpls.isEmpty
-                      ? null
-                      : (targetId) {
-                          if (targetId == null) return;
-                          debugPrint('>>> Selected link changed: targetId=$targetId.');
-                          onSelectedLinkChanged(targetId);
-                        },
-                ),
-              ),
-              IconButton(
-                onPressed: selectedLinkId == null ? null : onAddOutLink,
-                icon: const Icon(Icons.add, size: 16),
-                tooltip: 'Add link',
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-        ],
-      ],
     );
   }
 }
