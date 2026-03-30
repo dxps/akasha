@@ -98,9 +98,7 @@ class _EntityTmplRowState extends State<EntityTmplRow> {
             height: widget.height,
             decoration: BoxDecoration(
               color: _isHovered ? (isDarkMode ? Colors.grey.shade700 : Colors.white) : Colors.transparent,
-              border: Border(
-                bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade200),
-              ),
+              border: Border(bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade400)),
               borderRadius: _isHovered ? BorderRadius.circular(6) : null,
             ),
             child: Row(

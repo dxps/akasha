@@ -87,9 +87,7 @@ ThemeData initThemeData(Brightness brightness) {
           }
           return isDark ? const Color(0xFF2A2D2E) : Colors.white;
         }),
-        foregroundColor: WidgetStatePropertyAll(
-          isDark ? Colors.grey.shade100 : Colors.black87,
-        ),
+        foregroundColor: WidgetStatePropertyAll(isDark ? Colors.grey.shade100 : Colors.black87),
         elevation: WidgetStateProperty.resolveWith<double?>((states) {
           if (states.contains(WidgetState.disabled)) return 0;
           return 1;
@@ -123,22 +121,10 @@ ThemeData initThemeData(Brightness brightness) {
       hoverColor: Colors.transparent,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
-      labelStyle: TextStyle(
-        fontSize: 14,
-        color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
-      ),
-      floatingLabelStyle: TextStyle(
-        fontSize: 15,
-        color: colorScheme.primary,
-      ),
-      hintStyle: TextStyle(
-        fontSize: 13,
-        color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
-      ),
-      helperStyle: TextStyle(
-        fontSize: 12,
-        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-      ),
+      labelStyle: TextStyle(fontSize: 14, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700),
+      floatingLabelStyle: TextStyle(fontSize: 15, color: colorScheme.primary),
+      hintStyle: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade500 : Colors.grey.shade600),
+      helperStyle: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
       errorStyle: const TextStyle(fontSize: 12),
       errorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red),
@@ -149,21 +135,19 @@ ThemeData initThemeData(Brightness brightness) {
     ),
 
     listTileTheme: ListTileThemeData(
-      dense: true,
-      minTileHeight: 16,
+      dense: false,
+      minTileHeight: 18,
       minVerticalPadding: 2,
       minLeadingWidth: 0,
       visualDensity: VisualDensity.compact,
       contentPadding: EdgeInsets.zero,
-      titleTextStyle: TextStyle(fontSize: 18, color: isDark ? Colors.grey.shade100 : Colors.black87),
-      subtitleTextStyle: TextStyle(fontSize: 13, color: isDark ? darkFgFadedColor : lightFgFadedColor, fontStyle: FontStyle.italic),
+      titleTextStyle: TextStyle(fontSize: 15, color: isDark ? Colors.grey.shade100 : Colors.black87),
+      subtitleTextStyle: TextStyle(fontSize: 12, color: isDark ? darkFgFadedColor : lightFgFadedColor, fontStyle: FontStyle.italic),
     ),
 
     menuButtonTheme: MenuButtonThemeData(
       style: ButtonStyle(
-        foregroundColor: WidgetStatePropertyAll(
-          isDark ? Colors.grey.shade100 : Colors.black87,
-        ),
+        foregroundColor: WidgetStatePropertyAll(isDark ? Colors.grey.shade100 : Colors.black87),
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.hovered) || states.contains(WidgetState.focused)) {
             return isDark ? Colors.grey.shade800 : Colors.grey.shade100;
@@ -179,9 +163,7 @@ ThemeData initThemeData(Brightness brightness) {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: isDark ? Colors.grey.shade100 : Colors.black87,
-        side: BorderSide(
-          color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-        ),
+        side: BorderSide(color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),

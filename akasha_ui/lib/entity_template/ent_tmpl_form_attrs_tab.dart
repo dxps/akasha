@@ -46,11 +46,13 @@ class _AttributesTab extends StatelessWidget {
                     final attr = includedAttributeTmpls[index];
                     return ListTile(
                       key: ValueKey(attr.id),
-                      dense: true,
+                      dense: false,
                       minVerticalPadding: 6,
                       leading: Text('•'),
-                      title: Text(attr.name),
-                      subtitle: attr.description != null && attr.description!.isNotEmpty ? Text(attr.description!) : null,
+                      title: Text(attr.name, style: TextStyle(fontSize: 15)),
+                      subtitle: attr.description != null && attr.description!.isNotEmpty
+                          ? Text(attr.description!, style: TextStyle(fontSize: 12))
+                          : null,
                     );
                   },
                 )
@@ -67,8 +69,10 @@ class _AttributesTab extends StatelessWidget {
                         mouseCursor: SystemMouseCursors.resizeUpDown,
                         minVerticalPadding: 6,
                         leading: Text('•'),
-                        title: Text(attr.name),
-                        subtitle: attr.description != null && attr.description!.isNotEmpty ? Text(attr.description!) : null,
+                        title: Text(attr.name, style: TextStyle(fontSize: 15)),
+                        subtitle: attr.description != null && attr.description!.isNotEmpty
+                            ? Text(attr.description!, style: TextStyle(fontSize: 12))
+                            : null,
                         trailing: IconButton(
                           onPressed: () => onRemoveAttribute(attr),
                           icon: const Icon(Icons.remove, size: 14),
@@ -78,6 +82,11 @@ class _AttributesTab extends StatelessWidget {
                       ),
                     );
                   },
+                  proxyDecorator: (child, index, animation) => Material(
+                    elevation: 6,
+                    color: isDarkMode ? darkBgColor : lightBgColor,
+                    child: child,
+                  ),
                 ),
         ),
         if (!readOnly) ...[

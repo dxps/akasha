@@ -58,7 +58,7 @@ class _LinksTab extends StatelessWidget {
                       ...outgoingLinks.map(
                         (link) {
                           final targetName = entityTmpls.firstWhere((ent) => ent.id == link.targetId, orElse: () => EntityTmpl(name: 'Unknown')).name;
-                          final title = '${link.name}  --  $targetName';
+                          final title = '--  ${link.name} --> $targetName';
                           return ListTile(
                             leading: Text('•'),
                             title: Text(title),
@@ -79,7 +79,7 @@ class _LinksTab extends StatelessWidget {
                       ...incomingLinks.map(
                         (link) {
                           final sourceName = entityTmpls.firstWhere((ent) => ent.id == link.sourceId, orElse: () => EntityTmpl(name: 'Unknown')).name;
-                          final title = '$sourceName  --  ${link.name}';
+                          final title = '<-- ${link.name} -- $sourceName';
                           return ListTile(
                             minVerticalPadding: 5,
                             leading: Text('•'),
@@ -105,15 +105,20 @@ class _LinksTab extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final link = outgoingLinks[index];
                     final linkLabel =
-                        '${link.name} -> ${entityTmpls.firstWhere((ent) => ent.id == link.targetId, orElse: () => EntityTmpl(name: 'Unknown')).name}';
+                        '--  ${link.name} --> ${entityTmpls.firstWhere(
+                          (ent) => ent.id == link.targetId,
+                          orElse: () => EntityTmpl(name: 'Unknown'),
+                        ).name}';
                     return ReorderableDragStartListener(
                       key: ValueKey(link.id),
                       index: index,
                       child: ListTile(
                         mouseCursor: SystemMouseCursors.resizeUpDown,
                         leading: Text('•'),
-                        title: Text(linkLabel),
-                        subtitle: link.description != null && link.description!.isNotEmpty ? Text(link.description!) : null,
+                        title: Text(linkLabel, style: TextStyle(fontSize: 15)),
+                        subtitle: link.description != null && link.description!.isNotEmpty
+                            ? Text(link.description!, style: TextStyle(fontSize: 12))
+                            : null,
                         trailing: IconButton(
                           onPressed: () => onRemoveLink(link.id ?? zeroUuid),
                           icon: const Icon(Icons.remove, size: 14),
@@ -123,6 +128,11 @@ class _LinksTab extends StatelessWidget {
                       ),
                     );
                   },
+                  proxyDecorator: (child, index, animation) => Material(
+                    elevation: 6,
+                    color: isDarkMode ? darkBgColor : lightBgColor,
+                    child: child,
+                  ),
                 ),
         ),
         if (!readOnly) ...[
