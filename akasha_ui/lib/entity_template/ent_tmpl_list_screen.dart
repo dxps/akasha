@@ -188,6 +188,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     Size? viewportSize,
     bool readOnly = false,
     Offset? initialOffset,
+    Map<String, Object?> options = const {},
   }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
@@ -212,24 +213,26 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
       child: EntityTmplForm(
         item: item,
         readOnly: readOnly,
-        onRequestEdit: readOnly && item != null
-            ? () {
-                final currentModal = modals.firstWhere((m) => m.id == id);
-                final currentOffset = currentModal.offset;
+        options: options,
+        onRequestEdit: (options) {
+          if (readOnly && item != null) {
+            final currentModal = modals.firstWhere((m) => m.id == id);
+            final currentOffset = currentModal.offset;
 
-                _closeModal(id);
+            _closeModal(id);
 
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted) return;
-                  _openModal(
-                    item: item,
-                    viewportSize: viewportSize,
-                    readOnly: false,
-                    initialOffset: currentOffset,
-                  );
-                });
-              }
-            : null,
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _openModal(
+                item: item,
+                viewportSize: viewportSize,
+                readOnly: false,
+                initialOffset: currentOffset,
+                options: options,
+              );
+            });
+          }
+        },
         onSave: (item) async {
           debugPrint('>>> Got from form the item (EntityTmpl): $item');
 

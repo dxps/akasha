@@ -15,10 +15,11 @@ class EntityTmplForm extends StatefulWidget {
   //
   final EntityTmpl? item;
   final Future<void> Function(EntityTmpl)? onSave;
-  final VoidCallback? onRequestEdit;
+  final void Function(Map<String, Object?> options)? onRequestEdit;
   final bool readOnly;
+  final Map<String, Object?> options;
 
-  const EntityTmplForm({super.key, this.item, this.onSave, this.onRequestEdit, this.readOnly = false});
+  const EntityTmplForm({super.key, this.item, this.onSave, this.onRequestEdit, this.readOnly = false, this.options = const {}});
 
   @override
   State<EntityTmplForm> createState() => _EntityTmplFormState();
@@ -247,113 +248,126 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+
     return DefaultTabController(
       length: 2,
+      initialIndex: (widget.options['activeTabIdx'] as int?) ?? 0,
       child: Form(
         key: formKey,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  key: nameFieldKey,
-                  controller: nameCtrl,
-                  readOnly: _isReadOnly,
-                  decoration: InputDecoration(
-                    labelText: _isReadOnly ? 'Name' : 'Name *',
-                    hintText: _isReadOnly ? null : 'Required',
-                  ),
-                  validator: _isReadOnly
-                      ? null
-                      : (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Name is required';
-                          }
-                          return null;
-                        },
-                  onChanged: _isReadOnly ? null : (_) => nameFieldKey.currentState?.validate(),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: descriptionController,
-                  readOnly: _isReadOnly,
-                  decoration: const InputDecoration(labelText: 'Description'),
-                  maxLines: 1,
-                  minLines: 1,
-                ),
-                const SizedBox(height: 20),
+        child: Builder(
+          builder: (tabContext) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      key: nameFieldKey,
+                      controller: nameCtrl,
+                      readOnly: _isReadOnly,
+                      decoration: InputDecoration(
+                        labelText: _isReadOnly ? 'Name' : 'Name *',
+                        hintText: _isReadOnly ? null : 'Required',
+                      ),
+                      validator: _isReadOnly
+                          ? null
+                          : (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Name is required';
+                              }
+                              return null;
+                            },
+                      onChanged: _isReadOnly ? null : (_) => nameFieldKey.currentState?.validate(),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: descriptionController,
+                      readOnly: _isReadOnly,
+                      decoration: const InputDecoration(labelText: 'Description'),
+                      maxLines: 1,
+                      minLines: 1,
+                    ),
+                    const SizedBox(height: 20),
 
-                const TabBar(
-                  tabs: [
-                    Tab(text: 'Attributes', height: tabHeight),
-                    Tab(text: 'Links', height: tabHeight),
+                    const TabBar(
+                      tabs: [
+                        Tab(text: 'Attributes', height: tabHeight),
+                        Tab(text: 'Links', height: tabHeight),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      height: 330,
+                      child: TabBarView(
+                        children: [
+                          _AttributesTab(
+                            readOnly: _isReadOnly,
+                            availableAttributeTmpls: availableAttributeTmpls,
+                            includedAttributeTmpls: includedAttributeTmpls,
+                            selectedAttributeTmpl: selectedAttributeTmpl,
+                            onSelectedAttributeChanged: (value) => setState(() => selectedAttributeTmpl = value),
+                            onAddAttribute: _addSelectedAttributeTmpl,
+                            onRemoveAttribute: _removeIncludedAttributeTmpl,
+                            onReorderAttributes: _onReorderAttributes,
+                          ),
+                          _LinksTab(
+                            readOnly: _isReadOnly,
+                            outgoingLinks: includedOutLinks,
+                            incomingLinks: widget.item?.incomingLinks ?? [],
+                            entityTmpls: entityTmpls,
+                            linkNameCtrl: linkNameCtrl,
+                            linkDescCtrl: linkDescCtrl,
+                            selectedLinkId: selectedLinkId,
+                            onSelectedLinkChanged: (linkId) {
+                              setState(() => selectedLinkId = linkId);
+                            },
+                            onAddOutLink: _addSelectedOutLink,
+                            onRemoveLink: _removeIncludedOutgoingLink,
+                            onReorderLinks: _onReorderOutgoingLinks,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: _isReadOnly
+                          ? IconButton(
+                              onPressed: _isEdit
+                                  ? () {
+                                      final activeTabIndex = DefaultTabController.of(tabContext).index;
+                                      widget.onRequestEdit?.call({
+                                        "activeTabIdx": activeTabIndex,
+                                      });
+                                    }
+                                  : null,
+                              color: isDarkMode ? darkFgFadedColor : lightFgFadedColor,
+                              icon: const Icon(Icons.edit, size: 22),
+                              tooltip: 'Edit',
+                            )
+                          : IconButton(
+                              onPressed: _isSaving ? null : onSave,
+                              color: isDarkMode ? darkFgColor : lightFgColor,
+                              icon: _isSaving
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.save, size: 22),
+                              tooltip: _isEdit ? 'Update' : 'Add',
+                            ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-
-                // Important: TabBarView needs bounded height here.
-                SizedBox(
-                  height: 330,
-                  child: TabBarView(
-                    children: [
-                      _AttributesTab(
-                        readOnly: _isReadOnly,
-                        availableAttributeTmpls: availableAttributeTmpls,
-                        includedAttributeTmpls: includedAttributeTmpls,
-                        selectedAttributeTmpl: selectedAttributeTmpl,
-                        onSelectedAttributeChanged: (value) => setState(() => selectedAttributeTmpl = value),
-                        onAddAttribute: _addSelectedAttributeTmpl,
-                        onRemoveAttribute: _removeIncludedAttributeTmpl,
-                        onReorderAttributes: _onReorderAttributes,
-                      ),
-                      _LinksTab(
-                        readOnly: _isReadOnly,
-                        outgoingLinks: includedOutLinks,
-                        incomingLinks: widget.item?.incomingLinks ?? [],
-                        entityTmpls: entityTmpls,
-                        linkNameCtrl: linkNameCtrl,
-                        linkDescCtrl: linkDescCtrl,
-                        selectedLinkId: selectedLinkId,
-                        onSelectedLinkChanged: (linkId) {
-                          debugPrint('>>> Selected link changed: linkId=$linkId.');
-                          setState(() => selectedLinkId = linkId);
-                        },
-                        onAddOutLink: _addSelectedOutLink,
-                        onRemoveLink: _removeIncludedOutgoingLink,
-                        onReorderLinks: _onReorderOutgoingLinks,
-                      ),
-                    ],
-                  ),
-                ),
-
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: _isReadOnly
-                      ? IconButton(
-                          onPressed: _isEdit ? widget.onRequestEdit : null,
-                          color: isDarkMode ? darkFgFadedColor : lightFgFadedColor,
-                          icon: const Icon(Icons.edit, size: 22),
-                          tooltip: 'Edit',
-                        )
-                      : IconButton(
-                          onPressed: _isSaving ? null : onSave,
-                          color: isDarkMode ? darkFgColor : lightFgColor,
-                          icon: _isSaving
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.save, size: 22),
-                          tooltip: _isEdit ? 'Update' : 'Add',
-                        ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
