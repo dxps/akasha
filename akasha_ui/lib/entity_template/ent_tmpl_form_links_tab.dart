@@ -58,10 +58,27 @@ class _LinksTab extends StatelessWidget {
                       ...outgoingLinks.map(
                         (link) {
                           final targetName = entityTmpls.firstWhere((ent) => ent.id == link.targetId, orElse: () => EntityTmpl(name: 'Unknown')).name;
-                          final title = '--  ${link.name} --> $targetName';
+                          final linkLabel = '--  ${link.name} --> $targetName';
                           return ListTile(
                             leading: Text('•'),
-                            title: Text(title),
+                            // title: Text(linkLabel),
+                            title: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 4,
+                              children: [
+                                Text(linkLabel),
+                                InkWell(
+                                  onTap: () {
+                                    // TODO: Navigate to target entity template
+                                    debugPrint('>>> TODO: Open the modal with that (target) entity template w/ id:=${link.targetId}.');
+                                  },
+                                  child: Text(
+                                    '(i)',
+                                    style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.primary.withAlpha(230)),
+                                  ),
+                                ),
+                              ],
+                            ),
                             subtitle: link.description != null ? Text(link.description!) : null,
                             minVerticalPadding: 6,
                           );
@@ -169,7 +186,7 @@ class _LinksTab extends StatelessWidget {
                   initialValue: selectedLinkId,
                   isExpanded: true,
                   decoration: const InputDecoration(
-                    labelText: 'Add target',
+                    labelText: 'Target',
                     hintText: 'Pick an entity template',
                   ),
                   items: entityTmpls
