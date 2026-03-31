@@ -1,5 +1,6 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_client/shared.dart';
+import 'package:akasha_ui/entity_template/ent_tmpl_dialogs_cubit.dart';
 import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/theming/colors.dart';
 import 'package:akasha_ui/theming/sizes.dart';

@@ -1,4 +1,6 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_ui/entity_template/ent_tmpl_dialogs_cubit.dart';
+import 'package:akasha_ui/entity_template/ent_tmpl_repo.dart';
 import 'package:akasha_ui/routing.dart';
 import 'package:akasha_ui/theming/init_theme.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
@@ -51,8 +53,16 @@ void main() async {
   initRouter(client);
 
   runApp(
-    BlocProvider(
-      create: (_) => ThemeCubit(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => ThemeCubit()),
+        BlocProvider(
+          create: (_) {
+            final repo = EntityTemplateRepo(client: client);
+            return EntityTemplatesCubit(repo: repo);
+          },
+        ),
+      ],
       child: const MyApp(),
     ),
   );

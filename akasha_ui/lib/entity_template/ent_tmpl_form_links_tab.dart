@@ -69,8 +69,8 @@ class _LinksTab extends StatelessWidget {
                                 Text(linkLabel),
                                 InkWell(
                                   onTap: () {
-                                    // TODO: Navigate to target entity template
                                     debugPrint('>>> TODO: Open the modal with that (target) entity template w/ id:=${link.targetId}.');
+                                    context.read<EntityTemplatesCubit>().openModal(link.targetId);
                                   },
                                   child: Text(
                                     '(i)',

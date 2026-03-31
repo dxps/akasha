@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_ui/entity_template/ent_tmpl_dialogs_cubit.dart';
+import 'package:akasha_ui/entity_template/ent_tmpl_dialogs_state.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_form.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_row.dart';
 import 'package:akasha_ui/main.dart';
@@ -27,12 +29,30 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
 
   Future<void> _getEntries() async {
     setState(() => isFetchingData = true);
-    final items = await client.entityTmpl.readAll();
-    debugPrint("[_EntityTemplatesScreenState] Got ${items.length} entity templates.");
-    setState(() {
-      entityTemplates = items;
-      isFetchingData = false;
-    });
+    // final items = await client.entityTmpl.readAll();
+    // debugPrint("[_EntityTemplatesScreenState] Got ${items.length} entity templates.");
+    // setState(() {
+    //   entityTemplates = items;
+    //   isFetchingData = false;
+    // });
+
+    context
+        .read<EntityTemplatesCubit>()
+        .getAll()
+        .then((items) {
+          debugPrint(">>> [_EntityTemplatesScreenState] Got ${items.length} entity templates from cubit.");
+          setState(() {
+            entityTemplates = items;
+            isFetchingData = false;
+          });
+        })
+        .catchError((e) {
+          debugPrint('>>> [_EntityTemplatesScreenState] Failed to load entity templates: $e');
+          if (mounted) {
+            showErrorSnackbar(context, 'Failed to load entity templates: $e');
+            setState(() => isFetchingData = false);
+          }
+        });
   }
 
   @override
@@ -43,65 +63,84 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
 
   @override
   Widget build(BuildContext context) {
+    final viewportSize = MediaQuery.sizeOf(context);
     final addButton = IconButton(
       icon: const Icon(Icons.add),
       iconSize: 20,
       tooltip: 'Add Entity Template',
       onPressed: () {
-        final size = MediaQuery.of(context).size;
-        _openModal(viewportSize: size);
+        _openModal(viewportSize: viewportSize);
       },
     );
-    return BlocSelector<ThemeCubit, ThemeMode, bool>(
-      selector: (themeMode) => themeMode == ThemeMode.dark,
-      builder: (context, isDarkMode) {
-        return Scaffold(
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
-              return Stack(
-                children: [
-                  const TopHeader(),
-                  isFetchingData
-                      ? const Center(child: CircularProgressIndicator())
-                      : entityTemplates.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('No entity templates yet.'),
-                              const SizedBox(height: 16),
-                              addButton,
-                            ],
-                          ),
-                        )
-                      : Center(
-                          child: SingleChildScrollView(
+    return BlocListener<EntityTemplatesCubit, EntityTemplatesState>(
+      listenWhen: (previous, current) => current is EntityTemplatesStateOpenModalFor,
+      listener: (context, state) {
+        if (state is EntityTemplatesStateOpenModalFor) {
+          debugPrint('>>> Reacting to EntityTemplatesStateOpenModalFor w/ id ${state.id} ...');
+          final item = entityTemplates.where((ent) => ent.id == state.id).firstOrNull;
+          debugPrint('>>> For id ${state.id}, found item: $item');
+          if (item == null) {
+            debugPrint('>>> No entity template found in the current list with id ${state.id} for opening the modal.');
+            return;
+          }
+          _openModal(
+            item: item,
+            readOnly: true,
+            viewportSize: viewportSize,
+          );
+        }
+      },
+      child: BlocSelector<ThemeCubit, ThemeMode, bool>(
+        selector: (themeMode) => themeMode == ThemeMode.dark,
+        builder: (context, isDarkMode) {
+          return Scaffold(
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
+                return Stack(
+                  children: [
+                    const TopHeader(),
+                    isFetchingData
+                        ? const Center(child: CircularProgressIndicator())
+                        : entityTemplates.isEmpty
+                        ? Center(
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                _buildTable(vwSize, isDarkMode),
-                                const SizedBox(height: 20),
+                                const Text('No entity templates yet.'),
+                                const SizedBox(height: 16),
                                 addButton,
                               ],
                             ),
+                          )
+                        : Center(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  _buildTable(vwSize, isDarkMode),
+                                  const SizedBox(height: 20),
+                                  addButton,
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
 
-                  for (final modal in modals)
-                    DraggableModal(
-                      key: ValueKey(modal.id),
-                      data: modal,
-                      viewport: vwSize,
-                      onTap: () => _bringToFront(modal.id),
-                      onClose: () => _closeModal(modal.id),
-                      onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
-                    ),
-                ],
-              );
-            },
-          ),
-        );
-      },
+                    for (final modal in modals)
+                      DraggableModal(
+                        key: ValueKey(modal.id),
+                        data: modal,
+                        viewport: vwSize,
+                        onTap: () => _bringToFront(modal.id),
+                        onClose: () => _closeModal(modal.id),
+                        onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
+                      ),
+                  ],
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 
