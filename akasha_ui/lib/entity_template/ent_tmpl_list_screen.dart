@@ -24,21 +24,14 @@ class EntityTemplatesScreen extends StatefulWidget {
 
 class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _ModalHelpers {
   bool isFetchingData = false;
-  List<dynamic> entityTemplates = [];
+  List<EntityTmpl> entityTemplates = [];
   int _nextModalId = 1;
 
-  Future<void> _getEntries() async {
+  Future<void> _getEntries({bool forceRefresh = false}) async {
     setState(() => isFetchingData = true);
-    // final items = await client.entityTmpl.readAll();
-    // debugPrint("[_EntityTemplatesScreenState] Got ${items.length} entity templates.");
-    // setState(() {
-    //   entityTemplates = items;
-    //   isFetchingData = false;
-    // });
-
     context
         .read<EntityTemplatesCubit>()
-        .getAll()
+        .getAll(forceRefresh: forceRefresh)
         .then((items) {
           debugPrint(">>> [_EntityTemplatesScreenState] Got ${items.length} entity templates from cubit.");
           setState(() {
@@ -74,15 +67,10 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     );
     return BlocListener<EntityTemplatesCubit, EntityTemplatesState>(
       listenWhen: (previous, current) => current is EntityTemplatesStateOpenModalFor,
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is EntityTemplatesStateOpenModalFor) {
-          debugPrint('>>> Reacting to EntityTemplatesStateOpenModalFor w/ id ${state.id} ...');
-          final item = entityTemplates.where((ent) => ent.id == state.id).firstOrNull;
-          debugPrint('>>> For id ${state.id}, found item: $item');
-          if (item == null) {
-            debugPrint('>>> No entity template found in the current list with id ${state.id} for opening the modal.');
-            return;
-          }
+          debugPrint('>>> Reacting to EntityTemplatesStateOpenModalFor ${state.entityTmpl} ...');
+          final item = await context.read<EntityTemplatesCubit>().repo.getById(state.entityTmpl.id!);
           _openModal(
             item: item,
             readOnly: true,
@@ -146,7 +134,6 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
 
   Widget _buildTable(Size? viewportSize, bool isDarkMode) {
     final size = viewportSize ?? MediaQuery.sizeOf(context);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -293,7 +280,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
 
             if (response.success && mounted) {
               _closeModal(id);
-              await _getEntries();
+              await _getEntries(forceRefresh: true);
             } else if (!response.success) {
               if (!mounted) return;
               showErrorSnackbar(context, response.errorMessage ?? 'Failed to create entity template: ${response.errorCode}');
@@ -334,7 +321,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     if (confirmed == true) {
       try {
         await client.entityTmpl.delete(template.id!);
-        await _getEntries();
+        await _getEntries(forceRefresh: true);
       } catch (e) {
         debugPrint('Error deleting entity template: $e');
         if (mounted) {

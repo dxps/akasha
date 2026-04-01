@@ -1,15 +1,11 @@
 import 'package:akasha_client/akasha_client.dart';
-import 'package:equatable/equatable.dart';
 
-sealed class EntityTemplatesState extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+sealed class EntityTemplatesState {}
 
 class EntityTemplatesStateInitial extends EntityTemplatesState {}
 
 class EntityTemplatesStateOpenModalFor extends EntityTemplatesState {
-  final UuidValue id;
+  final EntityTmpl entityTmpl;
 
-  EntityTemplatesStateOpenModalFor({required this.id});
+  EntityTemplatesStateOpenModalFor({required this.entityTmpl});
 }

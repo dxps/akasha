@@ -179,6 +179,14 @@ class EntityTmplEndpoint extends Endpoint {
   }
 
   Future<bool> delete(Session session, UuidValue id) async {
+    await EntityTmplAttribute.db.deleteWhere(
+      session,
+      where: (t) => t.entityTmplId.equals(id),
+    );
+    await EntityTmplLink.db.deleteWhere(
+      session,
+      where: (t) => t.sourceId.equals(id),
+    );
     final deleted = await EntityTmpl.db.deleteWhere(
       session,
       where: (t) => t.id.equals(id),

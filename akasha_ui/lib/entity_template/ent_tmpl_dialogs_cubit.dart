@@ -10,12 +10,17 @@ class EntityTemplatesCubit extends Cubit<EntityTemplatesState> {
 
   EntityTemplatesCubit({required this.repo}) : super(EntityTemplatesStateInitial());
 
-  Future<List<EntityTmpl>> getAll() async {
+  Future<List<EntityTmpl>> getAll({bool forceRefresh = false}) async {
     return repo.getAll();
   }
 
-  void openModal(UuidValue id) {
-    debugPrint('>>> EntityTemplatesCubit.openModal() called with id: $id');
-    emit(EntityTemplatesStateOpenModalFor(id: id));
+  void openModal(UuidValue id) async {
+    debugPrint('>>> [EntityTemplatesCubit] Opening modal for entity template w/ id: $id ...');
+    final item = await repo.getById(id);
+    if (item != null) {
+      emit(EntityTemplatesStateOpenModalFor(entityTmpl: item));
+    } else {
+      debugPrint('>>> [error] EntityTemplatesCubit.openModal() - No entity template found w/ id: $id');
+    }
   }
 }

@@ -61,7 +61,6 @@ class _LinksTab extends StatelessWidget {
                           final linkLabel = '--  ${link.name} --> $targetName';
                           return ListTile(
                             leading: Text('•'),
-                            // title: Text(linkLabel),
                             title: Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
                               spacing: 4,
@@ -69,12 +68,12 @@ class _LinksTab extends StatelessWidget {
                                 Text(linkLabel),
                                 InkWell(
                                   onTap: () {
-                                    debugPrint('>>> TODO: Open the modal with that (target) entity template w/ id:=${link.targetId}.');
+                                    debugPrint('>>> Opening the modal with that (target) entity template w/ id:=${link.targetId} ...');
                                     context.read<EntityTemplatesCubit>().openModal(link.targetId);
                                   },
-                                  child: Text(
-                                    '(i)',
-                                    style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.primary.withAlpha(230)),
+                                  child: Tooltip(
+                                    message: 'Open in new modal',
+                                    child: const Icon(Icons.open_in_new, size: 14),
                                   ),
                                 ),
                               ],
