@@ -1,0 +1,14 @@
+class: EntityLink
+extends: HasId
+table: entity_links
+
+fields:
+    name: String
+    description: String?
+    orderIdx: int
+
+    ### The source of this entity link.
+    source: Entity?, relation(name=entity_outgoing_links)
+
+    ### The target of this entity link.
+    target: Entity?, relation(name=entity_incoming_links)

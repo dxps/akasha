@@ -356,18 +356,18 @@ class EndpointEntityTmpl extends _i1.EndpointRef {
         {},
       );
 
-  _i2.Future<_i10.EntityTmplApiResponse> create(_i9.EntityTmpl data) =>
+  _i2.Future<_i10.EntityTmplApiResponse> create(_i9.EntityTmpl item) =>
       caller.callServerEndpoint<_i10.EntityTmplApiResponse>(
         'entityTmpl',
         'create',
-        {'data': data},
+        {'item': item},
       );
 
-  _i2.Future<_i10.EntityTmplApiResponse> update(_i9.EntityTmpl data) =>
+  _i2.Future<_i10.EntityTmplApiResponse> update(_i9.EntityTmpl item) =>
       caller.callServerEndpoint<_i10.EntityTmplApiResponse>(
         'entityTmpl',
         'update',
-        {'data': data},
+        {'item': item},
       );
 
   _i2.Future<bool> delete(_i1.UuidValue id) => caller.callServerEndpoint<bool>(

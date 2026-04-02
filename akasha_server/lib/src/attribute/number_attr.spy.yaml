@@ -1,0 +1,7 @@
+### An attribute whose value is a number.
+class: NumberAttribute
+extends: Attribute
+table: number_attributes
+fields:
+    value: double
+    accessLevel: AccessLevel?, required, relation

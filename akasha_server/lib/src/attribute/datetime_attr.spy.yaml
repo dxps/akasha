@@ -1,0 +1,7 @@
+### An attribute whose value represents a date and time.
+class: DateTimeAttribute
+extends: Attribute
+table: datetime_attributes
+fields:
+    value: DateTime
+    accessLevel: AccessLevel?, required, relation

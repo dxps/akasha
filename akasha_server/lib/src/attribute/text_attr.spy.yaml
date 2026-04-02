@@ -1,0 +1,7 @@
+### An attribute whose value is a text.
+class: TextAttribute
+extends: Attribute
+table: text_attributes
+fields:
+    value: String
+    accessLevel: AccessLevel?, required, relation

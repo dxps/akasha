@@ -1,0 +1,16 @@
+class: Entity
+extends: HasId
+table: entities
+
+fields:
+    attributesOrder: List<(int, String)>
+
+    textAttributes: List<TextAttribute>
+    numberAttributes: List<NumberAttribute>
+    boolAttributes: List<BoolAttribute>
+    dateAttributes: List<DateAttribute>
+    dateTimeAttributes: List<DateTimeAttribute>
+
+    outgoingLinks: List<EntityLink>?, relation(name=entity_outgoing_links)
+
+    incomingLinks: List<EntityLink>?, relation(name=entity_incoming_links)

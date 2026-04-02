@@ -1,0 +1,22 @@
+enum: ValueType
+serialized: byName
+default: text
+properties:
+    type: String
+    label: String
+values:
+    - text:
+          type: 'text'
+          label: 'Text'
+    - number:
+          type: 'number'
+          label: 'Number'
+    - boolean:
+          type: 'boolean'
+          label: 'Boolean'
+    - date:
+          type: 'date'
+          label: 'Date'
+    - datetime:
+          type: 'dateTime'
+          label: 'DateTime'

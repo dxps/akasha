@@ -86,7 +86,7 @@ abstract class EntityTmplLink
 
   _i1.UuidValue targetId;
 
-  /// The target(s) of this entity link template, this link template points to.
+  /// The target of this entity link template.
   _i2.EntityTmpl? target;
 
   @override
@@ -293,7 +293,7 @@ class EntityTmplLinkTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnUuid targetId;
 
-  /// The target(s) of this entity link template, this link template points to.
+  /// The target of this entity link template.
   _i2.EntityTmplTable? _target;
 
   _i2.EntityTmplTable get source {

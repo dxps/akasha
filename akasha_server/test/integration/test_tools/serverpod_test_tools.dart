@@ -897,7 +897,7 @@ class _EntityTmplEndpoint {
 
   _i3.Future<_i10.EntityTmplApiResponse> create(
     _i1.TestSessionBuilder sessionBuilder,
-    _i9.EntityTmpl data,
+    _i9.EntityTmpl item,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -910,7 +910,7 @@ class _EntityTmplEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'entityTmpl',
           methodName: 'create',
-          parameters: _i1.testObjectToJson({'data': data}),
+          parameters: _i1.testObjectToJson({'item': item}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue =
@@ -928,7 +928,7 @@ class _EntityTmplEndpoint {
 
   _i3.Future<_i10.EntityTmplApiResponse> update(
     _i1.TestSessionBuilder sessionBuilder,
-    _i9.EntityTmpl data,
+    _i9.EntityTmpl item,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -941,7 +941,7 @@ class _EntityTmplEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'entityTmpl',
           methodName: 'update',
-          parameters: _i1.testObjectToJson({'data': data}),
+          parameters: _i1.testObjectToJson({'item': item}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue =

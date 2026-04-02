@@ -1,0 +1,7 @@
+### The base class for all attributes.
+class: Attribute
+extends: HasId
+fields:
+    name: String
+    description: String?
+    valueType: ValueType

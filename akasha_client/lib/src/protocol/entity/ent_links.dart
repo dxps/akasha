@@ -10,12 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import '../entity_template/entity_tmpl.dart' as _i2;
-import 'package:akasha_client/src/protocol/protocol.dart' as _i3;
+import '../protocol.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _i2;
+import '../entity/entity.dart' as _i3;
+import 'package:akasha_client/src/protocol/protocol.dart' as _i4;
 
-abstract class EntityTmplLink implements _i1.SerializableModel {
-  EntityTmplLink._({
+abstract class EntityLink extends _i1.HasId implements _i2.SerializableModel {
+  EntityLink._({
     this.id,
     required this.name,
     this.description,
@@ -26,48 +27,44 @@ abstract class EntityTmplLink implements _i1.SerializableModel {
     this.target,
   });
 
-  factory EntityTmplLink({
-    _i1.UuidValue? id,
+  factory EntityLink({
+    _i2.UuidValue? id,
     required String name,
     String? description,
     required int orderIdx,
-    required _i1.UuidValue sourceId,
-    _i2.EntityTmpl? source,
-    required _i1.UuidValue targetId,
-    _i2.EntityTmpl? target,
-  }) = _EntityTmplLinkImpl;
+    required _i2.UuidValue sourceId,
+    _i3.Entity? source,
+    required _i2.UuidValue targetId,
+    _i3.Entity? target,
+  }) = _EntityLinkImpl;
 
-  factory EntityTmplLink.fromJson(Map<String, dynamic> jsonSerialization) {
-    return EntityTmplLink(
+  factory EntityLink.fromJson(Map<String, dynamic> jsonSerialization) {
+    return EntityLink(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _i2.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       description: jsonSerialization['description'] as String?,
       orderIdx: jsonSerialization['orderIdx'] as int,
-      sourceId: _i1.UuidValueJsonExtension.fromJson(
+      sourceId: _i2.UuidValueJsonExtension.fromJson(
         jsonSerialization['sourceId'],
       ),
       source: jsonSerialization['source'] == null
           ? null
-          : _i3.Protocol().deserialize<_i2.EntityTmpl>(
-              jsonSerialization['source'],
-            ),
-      targetId: _i1.UuidValueJsonExtension.fromJson(
+          : _i4.Protocol().deserialize<_i3.Entity>(jsonSerialization['source']),
+      targetId: _i2.UuidValueJsonExtension.fromJson(
         jsonSerialization['targetId'],
       ),
       target: jsonSerialization['target'] == null
           ? null
-          : _i3.Protocol().deserialize<_i2.EntityTmpl>(
-              jsonSerialization['target'],
-            ),
+          : _i4.Protocol().deserialize<_i3.Entity>(jsonSerialization['target']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _i2.UuidValue? id;
 
   String name;
 
@@ -75,33 +72,34 @@ abstract class EntityTmplLink implements _i1.SerializableModel {
 
   int orderIdx;
 
-  _i1.UuidValue sourceId;
+  _i2.UuidValue sourceId;
 
-  /// The source of this entity link template.
-  _i2.EntityTmpl? source;
+  /// The source of this entity link.
+  _i3.Entity? source;
 
-  _i1.UuidValue targetId;
+  _i2.UuidValue targetId;
 
-  /// The target of this entity link template.
-  _i2.EntityTmpl? target;
+  /// The target of this entity link.
+  _i3.Entity? target;
 
-  /// Returns a shallow copy of this [EntityTmplLink]
+  /// Returns a shallow copy of this [EntityLink]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
-  EntityTmplLink copyWith({
-    _i1.UuidValue? id,
+  @override
+  @_i2.useResult
+  EntityLink copyWith({
+    Object? id,
     String? name,
     String? description,
     int? orderIdx,
-    _i1.UuidValue? sourceId,
-    _i2.EntityTmpl? source,
-    _i1.UuidValue? targetId,
-    _i2.EntityTmpl? target,
+    _i2.UuidValue? sourceId,
+    _i3.Entity? source,
+    _i2.UuidValue? targetId,
+    _i3.Entity? target,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
-      '__className__': 'EntityTmplLink',
+      '__className__': 'EntityLink',
       if (id != null) 'id': id?.toJson(),
       'name': name,
       if (description != null) 'description': description,
@@ -115,22 +113,22 @@ abstract class EntityTmplLink implements _i1.SerializableModel {
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _i2.SerializationManager.encode(this);
   }
 }
 
 class _Undefined {}
 
-class _EntityTmplLinkImpl extends EntityTmplLink {
-  _EntityTmplLinkImpl({
-    _i1.UuidValue? id,
+class _EntityLinkImpl extends EntityLink {
+  _EntityLinkImpl({
+    _i2.UuidValue? id,
     required String name,
     String? description,
     required int orderIdx,
-    required _i1.UuidValue sourceId,
-    _i2.EntityTmpl? source,
-    required _i1.UuidValue targetId,
-    _i2.EntityTmpl? target,
+    required _i2.UuidValue sourceId,
+    _i3.Entity? source,
+    required _i2.UuidValue targetId,
+    _i3.Entity? target,
   }) : super._(
          id: id,
          name: name,
@@ -142,29 +140,29 @@ class _EntityTmplLinkImpl extends EntityTmplLink {
          target: target,
        );
 
-  /// Returns a shallow copy of this [EntityTmplLink]
+  /// Returns a shallow copy of this [EntityLink]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_i2.useResult
   @override
-  EntityTmplLink copyWith({
+  EntityLink copyWith({
     Object? id = _Undefined,
     String? name,
     Object? description = _Undefined,
     int? orderIdx,
-    _i1.UuidValue? sourceId,
+    _i2.UuidValue? sourceId,
     Object? source = _Undefined,
-    _i1.UuidValue? targetId,
+    _i2.UuidValue? targetId,
     Object? target = _Undefined,
   }) {
-    return EntityTmplLink(
-      id: id is _i1.UuidValue? ? id : this.id,
+    return EntityLink(
+      id: id is _i2.UuidValue? ? id : this.id,
       name: name ?? this.name,
       description: description is String? ? description : this.description,
       orderIdx: orderIdx ?? this.orderIdx,
       sourceId: sourceId ?? this.sourceId,
-      source: source is _i2.EntityTmpl? ? source : this.source?.copyWith(),
+      source: source is _i3.Entity? ? source : this.source?.copyWith(),
       targetId: targetId ?? this.targetId,
-      target: target is _i2.EntityTmpl? ? target : this.target?.copyWith(),
+      target: target is _i3.Entity? ? target : this.target?.copyWith(),
     );
   }
 }

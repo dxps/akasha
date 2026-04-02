@@ -11,7 +11,7 @@ fields:
     ### The source of this entity link template.
     source: EntityTmpl?, relation(name=entity_tmpl_outgoing_links)
 
-    ### The target(s) of this entity link template, this link template points to.
+    ### The target of this entity link template.
     target: EntityTmpl?, relation(name=entity_tmpl_incoming_links)
 
 indexes:

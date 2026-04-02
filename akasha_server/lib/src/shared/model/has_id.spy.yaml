@@ -1,0 +1,3 @@
+class: HasId
+fields:
+    id: UuidValue?, defaultPersist=random_v7

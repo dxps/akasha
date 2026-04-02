@@ -1,0 +1,7 @@
+### A boolean attribute whose value is either true or false.
+class: BoolAttribute
+extends: Attribute
+table: bool_attributes
+fields:
+    value: bool
+    accessLevel: AccessLevel?, required, relation

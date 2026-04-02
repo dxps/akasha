@@ -485,8 +485,8 @@ class Endpoints extends _i1.EndpointDispatch {
         'create': _i1.MethodConnector(
           name: 'create',
           params: {
-            'data': _i1.ParameterDescription(
-              name: 'data',
+            'item': _i1.ParameterDescription(
+              name: 'item',
               type: _i1.getType<_i9.EntityTmpl>(),
               nullable: false,
             ),
@@ -498,14 +498,14 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async =>
                   (endpoints['entityTmpl'] as _i6.EntityTmplEndpoint).create(
                     session,
-                    params['data'],
+                    params['item'],
                   ),
         ),
         'update': _i1.MethodConnector(
           name: 'update',
           params: {
-            'data': _i1.ParameterDescription(
-              name: 'data',
+            'item': _i1.ParameterDescription(
+              name: 'item',
               type: _i1.getType<_i9.EntityTmpl>(),
               nullable: false,
             ),
@@ -517,7 +517,7 @@ class Endpoints extends _i1.EndpointDispatch {
               ) async =>
                   (endpoints['entityTmpl'] as _i6.EntityTmplEndpoint).update(
                     session,
-                    params['data'],
+                    params['item'],
                   ),
         ),
         'delete': _i1.MethodConnector(
