@@ -66,16 +66,14 @@ class _LinksTab extends StatelessWidget {
                               spacing: 4,
                               children: [
                                 Text(linkLabel),
-                                InkWell(
-                                  onTap: () {
-                                    debugPrint('>>> Opening the modal with that (target) entity template w/ id:=${link.targetId} ...');
-                                    context.read<EntityTemplatesCubit>().openModal(link.targetId);
-                                  },
-                                  child: Tooltip(
-                                    message: 'Open in new modal',
-                                    child: const Icon(Icons.open_in_new, size: 14),
+                                if (link.sourceId != link.targetId)
+                                  InkWell(
+                                    onTap: () {
+                                      debugPrint('>>> Opening the modal with that (target) entity template w/ id:=${link.targetId} ...');
+                                      context.read<EntityTemplatesCubit>().openModal(link.targetId);
+                                    },
+                                    child: Tooltip(message: 'Open in new modal', child: const Icon(Icons.open_in_new, size: 14)),
                                   ),
-                                ),
                               ],
                             ),
                             subtitle: link.description != null ? Text(link.description!) : null,

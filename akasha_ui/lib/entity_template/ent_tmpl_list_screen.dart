@@ -244,9 +244,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
           if (readOnly && item != null) {
             final currentModal = modals.firstWhere((m) => m.id == id);
             final currentOffset = currentModal.offset;
-
             _closeModal(id);
-
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               _openModal(
@@ -261,14 +259,13 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
         },
         onSave: (item) async {
           debugPrint('>>> Got from form the item (EntityTmpl): $item');
-
           try {
             if (isEdit) {
               final response = await client.entityTmpl.update(item);
 
               if (response.success && mounted) {
                 _closeModal(id);
-                await _getEntries();
+                await _getEntries(forceRefresh: true);
               } else if (!response.success) {
                 if (!mounted) return;
                 showErrorSnackbar(context, response.errorMessage ?? 'Failed to save entity template: ${response.errorCode}');
