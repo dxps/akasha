@@ -11,7 +11,7 @@ class EntityTemplatesCubit extends Cubit<EntityTemplatesState> {
   EntityTemplatesCubit({required this.repo}) : super(EntityTemplatesStateInitial());
 
   Future<List<EntityTmpl>> getAll({bool forceRefresh = false}) async {
-    return repo.getAll();
+    return repo.getAll(forceRefresh: forceRefresh);
   }
 
   void openModal(UuidValue id) async {

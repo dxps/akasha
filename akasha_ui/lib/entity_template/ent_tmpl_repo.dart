@@ -8,7 +8,7 @@ class EntityTemplateRepo {
   EntityTemplateRepo({required this.client});
 
   Future<List<EntityTmpl>> getAll({bool forceRefresh = false}) async {
-    if (_cache.isNotEmpty) {
+    if (_cache.isNotEmpty && !forceRefresh) {
       return _cache;
     }
     final entities = await client.entityTmpl.readAll();
