@@ -69,7 +69,9 @@ class _LinksTab extends StatelessWidget {
                                 if (link.sourceId != link.targetId)
                                   InkWell(
                                     onTap: () {
-                                      debugPrint('>>> Opening the modal with that (target) entity template w/ id:=${link.targetId} ...');
+                                      debugPrint(
+                                        '>>> Opening the modal with entity template (of the outgoing link target) w/ id:=${link.targetId} ...',
+                                      );
                                       context.read<EntityTemplatesCubit>().openModal(link.targetId);
                                     },
                                     child: Tooltip(message: 'Open in new modal', child: const Icon(Icons.open_in_new, size: 14)),
@@ -93,11 +95,27 @@ class _LinksTab extends StatelessWidget {
                       ...incomingLinks.map(
                         (link) {
                           final sourceName = entityTmpls.firstWhere((ent) => ent.id == link.sourceId, orElse: () => EntityTmpl(name: 'Unknown')).name;
-                          final title = '<-- ${link.name} -- $sourceName';
+                          final linkLabel = '<-- ${link.name} -- $sourceName';
                           return ListTile(
                             minVerticalPadding: 5,
                             leading: Text('•'),
-                            title: Text(title),
+                            title: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 4,
+                              children: [
+                                Text(linkLabel),
+                                if (link.sourceId != link.targetId)
+                                  InkWell(
+                                    onTap: () {
+                                      debugPrint(
+                                        '>>> Opening the modal with entity template (of the incoming link source) w/ id:=${link.sourceId} ...',
+                                      );
+                                      context.read<EntityTemplatesCubit>().openModal(link.sourceId);
+                                    },
+                                    child: Tooltip(message: 'Open in new modal', child: const Icon(Icons.open_in_new, size: 14)),
+                                  ),
+                              ],
+                            ),
                             subtitle: link.description != null ? Text(link.description!) : null,
                           );
                         },
