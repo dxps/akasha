@@ -91,6 +91,7 @@ abstract class Entity extends _i1.HasId
   @override
   _i2.UuidValue? id;
 
+  /// The order of attributes. Each list item is a tuple of (order-idx, attribute-type).
   List<(int, String)> attributesOrder;
 
   List<_i3.TextAttribute> textAttributes;
@@ -364,6 +365,7 @@ class EntityTable extends _i2.Table<_i2.UuidValue?> {
 
   late final EntityUpdateTable updateTable;
 
+  /// The order of attributes. Each list item is a tuple of (order-idx, attribute-type).
   late final _i2.ColumnSerializable<List<(int, String)>> attributesOrder;
 
   late final _i2.ColumnSerializable<List<_i3.TextAttribute>> textAttributes;

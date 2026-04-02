@@ -35,6 +35,13 @@ class TopHeader extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
+                    context.go(Routes.entities.path);
+                  },
+                  style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),
+                  child: const Text('Entities'),
+                ),
+                TextButton(
+                  onPressed: () {
                     context.go(Routes.entityTemplates.path);
                   },
                   style: TextButton.styleFrom(backgroundColor: Colors.transparent, textStyle: const TextStyle(fontSize: 13)),

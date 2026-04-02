@@ -87,6 +87,7 @@ abstract class Entity extends _i1.HasId implements _i2.SerializableModel {
   /// the id will be null.
   _i2.UuidValue? id;
 
+  /// The order of attributes. Each list item is a tuple of (order-idx, attribute-type).
   List<(int, String)> attributesOrder;
 
   List<_i3.TextAttribute> textAttributes;
