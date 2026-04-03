@@ -23,6 +23,7 @@ import 'package:akasha_client/src/protocol/protocol.dart' as _i9;
 abstract class Entity extends _i1.HasId implements _i2.SerializableModel {
   Entity._({
     this.id,
+    required this.listingAttribute,
     required this.attributesOrder,
     required this.textAttributes,
     required this.numberAttributes,
@@ -35,6 +36,7 @@ abstract class Entity extends _i1.HasId implements _i2.SerializableModel {
 
   factory Entity({
     _i2.UuidValue? id,
+    required (String, String) listingAttribute,
     required List<(int, String)> attributesOrder,
     required List<_i3.TextAttribute> textAttributes,
     required List<_i4.NumberAttribute> numberAttributes,
@@ -50,6 +52,9 @@ abstract class Entity extends _i1.HasId implements _i2.SerializableModel {
       id: jsonSerialization['id'] == null
           ? null
           : _i2.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      listingAttribute: _i9.Protocol().deserialize<(String, String)>(
+        (jsonSerialization['listingAttribute'] as Map<String, dynamic>),
+      ),
       attributesOrder: _i9.Protocol().deserialize<List<(int, String)>>(
         jsonSerialization['attributesOrder'],
       ),
@@ -87,6 +92,9 @@ abstract class Entity extends _i1.HasId implements _i2.SerializableModel {
   /// the id will be null.
   _i2.UuidValue? id;
 
+  /// The attribute (the name and its value) that is presented in the listing of entities.
+  (String, String) listingAttribute;
+
   /// The order of attributes. Each list item is a tuple of (order-idx, attribute-type).
   List<(int, String)> attributesOrder;
 
@@ -110,6 +118,7 @@ abstract class Entity extends _i1.HasId implements _i2.SerializableModel {
   @_i2.useResult
   Entity copyWith({
     Object? id,
+    (String, String)? listingAttribute,
     List<(int, String)>? attributesOrder,
     List<_i3.TextAttribute>? textAttributes,
     List<_i4.NumberAttribute>? numberAttributes,
@@ -124,6 +133,7 @@ abstract class Entity extends _i1.HasId implements _i2.SerializableModel {
     return {
       '__className__': 'Entity',
       if (id != null) 'id': id?.toJson(),
+      'listingAttribute': _i9.Protocol().mapRecordToJson(listingAttribute),
       'attributesOrder': _i9.Protocol().mapContainerToJson(attributesOrder),
       'textAttributes': textAttributes.toJson(valueToJson: (v) => v.toJson()),
       'numberAttributes': numberAttributes.toJson(
@@ -152,6 +162,7 @@ class _Undefined {}
 class _EntityImpl extends Entity {
   _EntityImpl({
     _i2.UuidValue? id,
+    required (String, String) listingAttribute,
     required List<(int, String)> attributesOrder,
     required List<_i3.TextAttribute> textAttributes,
     required List<_i4.NumberAttribute> numberAttributes,
@@ -162,6 +173,7 @@ class _EntityImpl extends Entity {
     List<_i8.EntityLink>? incomingLinks,
   }) : super._(
          id: id,
+         listingAttribute: listingAttribute,
          attributesOrder: attributesOrder,
          textAttributes: textAttributes,
          numberAttributes: numberAttributes,
@@ -178,6 +190,7 @@ class _EntityImpl extends Entity {
   @override
   Entity copyWith({
     Object? id = _Undefined,
+    (String, String)? listingAttribute,
     List<(int, String)>? attributesOrder,
     List<_i3.TextAttribute>? textAttributes,
     List<_i4.NumberAttribute>? numberAttributes,
@@ -189,6 +202,12 @@ class _EntityImpl extends Entity {
   }) {
     return Entity(
       id: id is _i2.UuidValue? ? id : this.id,
+      listingAttribute:
+          listingAttribute ??
+          (
+            this.listingAttribute.$1,
+            this.listingAttribute.$2,
+          ),
       attributesOrder:
           attributesOrder ??
           this.attributesOrder

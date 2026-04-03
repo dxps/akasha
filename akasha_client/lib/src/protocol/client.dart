@@ -24,11 +24,13 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _i7;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i8;
+import 'package:akasha_client/src/protocol/entity/ent.dart' as _i9;
+import 'package:akasha_client/src/protocol/entity/ent_api_resp.dart' as _i10;
 import 'package:akasha_client/src/protocol/entity_template/entity_tmpl.dart'
-    as _i9;
+    as _i11;
 import 'package:akasha_client/src/protocol/entity_template/entity_tmpl_api_resp.dart'
-    as _i10;
-import 'protocol.dart' as _i11;
+    as _i12;
+import 'protocol.dart' as _i13;
 
 /// {@category Endpoint}
 class EndpointAccessLevel extends _i1.EndpointRef {
@@ -336,35 +338,78 @@ class EndpointJwtRefresh extends _i8.EndpointRefreshJwtTokens {
 }
 
 /// {@category Endpoint}
+class EndpointEntityApi extends _i1.EndpointRef {
+  EndpointEntityApi(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'entityApi';
+
+  _i2.Future<List<_i9.Entity>> readAll() =>
+      caller.callServerEndpoint<List<_i9.Entity>>(
+        'entityApi',
+        'readAll',
+        {},
+      );
+
+  _i2.Future<_i10.EntityApiResponse> create(_i9.Entity item) =>
+      caller.callServerEndpoint<_i10.EntityApiResponse>(
+        'entityApi',
+        'create',
+        {'item': item},
+      );
+
+  _i2.Future<_i10.EntityApiResponse> read(_i1.UuidValue id) =>
+      caller.callServerEndpoint<_i10.EntityApiResponse>(
+        'entityApi',
+        'read',
+        {'id': id},
+      );
+
+  _i2.Future<_i10.EntityApiResponse> update(_i9.Entity item) =>
+      caller.callServerEndpoint<_i10.EntityApiResponse>(
+        'entityApi',
+        'update',
+        {'item': item},
+      );
+
+  _i2.Future<_i10.EntityApiResponse> delete(_i1.UuidValue id) =>
+      caller.callServerEndpoint<_i10.EntityApiResponse>(
+        'entityApi',
+        'delete',
+        {'id': id},
+      );
+}
+
+/// {@category Endpoint}
 class EndpointEntityTmpl extends _i1.EndpointRef {
   EndpointEntityTmpl(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'entityTmpl';
 
-  _i2.Future<_i9.EntityTmpl?> read(_i1.UuidValue id) =>
-      caller.callServerEndpoint<_i9.EntityTmpl?>(
+  _i2.Future<_i11.EntityTmpl?> read(_i1.UuidValue id) =>
+      caller.callServerEndpoint<_i11.EntityTmpl?>(
         'entityTmpl',
         'read',
         {'id': id},
       );
 
-  _i2.Future<List<_i9.EntityTmpl>> readAll() =>
-      caller.callServerEndpoint<List<_i9.EntityTmpl>>(
+  _i2.Future<List<_i11.EntityTmpl>> readAll() =>
+      caller.callServerEndpoint<List<_i11.EntityTmpl>>(
         'entityTmpl',
         'readAll',
         {},
       );
 
-  _i2.Future<_i10.EntityTmplApiResponse> create(_i9.EntityTmpl item) =>
-      caller.callServerEndpoint<_i10.EntityTmplApiResponse>(
+  _i2.Future<_i12.EntityTmplApiResponse> create(_i11.EntityTmpl item) =>
+      caller.callServerEndpoint<_i12.EntityTmplApiResponse>(
         'entityTmpl',
         'create',
         {'item': item},
       );
 
-  _i2.Future<_i10.EntityTmplApiResponse> update(_i9.EntityTmpl item) =>
-      caller.callServerEndpoint<_i10.EntityTmplApiResponse>(
+  _i2.Future<_i12.EntityTmplApiResponse> update(_i11.EntityTmpl item) =>
+      caller.callServerEndpoint<_i12.EntityTmplApiResponse>(
         'entityTmpl',
         'update',
         {'item': item},
@@ -408,7 +453,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i11.Protocol(),
+         _i13.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -421,6 +466,7 @@ class Client extends _i1.ServerpodClientShared {
     attrTmpls = EndpointAttrTmpls(this);
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    entityApi = EndpointEntityApi(this);
     entityTmpl = EndpointEntityTmpl(this);
     modules = Modules(this);
   }
@@ -433,6 +479,8 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointJwtRefresh jwtRefresh;
 
+  late final EndpointEntityApi entityApi;
+
   late final EndpointEntityTmpl entityTmpl;
 
   late final Modules modules;
@@ -443,6 +491,7 @@ class Client extends _i1.ServerpodClientShared {
     'attrTmpls': attrTmpls,
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'entityApi': entityApi,
     'entityTmpl': entityTmpl,
   };
 

@@ -1,0 +1,7 @@
+### The response of CRUD operations on an Entity.
+class: EntityApiResponse
+fields:
+    success: bool
+    data: Entity?
+    errorCode: String?
+    errorMessage: String?

@@ -288,6 +288,13 @@
           },
           {
             "__className__": "serverpod.ColumnDefinition",
+            "name": "listingAttribute",
+            "columnType": 8,
+            "isNullable": false,
+            "dartType": "(String, String,)"
+          },
+          {
+            "__className__": "serverpod.ColumnDefinition",
             "name": "attributesOrder",
             "columnType": 8,
             "isNullable": false,

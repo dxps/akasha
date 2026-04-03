@@ -26,21 +26,23 @@ import 'attribute/text_attr.dart' as _i11;
 import 'attribute/attr.dart' as _i12;
 import 'attribute_template/attr_tmpl.dart' as _i13;
 import 'attribute_template/attr_tmpl_api_resp.dart' as _i14;
-import 'entity/ent_links.dart' as _i15;
-import 'entity/entity.dart' as _i16;
-import 'entity_template/entity_tmpl.dart' as _i17;
-import 'entity_template/entity_tmpl_api_resp.dart' as _i18;
-import 'entity_template/entity_tmpl_attribute.dart' as _i19;
-import 'entity_template/entity_tmpl_link.dart' as _i20;
-import 'shared/api/exceptions/api_exception.dart' as _i21;
-import 'shared/model/has_id.dart' as _i22;
-import 'shared/model/value_type.dart' as _i23;
+import 'entity/ent.dart' as _i15;
+import 'entity/ent_api_resp.dart' as _i16;
+import 'entity/ent_links.dart' as _i17;
+import 'entity_template/entity_tmpl.dart' as _i18;
+import 'entity_template/entity_tmpl_api_resp.dart' as _i19;
+import 'entity_template/entity_tmpl_attribute.dart' as _i20;
+import 'entity_template/entity_tmpl_link.dart' as _i21;
+import 'shared/api/exceptions/api_exception.dart' as _i22;
+import 'shared/model/has_id.dart' as _i23;
+import 'shared/model/value_type.dart' as _i24;
 import 'package:akasha_server/src/generated/access_level/access_level.dart'
-    as _i24;
-import 'package:akasha_server/src/generated/attribute_template/attr_tmpl.dart'
     as _i25;
-import 'package:akasha_server/src/generated/entity_template/entity_tmpl.dart'
+import 'package:akasha_server/src/generated/attribute_template/attr_tmpl.dart'
     as _i26;
+import 'package:akasha_server/src/generated/entity/ent.dart' as _i27;
+import 'package:akasha_server/src/generated/entity_template/entity_tmpl.dart'
+    as _i28;
 export 'access_level/access_level.dart';
 export 'access_level/access_level_api_resp.dart';
 export 'attribute/bool_attr.dart';
@@ -51,8 +53,9 @@ export 'attribute/text_attr.dart';
 export 'attribute/attr.dart';
 export 'attribute_template/attr_tmpl.dart';
 export 'attribute_template/attr_tmpl_api_resp.dart';
+export 'entity/ent.dart';
+export 'entity/ent_api_resp.dart';
 export 'entity/ent_links.dart';
-export 'entity/entity.dart';
 export 'entity_template/entity_tmpl.dart';
 export 'entity_template/entity_tmpl_api_resp.dart';
 export 'entity_template/entity_tmpl_attribute.dart';
@@ -453,6 +456,12 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: false,
           dartType: 'UuidValue?',
           columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'listingAttribute',
+          columnType: _i2.ColumnType.json,
+          isNullable: false,
+          dartType: '(String, String,)',
         ),
         _i2.ColumnDefinition(
           name: 'attributesOrder',
@@ -1066,32 +1075,35 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i14.AttributeTmplApiResponse) {
       return _i14.AttributeTmplApiResponse.fromJson(data) as T;
     }
-    if (t == _i15.EntityLink) {
-      return _i15.EntityLink.fromJson(data) as T;
+    if (t == _i15.Entity) {
+      return _i15.Entity.fromJson(data) as T;
     }
-    if (t == _i16.Entity) {
-      return _i16.Entity.fromJson(data) as T;
+    if (t == _i16.EntityApiResponse) {
+      return _i16.EntityApiResponse.fromJson(data) as T;
     }
-    if (t == _i17.EntityTmpl) {
-      return _i17.EntityTmpl.fromJson(data) as T;
+    if (t == _i17.EntityLink) {
+      return _i17.EntityLink.fromJson(data) as T;
     }
-    if (t == _i18.EntityTmplApiResponse) {
-      return _i18.EntityTmplApiResponse.fromJson(data) as T;
+    if (t == _i18.EntityTmpl) {
+      return _i18.EntityTmpl.fromJson(data) as T;
     }
-    if (t == _i19.EntityTmplAttribute) {
-      return _i19.EntityTmplAttribute.fromJson(data) as T;
+    if (t == _i19.EntityTmplApiResponse) {
+      return _i19.EntityTmplApiResponse.fromJson(data) as T;
     }
-    if (t == _i20.EntityTmplLink) {
-      return _i20.EntityTmplLink.fromJson(data) as T;
+    if (t == _i20.EntityTmplAttribute) {
+      return _i20.EntityTmplAttribute.fromJson(data) as T;
     }
-    if (t == _i21.ApiException) {
-      return _i21.ApiException.fromJson(data) as T;
+    if (t == _i21.EntityTmplLink) {
+      return _i21.EntityTmplLink.fromJson(data) as T;
     }
-    if (t == _i22.HasId) {
-      return _i22.HasId.fromJson(data) as T;
+    if (t == _i22.ApiException) {
+      return _i22.ApiException.fromJson(data) as T;
     }
-    if (t == _i23.ValueType) {
-      return _i23.ValueType.fromJson(data) as T;
+    if (t == _i23.HasId) {
+      return _i23.HasId.fromJson(data) as T;
+    }
+    if (t == _i24.ValueType) {
+      return _i24.ValueType.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.AccessLevel?>()) {
       return (data != null ? _i5.AccessLevel.fromJson(data) : null) as T;
@@ -1127,34 +1139,44 @@ class Protocol extends _i1.SerializationManagerServer {
               : null)
           as T;
     }
-    if (t == _i1.getType<_i15.EntityLink?>()) {
-      return (data != null ? _i15.EntityLink.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.Entity?>()) {
+      return (data != null ? _i15.Entity.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i16.Entity?>()) {
-      return (data != null ? _i16.Entity.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.EntityApiResponse?>()) {
+      return (data != null ? _i16.EntityApiResponse.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i17.EntityTmpl?>()) {
-      return (data != null ? _i17.EntityTmpl.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i17.EntityLink?>()) {
+      return (data != null ? _i17.EntityLink.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.EntityTmplApiResponse?>()) {
-      return (data != null ? _i18.EntityTmplApiResponse.fromJson(data) : null)
+    if (t == _i1.getType<_i18.EntityTmpl?>()) {
+      return (data != null ? _i18.EntityTmpl.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i19.EntityTmplApiResponse?>()) {
+      return (data != null ? _i19.EntityTmplApiResponse.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i19.EntityTmplAttribute?>()) {
-      return (data != null ? _i19.EntityTmplAttribute.fromJson(data) : null)
+    if (t == _i1.getType<_i20.EntityTmplAttribute?>()) {
+      return (data != null ? _i20.EntityTmplAttribute.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i20.EntityTmplLink?>()) {
-      return (data != null ? _i20.EntityTmplLink.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i21.EntityTmplLink?>()) {
+      return (data != null ? _i21.EntityTmplLink.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i21.ApiException?>()) {
-      return (data != null ? _i21.ApiException.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i22.ApiException?>()) {
+      return (data != null ? _i22.ApiException.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i22.HasId?>()) {
-      return (data != null ? _i22.HasId.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i23.HasId?>()) {
+      return (data != null ? _i23.HasId.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i23.ValueType?>()) {
-      return (data != null ? _i23.ValueType.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i24.ValueType?>()) {
+      return (data != null ? _i24.ValueType.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<(String, String)>()) {
+      return (
+            deserialize<String>(((data as Map)['p'] as List)[0]),
+            deserialize<String>(data['p'][1]),
+          )
+          as T;
     }
     if (t == List<(int, String)>) {
       return (data as List).map((e) => deserialize<(int, String)>(e)).toList()
@@ -1197,60 +1219,71 @@ class Protocol extends _i1.SerializationManagerServer {
               .toList()
           as T;
     }
-    if (t == List<_i15.EntityLink>) {
-      return (data as List).map((e) => deserialize<_i15.EntityLink>(e)).toList()
+    if (t == List<_i17.EntityLink>) {
+      return (data as List).map((e) => deserialize<_i17.EntityLink>(e)).toList()
           as T;
     }
-    if (t == _i1.getType<List<_i15.EntityLink>?>()) {
+    if (t == _i1.getType<List<_i17.EntityLink>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i15.EntityLink>(e))
+                    .map((e) => deserialize<_i17.EntityLink>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i19.EntityTmplAttribute>) {
+    if (t == List<_i20.EntityTmplAttribute>) {
       return (data as List)
-              .map((e) => deserialize<_i19.EntityTmplAttribute>(e))
+              .map((e) => deserialize<_i20.EntityTmplAttribute>(e))
               .toList()
           as T;
     }
-    if (t == _i1.getType<List<_i19.EntityTmplAttribute>?>()) {
+    if (t == _i1.getType<List<_i20.EntityTmplAttribute>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i19.EntityTmplAttribute>(e))
+                    .map((e) => deserialize<_i20.EntityTmplAttribute>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i20.EntityTmplLink>) {
+    if (t == List<_i21.EntityTmplLink>) {
       return (data as List)
-              .map((e) => deserialize<_i20.EntityTmplLink>(e))
+              .map((e) => deserialize<_i21.EntityTmplLink>(e))
               .toList()
           as T;
     }
-    if (t == _i1.getType<List<_i20.EntityTmplLink>?>()) {
+    if (t == _i1.getType<List<_i21.EntityTmplLink>?>()) {
       return (data != null
               ? (data as List)
-                    .map((e) => deserialize<_i20.EntityTmplLink>(e))
+                    .map((e) => deserialize<_i21.EntityTmplLink>(e))
                     .toList()
               : null)
           as T;
     }
-    if (t == List<_i24.AccessLevel>) {
+    if (t == List<_i25.AccessLevel>) {
       return (data as List)
-              .map((e) => deserialize<_i24.AccessLevel>(e))
+              .map((e) => deserialize<_i25.AccessLevel>(e))
               .toList()
           as T;
     }
-    if (t == List<_i25.AttributeTmpl>) {
+    if (t == List<_i26.AttributeTmpl>) {
       return (data as List)
-              .map((e) => deserialize<_i25.AttributeTmpl>(e))
+              .map((e) => deserialize<_i26.AttributeTmpl>(e))
               .toList()
           as T;
     }
-    if (t == List<_i26.EntityTmpl>) {
-      return (data as List).map((e) => deserialize<_i26.EntityTmpl>(e)).toList()
+    if (t == List<_i27.Entity>) {
+      return (data as List).map((e) => deserialize<_i27.Entity>(e)).toList()
+          as T;
+    }
+    if (t == List<_i28.EntityTmpl>) {
+      return (data as List).map((e) => deserialize<_i28.EntityTmpl>(e)).toList()
+          as T;
+    }
+    if (t == _i1.getType<(String, String)>()) {
+      return (
+            deserialize<String>(((data as Map)['p'] as List)[0]),
+            deserialize<String>(data['p'][1]),
+          )
           as T;
     }
     if (t == _i1.getType<(int, String)>()) {
@@ -1291,15 +1324,16 @@ class Protocol extends _i1.SerializationManagerServer {
       _i12.Attribute => 'Attribute',
       _i13.AttributeTmpl => 'AttributeTmpl',
       _i14.AttributeTmplApiResponse => 'AttributeTmplApiResponse',
-      _i15.EntityLink => 'EntityLink',
-      _i16.Entity => 'Entity',
-      _i17.EntityTmpl => 'EntityTmpl',
-      _i18.EntityTmplApiResponse => 'EntityTmplApiResponse',
-      _i19.EntityTmplAttribute => 'EntityTmplAttribute',
-      _i20.EntityTmplLink => 'EntityTmplLink',
-      _i21.ApiException => 'ApiException',
-      _i22.HasId => 'HasId',
-      _i23.ValueType => 'ValueType',
+      _i15.Entity => 'Entity',
+      _i16.EntityApiResponse => 'EntityApiResponse',
+      _i17.EntityLink => 'EntityLink',
+      _i18.EntityTmpl => 'EntityTmpl',
+      _i19.EntityTmplApiResponse => 'EntityTmplApiResponse',
+      _i20.EntityTmplAttribute => 'EntityTmplAttribute',
+      _i21.EntityTmplLink => 'EntityTmplLink',
+      _i22.ApiException => 'ApiException',
+      _i23.HasId => 'HasId',
+      _i24.ValueType => 'ValueType',
       _ => null,
     };
   }
@@ -1334,23 +1368,25 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'AttributeTmpl';
       case _i14.AttributeTmplApiResponse():
         return 'AttributeTmplApiResponse';
-      case _i15.EntityLink():
-        return 'EntityLink';
-      case _i16.Entity():
+      case _i15.Entity():
         return 'Entity';
-      case _i17.EntityTmpl():
+      case _i16.EntityApiResponse():
+        return 'EntityApiResponse';
+      case _i17.EntityLink():
+        return 'EntityLink';
+      case _i18.EntityTmpl():
         return 'EntityTmpl';
-      case _i18.EntityTmplApiResponse():
+      case _i19.EntityTmplApiResponse():
         return 'EntityTmplApiResponse';
-      case _i19.EntityTmplAttribute():
+      case _i20.EntityTmplAttribute():
         return 'EntityTmplAttribute';
-      case _i20.EntityTmplLink():
+      case _i21.EntityTmplLink():
         return 'EntityTmplLink';
-      case _i21.ApiException():
+      case _i22.ApiException():
         return 'ApiException';
-      case _i22.HasId():
+      case _i23.HasId():
         return 'HasId';
-      case _i23.ValueType():
+      case _i24.ValueType():
         return 'ValueType';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1404,32 +1440,35 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'AttributeTmplApiResponse') {
       return deserialize<_i14.AttributeTmplApiResponse>(data['data']);
     }
-    if (dataClassName == 'EntityLink') {
-      return deserialize<_i15.EntityLink>(data['data']);
-    }
     if (dataClassName == 'Entity') {
-      return deserialize<_i16.Entity>(data['data']);
+      return deserialize<_i15.Entity>(data['data']);
+    }
+    if (dataClassName == 'EntityApiResponse') {
+      return deserialize<_i16.EntityApiResponse>(data['data']);
+    }
+    if (dataClassName == 'EntityLink') {
+      return deserialize<_i17.EntityLink>(data['data']);
     }
     if (dataClassName == 'EntityTmpl') {
-      return deserialize<_i17.EntityTmpl>(data['data']);
+      return deserialize<_i18.EntityTmpl>(data['data']);
     }
     if (dataClassName == 'EntityTmplApiResponse') {
-      return deserialize<_i18.EntityTmplApiResponse>(data['data']);
+      return deserialize<_i19.EntityTmplApiResponse>(data['data']);
     }
     if (dataClassName == 'EntityTmplAttribute') {
-      return deserialize<_i19.EntityTmplAttribute>(data['data']);
+      return deserialize<_i20.EntityTmplAttribute>(data['data']);
     }
     if (dataClassName == 'EntityTmplLink') {
-      return deserialize<_i20.EntityTmplLink>(data['data']);
+      return deserialize<_i21.EntityTmplLink>(data['data']);
     }
     if (dataClassName == 'ApiException') {
-      return deserialize<_i21.ApiException>(data['data']);
+      return deserialize<_i22.ApiException>(data['data']);
     }
     if (dataClassName == 'HasId') {
-      return deserialize<_i22.HasId>(data['data']);
+      return deserialize<_i23.HasId>(data['data']);
     }
     if (dataClassName == 'ValueType') {
-      return deserialize<_i23.ValueType>(data['data']);
+      return deserialize<_i24.ValueType>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1481,16 +1520,16 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i11.TextAttribute.t;
       case _i13.AttributeTmpl:
         return _i13.AttributeTmpl.t;
-      case _i15.EntityLink:
-        return _i15.EntityLink.t;
-      case _i16.Entity:
-        return _i16.Entity.t;
-      case _i17.EntityTmpl:
-        return _i17.EntityTmpl.t;
-      case _i19.EntityTmplAttribute:
-        return _i19.EntityTmplAttribute.t;
-      case _i20.EntityTmplLink:
-        return _i20.EntityTmplLink.t;
+      case _i15.Entity:
+        return _i15.Entity.t;
+      case _i17.EntityLink:
+        return _i17.EntityLink.t;
+      case _i18.EntityTmpl:
+        return _i18.EntityTmpl.t;
+      case _i20.EntityTmplAttribute:
+        return _i20.EntityTmplAttribute.t;
+      case _i21.EntityTmplLink:
+        return _i21.EntityTmplLink.t;
     }
     return null;
   }
@@ -1510,6 +1549,14 @@ class Protocol extends _i1.SerializationManagerServer {
   Map<String, dynamic>? mapRecordToJson(Record? record) {
     if (record == null) {
       return null;
+    }
+    if (record is (String, String)) {
+      return {
+        "p": [
+          record.$1,
+          record.$2,
+        ],
+      };
     }
     if (record is (int, String)) {
       return {

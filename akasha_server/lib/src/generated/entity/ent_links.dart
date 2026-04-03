@@ -13,7 +13,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import '../protocol.dart' as _i1;
 import 'package:serverpod/serverpod.dart' as _i2;
-import '../entity/entity.dart' as _i3;
+import '../entity/ent.dart' as _i3;
 import 'package:akasha_server/src/generated/protocol.dart' as _i4;
 
 abstract class EntityLink extends _i1.HasId

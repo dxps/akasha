@@ -25,6 +25,7 @@ abstract class Entity extends _i1.HasId
     implements _i2.TableRow<_i2.UuidValue?>, _i2.ProtocolSerialization {
   Entity._({
     this.id,
+    required this.listingAttribute,
     required this.attributesOrder,
     required this.textAttributes,
     required this.numberAttributes,
@@ -37,6 +38,7 @@ abstract class Entity extends _i1.HasId
 
   factory Entity({
     _i2.UuidValue? id,
+    required (String, String) listingAttribute,
     required List<(int, String)> attributesOrder,
     required List<_i3.TextAttribute> textAttributes,
     required List<_i4.NumberAttribute> numberAttributes,
@@ -52,6 +54,9 @@ abstract class Entity extends _i1.HasId
       id: jsonSerialization['id'] == null
           ? null
           : _i2.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      listingAttribute: _i9.Protocol().deserialize<(String, String)>(
+        (jsonSerialization['listingAttribute'] as Map<String, dynamic>),
+      ),
       attributesOrder: _i9.Protocol().deserialize<List<(int, String)>>(
         jsonSerialization['attributesOrder'],
       ),
@@ -91,6 +96,9 @@ abstract class Entity extends _i1.HasId
   @override
   _i2.UuidValue? id;
 
+  /// The attribute (the name and its value) that is presented in the listing of entities.
+  (String, String) listingAttribute;
+
   /// The order of attributes. Each list item is a tuple of (order-idx, attribute-type).
   List<(int, String)> attributesOrder;
 
@@ -117,6 +125,7 @@ abstract class Entity extends _i1.HasId
   @_i2.useResult
   Entity copyWith({
     Object? id,
+    (String, String)? listingAttribute,
     List<(int, String)>? attributesOrder,
     List<_i3.TextAttribute>? textAttributes,
     List<_i4.NumberAttribute>? numberAttributes,
@@ -131,6 +140,7 @@ abstract class Entity extends _i1.HasId
     return {
       '__className__': 'Entity',
       if (id != null) 'id': id?.toJson(),
+      'listingAttribute': _i9.Protocol().mapRecordToJson(listingAttribute),
       'attributesOrder': _i9.Protocol().mapContainerToJson(attributesOrder),
       'textAttributes': textAttributes.toJson(valueToJson: (v) => v.toJson()),
       'numberAttributes': numberAttributes.toJson(
@@ -153,6 +163,7 @@ abstract class Entity extends _i1.HasId
     return {
       '__className__': 'Entity',
       if (id != null) 'id': id?.toJson(),
+      'listingAttribute': _i9.Protocol().mapRecordToJson(listingAttribute),
       'attributesOrder': _i9.Protocol().mapContainerToJson(attributesOrder),
       'textAttributes': textAttributes.toJson(
         valueToJson: (v) => v.toJsonForProtocol(),
@@ -221,6 +232,7 @@ class _Undefined {}
 class _EntityImpl extends Entity {
   _EntityImpl({
     _i2.UuidValue? id,
+    required (String, String) listingAttribute,
     required List<(int, String)> attributesOrder,
     required List<_i3.TextAttribute> textAttributes,
     required List<_i4.NumberAttribute> numberAttributes,
@@ -231,6 +243,7 @@ class _EntityImpl extends Entity {
     List<_i8.EntityLink>? incomingLinks,
   }) : super._(
          id: id,
+         listingAttribute: listingAttribute,
          attributesOrder: attributesOrder,
          textAttributes: textAttributes,
          numberAttributes: numberAttributes,
@@ -247,6 +260,7 @@ class _EntityImpl extends Entity {
   @override
   Entity copyWith({
     Object? id = _Undefined,
+    (String, String)? listingAttribute,
     List<(int, String)>? attributesOrder,
     List<_i3.TextAttribute>? textAttributes,
     List<_i4.NumberAttribute>? numberAttributes,
@@ -258,6 +272,12 @@ class _EntityImpl extends Entity {
   }) {
     return Entity(
       id: id is _i2.UuidValue? ? id : this.id,
+      listingAttribute:
+          listingAttribute ??
+          (
+            this.listingAttribute.$1,
+            this.listingAttribute.$2,
+          ),
       attributesOrder:
           attributesOrder ??
           this.attributesOrder
@@ -295,6 +315,13 @@ class _EntityImpl extends Entity {
 
 class EntityUpdateTable extends _i2.UpdateTable<EntityTable> {
   EntityUpdateTable(super.table);
+
+  _i2.ColumnValue<(String, String), Map<String, dynamic>?> listingAttribute(
+    (String, String) value,
+  ) => _i2.ColumnValue(
+    table.listingAttribute,
+    _i9.Protocol().mapRecordToJson(value),
+  );
 
   _i2.ColumnValue<List<(int, String)>, List<(int, String)>> attributesOrder(
     List<(int, String)> value,
@@ -337,6 +364,10 @@ class EntityUpdateTable extends _i2.UpdateTable<EntityTable> {
 class EntityTable extends _i2.Table<_i2.UuidValue?> {
   EntityTable({super.tableRelation}) : super(tableName: 'entities') {
     updateTable = EntityUpdateTable(this);
+    listingAttribute = _i2.ColumnSerializable<(String, String)>(
+      'listingAttribute',
+      this,
+    );
     attributesOrder = _i2.ColumnSerializable<List<(int, String)>>(
       'attributesOrder',
       this,
@@ -364,6 +395,9 @@ class EntityTable extends _i2.Table<_i2.UuidValue?> {
   }
 
   late final EntityUpdateTable updateTable;
+
+  /// The attribute (the name and its value) that is presented in the listing of entities.
+  late final _i2.ColumnSerializable<(String, String)> listingAttribute;
 
   /// The order of attributes. Each list item is a tuple of (order-idx, attribute-type).
   late final _i2.ColumnSerializable<List<(int, String)>> attributesOrder;
@@ -454,6 +488,7 @@ class EntityTable extends _i2.Table<_i2.UuidValue?> {
   @override
   List<_i2.Column> get columns => [
     id,
+    listingAttribute,
     attributesOrder,
     textAttributes,
     numberAttributes,
@@ -523,6 +558,10 @@ class EntityRepository {
   final attach = const EntityAttachRepository._();
 
   final attachRow = const EntityAttachRowRepository._();
+
+  final detach = const EntityDetachRepository._();
+
+  final detachRow = const EntityDetachRowRepository._();
 
   /// Returns a list of [Entity]s matching the given query parameters.
   ///
@@ -910,6 +949,106 @@ class EntityAttachRowRepository {
     }
 
     var $entityLink = entityLink.copyWith(targetId: entity.id);
+    await session.db.updateRow<_i8.EntityLink>(
+      $entityLink,
+      columns: [_i8.EntityLink.t.targetId],
+      transaction: transaction,
+    );
+  }
+}
+
+class EntityDetachRepository {
+  const EntityDetachRepository._();
+
+  /// Detaches the relation between this [Entity] and the given [EntityLink]
+  /// by setting the [EntityLink]'s foreign key `sourceId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> outgoingLinks(
+    _i2.DatabaseSession session,
+    List<_i8.EntityLink> entityLink, {
+    _i2.Transaction? transaction,
+  }) async {
+    if (entityLink.any((e) => e.id == null)) {
+      throw ArgumentError.notNull('entityLink.id');
+    }
+
+    var $entityLink = entityLink
+        .map((e) => e.copyWith(sourceId: null))
+        .toList();
+    await session.db.update<_i8.EntityLink>(
+      $entityLink,
+      columns: [_i8.EntityLink.t.sourceId],
+      transaction: transaction,
+    );
+  }
+
+  /// Detaches the relation between this [Entity] and the given [EntityLink]
+  /// by setting the [EntityLink]'s foreign key `targetId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> incomingLinks(
+    _i2.DatabaseSession session,
+    List<_i8.EntityLink> entityLink, {
+    _i2.Transaction? transaction,
+  }) async {
+    if (entityLink.any((e) => e.id == null)) {
+      throw ArgumentError.notNull('entityLink.id');
+    }
+
+    var $entityLink = entityLink
+        .map((e) => e.copyWith(targetId: null))
+        .toList();
+    await session.db.update<_i8.EntityLink>(
+      $entityLink,
+      columns: [_i8.EntityLink.t.targetId],
+      transaction: transaction,
+    );
+  }
+}
+
+class EntityDetachRowRepository {
+  const EntityDetachRowRepository._();
+
+  /// Detaches the relation between this [Entity] and the given [EntityLink]
+  /// by setting the [EntityLink]'s foreign key `sourceId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> outgoingLinks(
+    _i2.DatabaseSession session,
+    _i8.EntityLink entityLink, {
+    _i2.Transaction? transaction,
+  }) async {
+    if (entityLink.id == null) {
+      throw ArgumentError.notNull('entityLink.id');
+    }
+
+    var $entityLink = entityLink.copyWith(sourceId: null);
+    await session.db.updateRow<_i8.EntityLink>(
+      $entityLink,
+      columns: [_i8.EntityLink.t.sourceId],
+      transaction: transaction,
+    );
+  }
+
+  /// Detaches the relation between this [Entity] and the given [EntityLink]
+  /// by setting the [EntityLink]'s foreign key `targetId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> incomingLinks(
+    _i2.DatabaseSession session,
+    _i8.EntityLink entityLink, {
+    _i2.Transaction? transaction,
+  }) async {
+    if (entityLink.id == null) {
+      throw ArgumentError.notNull('entityLink.id');
+    }
+
+    var $entityLink = entityLink.copyWith(targetId: null);
     await session.db.updateRow<_i8.EntityLink>(
       $entityLink,
       columns: [_i8.EntityLink.t.targetId],

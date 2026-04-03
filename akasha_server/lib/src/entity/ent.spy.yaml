@@ -3,6 +3,9 @@ extends: HasId
 table: entities
 
 fields:
+    ### The attribute (the name and its value) that is presented in the listing of entities.
+    listingAttribute: (String, String)
+
     ### The order of attributes. Each list item is a tuple of (order-idx, attribute-type).
     attributesOrder: List<(int, String)>
 

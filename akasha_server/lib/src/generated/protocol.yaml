@@ -21,6 +21,12 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+entityApi:
+  - readAll:
+  - create:
+  - read:
+  - update:
+  - delete:
 entityTmpl:
   - read:
   - readAll:

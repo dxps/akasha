@@ -70,6 +70,7 @@ CREATE TABLE "datetime_attributes" (
 --
 CREATE TABLE "entities" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
+    "listingAttribute" json NOT NULL,
     "attributesOrder" json NOT NULL,
     "textAttributes" json NOT NULL,
     "numberAttributes" json NOT NULL,
@@ -185,9 +186,9 @@ ALTER TABLE ONLY "text_attributes"
 -- MIGRATION VERSION FOR akasha
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('akasha', '20260402133028712-ent-and-attrs', now())
+    VALUES ('akasha', '20260403134452892-ent-and-attrs', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20260402133028712-ent-and-attrs', "timestamp" = now();
+    DO UPDATE SET "version" = '20260403134452892-ent-and-attrs', "timestamp" = now();
 
 --
 -- MIGRATION VERSION FOR serverpod

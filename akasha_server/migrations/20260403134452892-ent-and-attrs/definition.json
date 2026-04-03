@@ -448,6 +448,13 @@
         },
         {
           "__className__": "serverpod.ColumnDefinition",
+          "name": "listingAttribute",
+          "columnType": 8,
+          "isNullable": false,
+          "dartType": "(String, String,)"
+        },
+        {
+          "__className__": "serverpod.ColumnDefinition",
           "name": "attributesOrder",
           "columnType": 8,
           "isNullable": false,
@@ -4232,7 +4239,7 @@
     {
       "__className__": "serverpod.DatabaseMigrationVersion",
       "module": "akasha",
-      "version": "20260402133028712-ent-and-attrs"
+      "version": "20260403134452892-ent-and-attrs"
     },
     {
       "__className__": "serverpod.DatabaseMigrationVersion",

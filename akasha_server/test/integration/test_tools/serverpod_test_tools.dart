@@ -24,10 +24,12 @@ import 'package:akasha_server/src/generated/attribute_template/attr_tmpl.dart'
     as _i7;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i8;
+import 'package:akasha_server/src/generated/entity/ent.dart' as _i9;
+import 'package:akasha_server/src/generated/entity/ent_api_resp.dart' as _i10;
 import 'package:akasha_server/src/generated/entity_template/entity_tmpl.dart'
-    as _i9;
+    as _i11;
 import 'package:akasha_server/src/generated/entity_template/entity_tmpl_api_resp.dart'
-    as _i10;
+    as _i12;
 import 'package:akasha_server/src/generated/protocol.dart';
 import 'package:akasha_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -143,6 +145,8 @@ class TestEndpoints {
 
   late final _JwtRefreshEndpoint jwtRefresh;
 
+  late final _EntityApi entityApi;
+
   late final _EntityTmplEndpoint entityTmpl;
 }
 
@@ -166,6 +170,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     jwtRefresh = _JwtRefreshEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    entityApi = _EntityApi(
       endpoints,
       serializationManager,
     );
@@ -824,6 +832,171 @@ class _JwtRefreshEndpoint {
   }
 }
 
+class _EntityApi {
+  _EntityApi(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<List<_i9.Entity>> readAll(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'entityApi',
+            method: 'readAll',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'entityApi',
+          methodName: 'readAll',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i9.Entity>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.EntityApiResponse> create(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i9.Entity item,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'entityApi',
+            method: 'create',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'entityApi',
+          methodName: 'create',
+          parameters: _i1.testObjectToJson({'item': item}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.EntityApiResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.EntityApiResponse> read(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue id,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'entityApi',
+            method: 'read',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'entityApi',
+          methodName: 'read',
+          parameters: _i1.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.EntityApiResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.EntityApiResponse> update(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i9.Entity item,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'entityApi',
+            method: 'update',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'entityApi',
+          methodName: 'update',
+          parameters: _i1.testObjectToJson({'item': item}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.EntityApiResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.EntityApiResponse> delete(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue id,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'entityApi',
+            method: 'delete',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'entityApi',
+          methodName: 'delete',
+          parameters: _i1.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.EntityApiResponse>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _EntityTmplEndpoint {
   _EntityTmplEndpoint(
     this._endpointDispatch,
@@ -834,7 +1007,7 @@ class _EntityTmplEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i9.EntityTmpl?> read(
+  _i3.Future<_i11.EntityTmpl?> read(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue id,
   ) async {
@@ -857,7 +1030,7 @@ class _EntityTmplEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i9.EntityTmpl?>);
+                as _i3.Future<_i11.EntityTmpl?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -865,7 +1038,7 @@ class _EntityTmplEndpoint {
     });
   }
 
-  _i3.Future<List<_i9.EntityTmpl>> readAll(
+  _i3.Future<List<_i11.EntityTmpl>> readAll(
     _i1.TestSessionBuilder sessionBuilder,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -887,7 +1060,7 @@ class _EntityTmplEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i9.EntityTmpl>>);
+                as _i3.Future<List<_i11.EntityTmpl>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -895,9 +1068,9 @@ class _EntityTmplEndpoint {
     });
   }
 
-  _i3.Future<_i10.EntityTmplApiResponse> create(
+  _i3.Future<_i12.EntityTmplApiResponse> create(
     _i1.TestSessionBuilder sessionBuilder,
-    _i9.EntityTmpl item,
+    _i11.EntityTmpl item,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -918,7 +1091,7 @@ class _EntityTmplEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i10.EntityTmplApiResponse>);
+                as _i3.Future<_i12.EntityTmplApiResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -926,9 +1099,9 @@ class _EntityTmplEndpoint {
     });
   }
 
-  _i3.Future<_i10.EntityTmplApiResponse> update(
+  _i3.Future<_i12.EntityTmplApiResponse> update(
     _i1.TestSessionBuilder sessionBuilder,
-    _i9.EntityTmpl item,
+    _i11.EntityTmpl item,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -949,7 +1122,7 @@ class _EntityTmplEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i10.EntityTmplApiResponse>);
+                as _i3.Future<_i12.EntityTmplApiResponse>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
