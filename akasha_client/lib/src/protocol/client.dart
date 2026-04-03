@@ -338,43 +338,43 @@ class EndpointJwtRefresh extends _i8.EndpointRefreshJwtTokens {
 }
 
 /// {@category Endpoint}
-class EndpointEntityApi extends _i1.EndpointRef {
-  EndpointEntityApi(_i1.EndpointCaller caller) : super(caller);
+class EndpointEntity extends _i1.EndpointRef {
+  EndpointEntity(_i1.EndpointCaller caller) : super(caller);
 
   @override
-  String get name => 'entityApi';
+  String get name => 'entity';
 
   _i2.Future<List<_i9.Entity>> readAll() =>
       caller.callServerEndpoint<List<_i9.Entity>>(
-        'entityApi',
+        'entity',
         'readAll',
         {},
       );
 
   _i2.Future<_i10.EntityApiResponse> create(_i9.Entity item) =>
       caller.callServerEndpoint<_i10.EntityApiResponse>(
-        'entityApi',
+        'entity',
         'create',
         {'item': item},
       );
 
   _i2.Future<_i10.EntityApiResponse> read(_i1.UuidValue id) =>
       caller.callServerEndpoint<_i10.EntityApiResponse>(
-        'entityApi',
+        'entity',
         'read',
         {'id': id},
       );
 
   _i2.Future<_i10.EntityApiResponse> update(_i9.Entity item) =>
       caller.callServerEndpoint<_i10.EntityApiResponse>(
-        'entityApi',
+        'entity',
         'update',
         {'item': item},
       );
 
   _i2.Future<_i10.EntityApiResponse> delete(_i1.UuidValue id) =>
       caller.callServerEndpoint<_i10.EntityApiResponse>(
-        'entityApi',
+        'entity',
         'delete',
         {'id': id},
       );
@@ -466,7 +466,7 @@ class Client extends _i1.ServerpodClientShared {
     attrTmpls = EndpointAttrTmpls(this);
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
-    entityApi = EndpointEntityApi(this);
+    entity = EndpointEntity(this);
     entityTmpl = EndpointEntityTmpl(this);
     modules = Modules(this);
   }
@@ -479,7 +479,7 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointJwtRefresh jwtRefresh;
 
-  late final EndpointEntityApi entityApi;
+  late final EndpointEntity entity;
 
   late final EndpointEntityTmpl entityTmpl;
 
@@ -491,7 +491,7 @@ class Client extends _i1.ServerpodClientShared {
     'attrTmpls': attrTmpls,
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
-    'entityApi': entityApi,
+    'entity': entity,
     'entityTmpl': entityTmpl,
   };
 

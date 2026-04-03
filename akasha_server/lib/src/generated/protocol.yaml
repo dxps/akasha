@@ -21,7 +21,7 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
-entityApi:
+entity:
   - readAll:
   - create:
   - read:

@@ -1,7 +1,7 @@
 import 'package:akasha_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
-class EntityApi extends Endpoint {
+class EntityEndpoint extends Endpoint {
   //
   Future<List<Entity>> readAll(Session session) async {
     return Entity.db.find(session);

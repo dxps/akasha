@@ -1,4 +1,6 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_ui/entity/ent_repo.dart';
+import 'package:akasha_ui/entity/ents_cubit.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_dialogs_cubit.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_repo.dart';
 import 'package:akasha_ui/routing.dart';
@@ -60,6 +62,12 @@ void main() async {
           create: (_) {
             final repo = EntityTemplateRepo(client: client);
             return EntityTemplatesCubit(repo: repo);
+          },
+        ),
+        RepositoryProvider(
+          create: (_) {
+            final repo = EntityRepo(client);
+            return EntitiesCubit(repo);
           },
         ),
       ],

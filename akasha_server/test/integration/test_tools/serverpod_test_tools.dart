@@ -145,7 +145,7 @@ class TestEndpoints {
 
   late final _JwtRefreshEndpoint jwtRefresh;
 
-  late final _EntityApi entityApi;
+  late final _EntityEndpoint entity;
 
   late final _EntityTmplEndpoint entityTmpl;
 }
@@ -173,7 +173,7 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
-    entityApi = _EntityApi(
+    entity = _EntityEndpoint(
       endpoints,
       serializationManager,
     );
@@ -832,8 +832,8 @@ class _JwtRefreshEndpoint {
   }
 }
 
-class _EntityApi {
-  _EntityApi(
+class _EntityEndpoint {
+  _EntityEndpoint(
     this._endpointDispatch,
     this._serializationManager,
   );
@@ -848,13 +848,13 @@ class _EntityApi {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'entityApi',
+            endpoint: 'entity',
             method: 'readAll',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'entityApi',
+          endpointPath: 'entity',
           methodName: 'readAll',
           parameters: _i1.testObjectToJson({}),
           serializationManager: _serializationManager,
@@ -879,13 +879,13 @@ class _EntityApi {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'entityApi',
+            endpoint: 'entity',
             method: 'create',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'entityApi',
+          endpointPath: 'entity',
           methodName: 'create',
           parameters: _i1.testObjectToJson({'item': item}),
           serializationManager: _serializationManager,
@@ -910,13 +910,13 @@ class _EntityApi {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'entityApi',
+            endpoint: 'entity',
             method: 'read',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'entityApi',
+          endpointPath: 'entity',
           methodName: 'read',
           parameters: _i1.testObjectToJson({'id': id}),
           serializationManager: _serializationManager,
@@ -941,13 +941,13 @@ class _EntityApi {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'entityApi',
+            endpoint: 'entity',
             method: 'update',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'entityApi',
+          endpointPath: 'entity',
           methodName: 'update',
           parameters: _i1.testObjectToJson({'item': item}),
           serializationManager: _serializationManager,
@@ -972,13 +972,13 @@ class _EntityApi {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
           (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-            endpoint: 'entityApi',
+            endpoint: 'entity',
             method: 'delete',
           );
       try {
         var _localCallContext = await _endpointDispatch.getMethodCallContext(
           createSessionCallback: (_) => _localUniqueSession,
-          endpointPath: 'entityApi',
+          endpointPath: 'entity',
           methodName: 'delete',
           parameters: _i1.testObjectToJson({'id': id}),
           serializationManager: _serializationManager,
