@@ -23,117 +23,136 @@ class EntityTemplatesScreen extends StatefulWidget {
 }
 
 class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _ModalHelpers {
-  bool isFetchingData = false;
-  List<EntityTmpl> entityTemplates = [];
   int _nextModalId = 1;
 
-  Future<void> _getEntries({bool forceRefresh = false}) async {
-    setState(() => isFetchingData = true);
-    context
-        .read<EntityTemplatesCubit>()
-        .getAll(forceRefresh: forceRefresh)
-        .then((items) {
-          debugPrint(">>> [_EntityTemplatesScreenState] Got ${items.length} entity templates from cubit.");
-          setState(() {
-            entityTemplates = items;
-            isFetchingData = false;
-          });
-        })
-        .catchError((e) {
-          debugPrint('>>> [_EntityTemplatesScreenState] Failed to load entity templates: $e');
-          if (mounted) {
-            showErrorSnackbar(context, 'Failed to load entity templates: $e');
-            setState(() => isFetchingData = false);
-          }
-        });
+  Future<void> _forceReloadEntries() async {
+    context.read<EntityTemplatesCubit>().getAll(forceRefresh: true);
   }
 
   @override
   void initState() {
     super.initState();
-    _getEntries();
+    context.read<EntityTemplatesCubit>().getAll();
   }
 
   @override
   Widget build(BuildContext context) {
     final viewportSize = MediaQuery.sizeOf(context);
+
     final addButton = IconButton(
       icon: const Icon(Icons.add),
       iconSize: 20,
       tooltip: 'Add Entity Template',
       onPressed: () {
-        _openModal(viewportSize: viewportSize);
+        _openModal(
+          viewportSize: viewportSize,
+          items: context.read<EntityTemplatesCubit>().state.items,
+        );
       },
     );
-    return BlocListener<EntityTemplatesCubit, EntityTemplatesState>(
-      listenWhen: (previous, current) => current is EntityTemplatesStateOpenModalFor,
+
+    return BlocConsumer<EntityTemplatesCubit, EntityTemplatesState>(
+      listenWhen: (previous, current) => current is EntityTemplatesStateOpenModalFor || current is EntityTemplatesStateError,
       listener: (context, state) async {
-        if (state is EntityTemplatesStateOpenModalFor) {
-          debugPrint('>>> Reacting to EntityTemplatesStateOpenModalFor ${state.entityTmpl} ...');
-          final item = await context.read<EntityTemplatesCubit>().repo.getById(state.entityTmpl.id!);
-          _openModal(
-            item: item,
-            readOnly: true,
-            viewportSize: viewportSize,
-          );
+        // Note: BlocListener does not rebuild UI. It is meant for side effects such as dialogs, snackbars, and navigation.
+        switch (state) {
+          case EntityTemplatesStateOpenModalFor(forItem: final entityTmpl):
+            debugPrint('>>> Reacting to EntityTemplatesStateOpenModalFor $entityTmpl ...');
+            _openModal(
+              item: entityTmpl,
+              readOnly: true,
+              viewportSize: viewportSize,
+              items: context.read<EntityTemplatesCubit>().state.items,
+            );
+            break;
+
+          case EntityTemplatesStateError(:final errorMessage):
+            debugPrint('>>> Reacting to EntityTemplatesStateError: $errorMessage');
+            showErrorSnackbar(context, errorMessage);
+            break;
+
+          default:
+            break;
         }
       },
-      child: BlocSelector<ThemeCubit, ThemeMode, bool>(
-        selector: (themeMode) => themeMode == ThemeMode.dark,
-        builder: (context, isDarkMode) {
-          return Scaffold(
-            body: LayoutBuilder(
-              builder: (context, constraints) {
-                final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
-                return Stack(
-                  children: [
-                    const TopHeader(),
-                    isFetchingData
-                        ? const Center(child: CircularProgressIndicator())
-                        : entityTemplates.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text('No entity templates yet.'),
-                                const SizedBox(height: 16),
-                                addButton,
-                              ],
-                            ),
-                          )
-                        : Center(
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  _buildTable(vwSize, isDarkMode),
-                                  const SizedBox(height: 20),
-                                  addButton,
-                                ],
-                              ),
-                            ),
-                          ),
+      buildWhen: (previous, current) => current is! EntityTemplatesStateOpenModalFor,
+      builder: (context, state) {
+        return BlocSelector<ThemeCubit, ThemeMode, bool>(
+          selector: (themeMode) => themeMode == ThemeMode.dark,
+          builder: (context, isDarkMode) {
+            return Scaffold(
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  final vwSize = Size(constraints.maxWidth, constraints.maxHeight);
 
-                    for (final modal in modals)
-                      DraggableModal(
-                        key: ValueKey(modal.id),
-                        data: modal,
-                        viewport: vwSize,
-                        onTap: () => _bringToFront(modal.id),
-                        onClose: () => _closeModal(modal.id),
-                        onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
-                      ),
-                  ],
-                );
-              },
-            ),
-          );
-        },
-      ),
+                  return Stack(
+                    children: [
+                      const TopHeader(),
+
+                      switch (state) {
+                        EntityTemplatesStateLoading() => const Center(child: CircularProgressIndicator()),
+
+                        EntityTemplatesStateLoaded(:final items) =>
+                          items.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text('No entity templates yet.'),
+                                      const SizedBox(height: 16),
+                                      addButton,
+                                    ],
+                                  ),
+                                )
+                              : Center(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        _buildTable(vwSize, isDarkMode, items),
+                                        const SizedBox(height: 20),
+                                        addButton,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                        EntityTemplatesStateError() => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Failed to load entity templates.'),
+                              const SizedBox(height: 16),
+                              addButton,
+                            ],
+                          ),
+                        ),
+
+                        _ => const SizedBox.shrink(),
+                      },
+
+                      for (final modal in modals)
+                        DraggableModal(
+                          key: ValueKey(modal.id),
+                          data: modal,
+                          viewport: vwSize,
+                          onTap: () => _bringToFront(modal.id),
+                          onClose: () => _closeModal(modal.id),
+                          onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
-  Widget _buildTable(Size? viewportSize, bool isDarkMode) {
+  Widget _buildTable(Size? viewportSize, bool isDarkMode, List<EntityTmpl> items) {
     final size = viewportSize ?? MediaQuery.sizeOf(context);
+    const colPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -153,49 +172,39 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
               SizedBox(
                 width: 200,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: colPadding,
                   child: Text('name', style: TextStyle(color: Colors.grey)),
                 ),
               ),
               SizedBox(
                 width: 300,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: colPadding,
                   child: Text('description', style: TextStyle(color: Colors.grey)),
                 ),
               ),
               SizedBox(
                 width: 30,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: colPadding,
                   child: Text(''),
                 ),
               ),
             ],
           ),
         ),
-        ...entityTemplates.map((template) {
+        ...items.map((template) {
           return EntityTmplRow(
             item: template,
             nameText: limitChars(template.name, 32),
             descriptionText: template.description != null ? limitChars(template.description!, 40) : '',
-            onView: () async {
-              final item = await client.entityTmpl.read(template.id!);
-              if (item != null) {
-                debugPrint('>>> Got entity template for view: $item');
-                _openModal(item: item, viewportSize: size, readOnly: true);
-              } else {
-                debugPrint('Failed to load entity template with id ${template.id} for view.');
-                if (!mounted) return;
-                showErrorSnackbar(context, 'Failed to load entity template details.');
-              }
-            },
+            onView: () async => context.read<EntityTemplatesCubit>().openModal(template.id!),
             onEdit: () async {
               debugPrint('>>> Got entity template for edit: $template');
               final item = await client.entityTmpl.read(template.id!);
               if (item != null) {
                 debugPrint('>>> Got entity template for edit: $item');
-                _openModal(item: item, viewportSize: size);
+                _openModal(item: item, viewportSize: size, items: items);
               } else {
                 debugPrint('Failed to load entity template with id ${template.id} for edit.');
                 if (!mounted) return;
@@ -214,6 +223,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     Size? viewportSize,
     bool readOnly = false,
     Offset? initialOffset,
+    required List<EntityTmpl> items,
     Map<String, Object?> options = const {},
   }) async {
     final id = _nextModalId++;
@@ -240,6 +250,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
         item: item,
         readOnly: readOnly,
         options: options,
+        entityTmpls: items,
         onRequestEdit: (options) {
           if (readOnly && item != null) {
             final currentModal = modals.firstWhere((m) => m.id == id);
@@ -252,6 +263,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
                 viewportSize: viewportSize,
                 readOnly: false,
                 initialOffset: currentOffset,
+                items: items,
                 options: options,
               );
             });
@@ -265,7 +277,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
 
               if (response.success && mounted) {
                 _closeModal(id);
-                await _getEntries(forceRefresh: true);
+                await _forceReloadEntries();
               } else if (!response.success) {
                 if (!mounted) return;
                 showErrorSnackbar(context, response.errorMessage ?? 'Failed to save entity template: ${response.errorCode}');
@@ -277,7 +289,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
 
             if (response.success && mounted) {
               _closeModal(id);
-              await _getEntries(forceRefresh: true);
+              await _forceReloadEntries();
             } else if (!response.success) {
               if (!mounted) return;
               showErrorSnackbar(context, response.errorMessage ?? 'Failed to create entity template: ${response.errorCode}');
@@ -318,7 +330,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     if (confirmed == true) {
       try {
         await client.entityTmpl.delete(template.id!);
-        await _getEntries(forceRefresh: true);
+        await _forceReloadEntries();
       } catch (e) {
         debugPrint('Error deleting entity template: $e');
         if (mounted) {

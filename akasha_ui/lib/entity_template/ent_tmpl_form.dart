@@ -19,8 +19,17 @@ class EntityTmplForm extends StatefulWidget {
   final void Function(Map<String, Object?> options)? onRequestEdit;
   final bool readOnly;
   final Map<String, Object?> options;
+  final List<EntityTmpl> entityTmpls;
 
-  const EntityTmplForm({super.key, this.item, this.onSave, this.onRequestEdit, this.readOnly = false, this.options = const {}});
+  const EntityTmplForm({
+    super.key,
+    this.item,
+    this.onSave,
+    this.onRequestEdit,
+    this.readOnly = false,
+    required this.entityTmpls,
+    this.options = const {},
+  });
 
   @override
   State<EntityTmplForm> createState() => _EntityTmplFormState();
@@ -36,7 +45,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   List<AttributeTmpl> includedAttributeTmpls = [];
   AttributeTmpl? selectedAttributeTmpl;
 
-  List<EntityTmpl> entityTmpls = [];
   List<EntityTmplLink> includedOutLinks = [];
   EntityTmpl? selectedEntityTmpl;
   UuidValue? selectedLinkId;
@@ -100,15 +108,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
 
   // -----------------------
   // links related logic
-
-  Future<void> _fetchEntityTmpls() async {
-    try {
-      final entries = await client.entityTmpl.readAll();
-      setState(() => entityTmpls = entries);
-    } catch (e) {
-      debugPrint('>>> Failed to fetch entity templates: $e');
-    }
-  }
 
   void _addSelectedOutLink() {
     final linkId = selectedLinkId;
@@ -177,7 +176,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
         }
       },
     );
-    _fetchEntityTmpls();
     includedOutLinks = [...?widget.item?.outgoingLinks];
   }
 
@@ -195,7 +193,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
       return;
     }
 
-    // We don't do the whole form validation, since in the Links tab, the name is empty most of the time.
+    // Note: We don't do the whole form validation, since in the Links tab, the name is empty most of the time.
     // if (!formKey.currentState!.validate()) { return; }
 
     if (nameCtrl.text.trim().isEmpty) {
@@ -272,14 +270,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                         labelText: _isReadOnly ? 'Name' : 'Name *',
                         hintText: _isReadOnly ? null : 'Required',
                       ),
-                      validator: _isReadOnly
-                          ? null
-                          : (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Name is required';
-                              }
-                              return null;
-                            },
+                      validator: _isReadOnly ? null : (value) => (value == null || value.trim().isEmpty) ? 'Name is required' : null,
                       onChanged: _isReadOnly ? null : (_) => nameFieldKey.currentState?.validate(),
                     ),
                     const SizedBox(height: 12),
@@ -318,13 +309,11 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                             readOnly: _isReadOnly,
                             outgoingLinks: includedOutLinks,
                             incomingLinks: widget.item?.incomingLinks ?? [],
-                            entityTmpls: entityTmpls,
+                            entityTmpls: widget.entityTmpls,
                             linkNameCtrl: linkNameCtrl,
                             linkDescCtrl: linkDescCtrl,
                             selectedLinkId: selectedLinkId,
-                            onSelectedLinkChanged: (linkId) {
-                              setState(() => selectedLinkId = linkId);
-                            },
+                            onSelectedLinkChanged: (linkId) => setState(() => selectedLinkId = linkId),
                             onAddOutLink: _addSelectedOutLink,
                             onRemoveLink: _removeIncludedOutgoingLink,
                             onReorderLinks: _onReorderOutgoingLinks,
@@ -340,9 +329,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                               onPressed: _isEdit
                                   ? () {
                                       final activeTabIndex = DefaultTabController.of(tabContext).index;
-                                      widget.onRequestEdit?.call({
-                                        "activeTabIdx": activeTabIndex,
-                                      });
+                                      widget.onRequestEdit?.call({"activeTabIdx": activeTabIndex});
                                     }
                                   : null,
                               color: isDarkMode ? darkFgFadedColor : lightFgFadedColor,
@@ -353,13 +340,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
                               onPressed: _isSaving ? null : onSave,
                               color: isDarkMode ? darkFgColor : lightFgColor,
                               icon: _isSaving
-                                  ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
+                                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                                   : const Icon(Icons.save, size: 22),
                               tooltip: _isEdit ? 'Update' : 'Add',
                             ),
