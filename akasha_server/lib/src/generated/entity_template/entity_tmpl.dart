@@ -11,13 +11,14 @@
 // ignore_for_file: unnecessary_null_comparison
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../entity_template/entity_tmpl_attribute.dart' as _i2;
-import '../entity_template/entity_tmpl_link.dart' as _i3;
-import 'package:akasha_server/src/generated/protocol.dart' as _i4;
+import '../protocol.dart' as _i1;
+import 'package:serverpod/serverpod.dart' as _i2;
+import '../entity_template/entity_tmpl_attribute.dart' as _i3;
+import '../entity_template/entity_tmpl_link.dart' as _i4;
+import 'package:akasha_server/src/generated/protocol.dart' as _i5;
 
-abstract class EntityTmpl
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+abstract class EntityTmpl extends _i1.HasId
+    implements _i2.TableRow<_i2.UuidValue?>, _i2.ProtocolSerialization {
   EntityTmpl._({
     this.id,
     required this.name,
@@ -28,34 +29,34 @@ abstract class EntityTmpl
   });
 
   factory EntityTmpl({
-    _i1.UuidValue? id,
+    _i2.UuidValue? id,
     required String name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributes,
-    List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinks,
+    List<_i3.EntityTmplAttribute>? attributes,
+    List<_i4.EntityTmplLink>? outgoingLinks,
+    List<_i4.EntityTmplLink>? incomingLinks,
   }) = _EntityTmplImpl;
 
   factory EntityTmpl.fromJson(Map<String, dynamic> jsonSerialization) {
     return EntityTmpl(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _i2.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       description: jsonSerialization['description'] as String?,
       attributes: jsonSerialization['attributes'] == null
           ? null
-          : _i4.Protocol().deserialize<List<_i2.EntityTmplAttribute>>(
+          : _i5.Protocol().deserialize<List<_i3.EntityTmplAttribute>>(
               jsonSerialization['attributes'],
             ),
       outgoingLinks: jsonSerialization['outgoingLinks'] == null
           ? null
-          : _i4.Protocol().deserialize<List<_i3.EntityTmplLink>>(
+          : _i5.Protocol().deserialize<List<_i4.EntityTmplLink>>(
               jsonSerialization['outgoingLinks'],
             ),
       incomingLinks: jsonSerialization['incomingLinks'] == null
           ? null
-          : _i4.Protocol().deserialize<List<_i3.EntityTmplLink>>(
+          : _i5.Protocol().deserialize<List<_i4.EntityTmplLink>>(
               jsonSerialization['incomingLinks'],
             ),
     );
@@ -66,33 +67,34 @@ abstract class EntityTmpl
   static const db = EntityTmplRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _i2.UuidValue? id;
 
   String name;
 
   String? description;
 
-  List<_i2.EntityTmplAttribute>? attributes;
+  List<_i3.EntityTmplAttribute>? attributes;
 
   /// The links where this entity template is the source.
-  List<_i3.EntityTmplLink>? outgoingLinks;
+  List<_i4.EntityTmplLink>? outgoingLinks;
 
   /// Optional reverse traversal: links where this entity template is a target.
-  List<_i3.EntityTmplLink>? incomingLinks;
+  List<_i4.EntityTmplLink>? incomingLinks;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _i2.Table<_i2.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [EntityTmpl]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @override
+  @_i2.useResult
   EntityTmpl copyWith({
-    _i1.UuidValue? id,
+    Object? id,
     String? name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributes,
-    List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinks,
+    List<_i3.EntityTmplAttribute>? attributes,
+    List<_i4.EntityTmplLink>? outgoingLinks,
+    List<_i4.EntityTmplLink>? incomingLinks,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -133,9 +135,9 @@ abstract class EntityTmpl
   }
 
   static EntityTmplInclude include({
-    _i2.EntityTmplAttributeIncludeList? attributes,
-    _i3.EntityTmplLinkIncludeList? outgoingLinks,
-    _i3.EntityTmplLinkIncludeList? incomingLinks,
+    _i3.EntityTmplAttributeIncludeList? attributes,
+    _i4.EntityTmplLinkIncludeList? outgoingLinks,
+    _i4.EntityTmplLinkIncludeList? incomingLinks,
   }) {
     return EntityTmplInclude._(
       attributes: attributes,
@@ -145,12 +147,12 @@ abstract class EntityTmpl
   }
 
   static EntityTmplIncludeList includeList({
-    _i1.WhereExpressionBuilder<EntityTmplTable>? where,
+    _i2.WhereExpressionBuilder<EntityTmplTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<EntityTmplTable>? orderBy,
+    _i2.OrderByBuilder<EntityTmplTable>? orderBy,
     bool orderDescending = false,
-    _i1.OrderByListBuilder<EntityTmplTable>? orderByList,
+    _i2.OrderByListBuilder<EntityTmplTable>? orderByList,
     EntityTmplInclude? include,
   }) {
     return EntityTmplIncludeList._(
@@ -166,7 +168,7 @@ abstract class EntityTmpl
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _i2.SerializationManager.encode(this);
   }
 }
 
@@ -174,12 +176,12 @@ class _Undefined {}
 
 class _EntityTmplImpl extends EntityTmpl {
   _EntityTmplImpl({
-    _i1.UuidValue? id,
+    _i2.UuidValue? id,
     required String name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributes,
-    List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinks,
+    List<_i3.EntityTmplAttribute>? attributes,
+    List<_i4.EntityTmplLink>? outgoingLinks,
+    List<_i4.EntityTmplLink>? incomingLinks,
   }) : super._(
          id: id,
          name: name,
@@ -191,7 +193,7 @@ class _EntityTmplImpl extends EntityTmpl {
 
   /// Returns a shallow copy of this [EntityTmpl]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_i2.useResult
   @override
   EntityTmpl copyWith({
     Object? id = _Undefined,
@@ -202,44 +204,44 @@ class _EntityTmplImpl extends EntityTmpl {
     Object? incomingLinks = _Undefined,
   }) {
     return EntityTmpl(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _i2.UuidValue? ? id : this.id,
       name: name ?? this.name,
       description: description is String? ? description : this.description,
-      attributes: attributes is List<_i2.EntityTmplAttribute>?
+      attributes: attributes is List<_i3.EntityTmplAttribute>?
           ? attributes
           : this.attributes?.map((e0) => e0.copyWith()).toList(),
-      outgoingLinks: outgoingLinks is List<_i3.EntityTmplLink>?
+      outgoingLinks: outgoingLinks is List<_i4.EntityTmplLink>?
           ? outgoingLinks
           : this.outgoingLinks?.map((e0) => e0.copyWith()).toList(),
-      incomingLinks: incomingLinks is List<_i3.EntityTmplLink>?
+      incomingLinks: incomingLinks is List<_i4.EntityTmplLink>?
           ? incomingLinks
           : this.incomingLinks?.map((e0) => e0.copyWith()).toList(),
     );
   }
 }
 
-class EntityTmplUpdateTable extends _i1.UpdateTable<EntityTmplTable> {
+class EntityTmplUpdateTable extends _i2.UpdateTable<EntityTmplTable> {
   EntityTmplUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
+  _i2.ColumnValue<String, String> name(String value) => _i2.ColumnValue(
     table.name,
     value,
   );
 
-  _i1.ColumnValue<String, String> description(String? value) => _i1.ColumnValue(
+  _i2.ColumnValue<String, String> description(String? value) => _i2.ColumnValue(
     table.description,
     value,
   );
 }
 
-class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
+class EntityTmplTable extends _i2.Table<_i2.UuidValue?> {
   EntityTmplTable({super.tableRelation}) : super(tableName: 'entity_tmpls') {
     updateTable = EntityTmplUpdateTable(this);
-    name = _i1.ColumnString(
+    name = _i2.ColumnString(
       'name',
       this,
     );
-    description = _i1.ColumnString(
+    description = _i2.ColumnString(
       'description',
       this,
     );
@@ -247,116 +249,116 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
 
   late final EntityTmplUpdateTable updateTable;
 
-  late final _i1.ColumnString name;
+  late final _i2.ColumnString name;
 
-  late final _i1.ColumnString description;
+  late final _i2.ColumnString description;
 
-  _i2.EntityTmplAttributeTable? ___attributes;
+  _i3.EntityTmplAttributeTable? ___attributes;
 
-  _i1.ManyRelation<_i2.EntityTmplAttributeTable>? _attributes;
-
-  /// The links where this entity template is the source.
-  _i3.EntityTmplLinkTable? ___outgoingLinks;
+  _i2.ManyRelation<_i3.EntityTmplAttributeTable>? _attributes;
 
   /// The links where this entity template is the source.
-  _i1.ManyRelation<_i3.EntityTmplLinkTable>? _outgoingLinks;
+  _i4.EntityTmplLinkTable? ___outgoingLinks;
+
+  /// The links where this entity template is the source.
+  _i2.ManyRelation<_i4.EntityTmplLinkTable>? _outgoingLinks;
 
   /// Optional reverse traversal: links where this entity template is a target.
-  _i3.EntityTmplLinkTable? ___incomingLinks;
+  _i4.EntityTmplLinkTable? ___incomingLinks;
 
   /// Optional reverse traversal: links where this entity template is a target.
-  _i1.ManyRelation<_i3.EntityTmplLinkTable>? _incomingLinks;
+  _i2.ManyRelation<_i4.EntityTmplLinkTable>? _incomingLinks;
 
-  _i2.EntityTmplAttributeTable get __attributes {
+  _i3.EntityTmplAttributeTable get __attributes {
     if (___attributes != null) return ___attributes!;
-    ___attributes = _i1.createRelationTable(
+    ___attributes = _i2.createRelationTable(
       relationFieldName: '__attributes',
       field: EntityTmpl.t.id,
-      foreignField: _i2.EntityTmplAttribute.t.entityTmplId,
+      foreignField: _i3.EntityTmplAttribute.t.entityTmplId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.EntityTmplAttributeTable(tableRelation: foreignTableRelation),
+          _i3.EntityTmplAttributeTable(tableRelation: foreignTableRelation),
     );
     return ___attributes!;
   }
 
-  _i3.EntityTmplLinkTable get __outgoingLinks {
+  _i4.EntityTmplLinkTable get __outgoingLinks {
     if (___outgoingLinks != null) return ___outgoingLinks!;
-    ___outgoingLinks = _i1.createRelationTable(
+    ___outgoingLinks = _i2.createRelationTable(
       relationFieldName: '__outgoingLinks',
       field: EntityTmpl.t.id,
-      foreignField: _i3.EntityTmplLink.t.sourceId,
+      foreignField: _i4.EntityTmplLink.t.sourceId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i3.EntityTmplLinkTable(tableRelation: foreignTableRelation),
+          _i4.EntityTmplLinkTable(tableRelation: foreignTableRelation),
     );
     return ___outgoingLinks!;
   }
 
-  _i3.EntityTmplLinkTable get __incomingLinks {
+  _i4.EntityTmplLinkTable get __incomingLinks {
     if (___incomingLinks != null) return ___incomingLinks!;
-    ___incomingLinks = _i1.createRelationTable(
+    ___incomingLinks = _i2.createRelationTable(
       relationFieldName: '__incomingLinks',
       field: EntityTmpl.t.id,
-      foreignField: _i3.EntityTmplLink.t.targetId,
+      foreignField: _i4.EntityTmplLink.t.targetId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i3.EntityTmplLinkTable(tableRelation: foreignTableRelation),
+          _i4.EntityTmplLinkTable(tableRelation: foreignTableRelation),
     );
     return ___incomingLinks!;
   }
 
-  _i1.ManyRelation<_i2.EntityTmplAttributeTable> get attributes {
+  _i2.ManyRelation<_i3.EntityTmplAttributeTable> get attributes {
     if (_attributes != null) return _attributes!;
-    var relationTable = _i1.createRelationTable(
+    var relationTable = _i2.createRelationTable(
       relationFieldName: 'attributes',
       field: EntityTmpl.t.id,
-      foreignField: _i2.EntityTmplAttribute.t.entityTmplId,
+      foreignField: _i3.EntityTmplAttribute.t.entityTmplId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.EntityTmplAttributeTable(tableRelation: foreignTableRelation),
+          _i3.EntityTmplAttributeTable(tableRelation: foreignTableRelation),
     );
-    _attributes = _i1.ManyRelation<_i2.EntityTmplAttributeTable>(
+    _attributes = _i2.ManyRelation<_i3.EntityTmplAttributeTable>(
       tableWithRelations: relationTable,
-      table: _i2.EntityTmplAttributeTable(
+      table: _i3.EntityTmplAttributeTable(
         tableRelation: relationTable.tableRelation!.lastRelation,
       ),
     );
     return _attributes!;
   }
 
-  _i1.ManyRelation<_i3.EntityTmplLinkTable> get outgoingLinks {
+  _i2.ManyRelation<_i4.EntityTmplLinkTable> get outgoingLinks {
     if (_outgoingLinks != null) return _outgoingLinks!;
-    var relationTable = _i1.createRelationTable(
+    var relationTable = _i2.createRelationTable(
       relationFieldName: 'outgoingLinks',
       field: EntityTmpl.t.id,
-      foreignField: _i3.EntityTmplLink.t.sourceId,
+      foreignField: _i4.EntityTmplLink.t.sourceId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i3.EntityTmplLinkTable(tableRelation: foreignTableRelation),
+          _i4.EntityTmplLinkTable(tableRelation: foreignTableRelation),
     );
-    _outgoingLinks = _i1.ManyRelation<_i3.EntityTmplLinkTable>(
+    _outgoingLinks = _i2.ManyRelation<_i4.EntityTmplLinkTable>(
       tableWithRelations: relationTable,
-      table: _i3.EntityTmplLinkTable(
+      table: _i4.EntityTmplLinkTable(
         tableRelation: relationTable.tableRelation!.lastRelation,
       ),
     );
     return _outgoingLinks!;
   }
 
-  _i1.ManyRelation<_i3.EntityTmplLinkTable> get incomingLinks {
+  _i2.ManyRelation<_i4.EntityTmplLinkTable> get incomingLinks {
     if (_incomingLinks != null) return _incomingLinks!;
-    var relationTable = _i1.createRelationTable(
+    var relationTable = _i2.createRelationTable(
       relationFieldName: 'incomingLinks',
       field: EntityTmpl.t.id,
-      foreignField: _i3.EntityTmplLink.t.targetId,
+      foreignField: _i4.EntityTmplLink.t.targetId,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i3.EntityTmplLinkTable(tableRelation: foreignTableRelation),
+          _i4.EntityTmplLinkTable(tableRelation: foreignTableRelation),
     );
-    _incomingLinks = _i1.ManyRelation<_i3.EntityTmplLinkTable>(
+    _incomingLinks = _i2.ManyRelation<_i4.EntityTmplLinkTable>(
       tableWithRelations: relationTable,
-      table: _i3.EntityTmplLinkTable(
+      table: _i4.EntityTmplLinkTable(
         tableRelation: relationTable.tableRelation!.lastRelation,
       ),
     );
@@ -364,14 +366,14 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
   }
 
   @override
-  List<_i1.Column> get columns => [
+  List<_i2.Column> get columns => [
     id,
     name,
     description,
   ];
 
   @override
-  _i1.Table? getRelationTable(String relationField) {
+  _i2.Table? getRelationTable(String relationField) {
     if (relationField == 'attributes') {
       return __attributes;
     }
@@ -385,37 +387,37 @@ class EntityTmplTable extends _i1.Table<_i1.UuidValue?> {
   }
 }
 
-class EntityTmplInclude extends _i1.IncludeObject {
+class EntityTmplInclude extends _i2.IncludeObject {
   EntityTmplInclude._({
-    _i2.EntityTmplAttributeIncludeList? attributes,
-    _i3.EntityTmplLinkIncludeList? outgoingLinks,
-    _i3.EntityTmplLinkIncludeList? incomingLinks,
+    _i3.EntityTmplAttributeIncludeList? attributes,
+    _i4.EntityTmplLinkIncludeList? outgoingLinks,
+    _i4.EntityTmplLinkIncludeList? incomingLinks,
   }) {
     _attributes = attributes;
     _outgoingLinks = outgoingLinks;
     _incomingLinks = incomingLinks;
   }
 
-  _i2.EntityTmplAttributeIncludeList? _attributes;
+  _i3.EntityTmplAttributeIncludeList? _attributes;
 
-  _i3.EntityTmplLinkIncludeList? _outgoingLinks;
+  _i4.EntityTmplLinkIncludeList? _outgoingLinks;
 
-  _i3.EntityTmplLinkIncludeList? _incomingLinks;
+  _i4.EntityTmplLinkIncludeList? _incomingLinks;
 
   @override
-  Map<String, _i1.Include?> get includes => {
+  Map<String, _i2.Include?> get includes => {
     'attributes': _attributes,
     'outgoingLinks': _outgoingLinks,
     'incomingLinks': _incomingLinks,
   };
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => EntityTmpl.t;
+  _i2.Table<_i2.UuidValue?> get table => EntityTmpl.t;
 }
 
-class EntityTmplIncludeList extends _i1.IncludeList {
+class EntityTmplIncludeList extends _i2.IncludeList {
   EntityTmplIncludeList._({
-    _i1.WhereExpressionBuilder<EntityTmplTable>? where,
+    _i2.WhereExpressionBuilder<EntityTmplTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
@@ -427,10 +429,10 @@ class EntityTmplIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _i2.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => EntityTmpl.t;
+  _i2.Table<_i2.UuidValue?> get table => EntityTmpl.t;
 }
 
 class EntityTmplRepository {
@@ -467,17 +469,17 @@ class EntityTmplRepository {
   /// );
   /// ```
   Future<List<EntityTmpl>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<EntityTmplTable>? where,
+    _i2.DatabaseSession session, {
+    _i2.WhereExpressionBuilder<EntityTmplTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<EntityTmplTable>? orderBy,
+    _i2.OrderByBuilder<EntityTmplTable>? orderBy,
     bool orderDescending = false,
-    _i1.OrderByListBuilder<EntityTmplTable>? orderByList,
-    _i1.Transaction? transaction,
+    _i2.OrderByListBuilder<EntityTmplTable>? orderByList,
+    _i2.Transaction? transaction,
     EntityTmplInclude? include,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _i2.LockMode? lockMode,
+    _i2.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<EntityTmpl>(
       where: where?.call(EntityTmpl.t),
@@ -511,16 +513,16 @@ class EntityTmplRepository {
   /// );
   /// ```
   Future<EntityTmpl?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<EntityTmplTable>? where,
+    _i2.DatabaseSession session, {
+    _i2.WhereExpressionBuilder<EntityTmplTable>? where,
     int? offset,
-    _i1.OrderByBuilder<EntityTmplTable>? orderBy,
+    _i2.OrderByBuilder<EntityTmplTable>? orderBy,
     bool orderDescending = false,
-    _i1.OrderByListBuilder<EntityTmplTable>? orderByList,
-    _i1.Transaction? transaction,
+    _i2.OrderByListBuilder<EntityTmplTable>? orderByList,
+    _i2.Transaction? transaction,
     EntityTmplInclude? include,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _i2.LockMode? lockMode,
+    _i2.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<EntityTmpl>(
       where: where?.call(EntityTmpl.t),
@@ -537,12 +539,12 @@ class EntityTmplRepository {
 
   /// Finds a single [EntityTmpl] by its [id] or null if no such row exists.
   Future<EntityTmpl?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    _i2.UuidValue id, {
+    _i2.Transaction? transaction,
     EntityTmplInclude? include,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _i2.LockMode? lockMode,
+    _i2.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<EntityTmpl>(
       id,
@@ -564,9 +566,9 @@ class EntityTmplRepository {
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
   Future<List<EntityTmpl>> insert(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     List<EntityTmpl> rows, {
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
     bool ignoreConflicts = false,
   }) async {
     return session.db.insert<EntityTmpl>(
@@ -580,9 +582,9 @@ class EntityTmplRepository {
   ///
   /// The returned [EntityTmpl] will have its `id` field set.
   Future<EntityTmpl> insertRow(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl row, {
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.insertRow<EntityTmpl>(
       row,
@@ -596,10 +598,10 @@ class EntityTmplRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<EntityTmpl>> update(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     List<EntityTmpl> rows, {
-    _i1.ColumnSelections<EntityTmplTable>? columns,
-    _i1.Transaction? transaction,
+    _i2.ColumnSelections<EntityTmplTable>? columns,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.update<EntityTmpl>(
       rows,
@@ -612,10 +614,10 @@ class EntityTmplRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<EntityTmpl> updateRow(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl row, {
-    _i1.ColumnSelections<EntityTmplTable>? columns,
-    _i1.Transaction? transaction,
+    _i2.ColumnSelections<EntityTmplTable>? columns,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.updateRow<EntityTmpl>(
       row,
@@ -627,10 +629,10 @@ class EntityTmplRepository {
   /// Updates a single [EntityTmpl] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<EntityTmpl?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<EntityTmplUpdateTable> columnValues,
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    _i2.UuidValue id, {
+    required _i2.ColumnValueListBuilder<EntityTmplUpdateTable> columnValues,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.updateById<EntityTmpl>(
       id,
@@ -642,15 +644,15 @@ class EntityTmplRepository {
   /// Updates all [EntityTmpl]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<EntityTmpl>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<EntityTmplUpdateTable> columnValues,
-    required _i1.WhereExpressionBuilder<EntityTmplTable> where,
+    _i2.DatabaseSession session, {
+    required _i2.ColumnValueListBuilder<EntityTmplUpdateTable> columnValues,
+    required _i2.WhereExpressionBuilder<EntityTmplTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<EntityTmplTable>? orderBy,
-    _i1.OrderByListBuilder<EntityTmplTable>? orderByList,
+    _i2.OrderByBuilder<EntityTmplTable>? orderBy,
+    _i2.OrderByListBuilder<EntityTmplTable>? orderByList,
     bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.updateWhere<EntityTmpl>(
       columnValues: columnValues(EntityTmpl.t.updateTable),
@@ -668,9 +670,9 @@ class EntityTmplRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<EntityTmpl>> delete(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     List<EntityTmpl> rows, {
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.delete<EntityTmpl>(
       rows,
@@ -680,9 +682,9 @@ class EntityTmplRepository {
 
   /// Deletes a single [EntityTmpl].
   Future<EntityTmpl> deleteRow(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl row, {
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.deleteRow<EntityTmpl>(
       row,
@@ -692,9 +694,9 @@ class EntityTmplRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<EntityTmpl>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<EntityTmplTable> where,
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session, {
+    required _i2.WhereExpressionBuilder<EntityTmplTable> where,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.deleteWhere<EntityTmpl>(
       where: where(EntityTmpl.t),
@@ -705,10 +707,10 @@ class EntityTmplRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<EntityTmplTable>? where,
+    _i2.DatabaseSession session, {
+    _i2.WhereExpressionBuilder<EntityTmplTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.count<EntityTmpl>(
       where: where?.call(EntityTmpl.t),
@@ -719,11 +721,11 @@ class EntityTmplRepository {
 
   /// Acquires row-level locks on [EntityTmpl] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<EntityTmplTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _i2.DatabaseSession session, {
+    required _i2.WhereExpressionBuilder<EntityTmplTable> where,
+    required _i2.LockMode lockMode,
+    required _i2.Transaction transaction,
+    _i2.LockBehavior lockBehavior = _i2.LockBehavior.wait,
   }) async {
     return session.db.lockRows<EntityTmpl>(
       where: where(EntityTmpl.t),
@@ -740,10 +742,10 @@ class EntityTmplAttachRepository {
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplAttribute]s
   /// by setting each [EntityTmplAttribute]'s foreign key `entityTmplId` to refer to this [EntityTmpl].
   Future<void> attributes(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl entityTmpl,
-    List<_i2.EntityTmplAttribute> entityTmplAttribute, {
-    _i1.Transaction? transaction,
+    List<_i3.EntityTmplAttribute> entityTmplAttribute, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplAttribute.any((e) => e.id == null)) {
       throw ArgumentError.notNull('entityTmplAttribute.id');
@@ -755,9 +757,9 @@ class EntityTmplAttachRepository {
     var $entityTmplAttribute = entityTmplAttribute
         .map((e) => e.copyWith(entityTmplId: entityTmpl.id))
         .toList();
-    await session.db.update<_i2.EntityTmplAttribute>(
+    await session.db.update<_i3.EntityTmplAttribute>(
       $entityTmplAttribute,
-      columns: [_i2.EntityTmplAttribute.t.entityTmplId],
+      columns: [_i3.EntityTmplAttribute.t.entityTmplId],
       transaction: transaction,
     );
   }
@@ -765,10 +767,10 @@ class EntityTmplAttachRepository {
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplLink]s
   /// by setting each [EntityTmplLink]'s foreign key `sourceId` to refer to this [EntityTmpl].
   Future<void> outgoingLinks(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl entityTmpl,
-    List<_i3.EntityTmplLink> entityTmplLink, {
-    _i1.Transaction? transaction,
+    List<_i4.EntityTmplLink> entityTmplLink, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplLink.any((e) => e.id == null)) {
       throw ArgumentError.notNull('entityTmplLink.id');
@@ -780,9 +782,9 @@ class EntityTmplAttachRepository {
     var $entityTmplLink = entityTmplLink
         .map((e) => e.copyWith(sourceId: entityTmpl.id))
         .toList();
-    await session.db.update<_i3.EntityTmplLink>(
+    await session.db.update<_i4.EntityTmplLink>(
       $entityTmplLink,
-      columns: [_i3.EntityTmplLink.t.sourceId],
+      columns: [_i4.EntityTmplLink.t.sourceId],
       transaction: transaction,
     );
   }
@@ -790,10 +792,10 @@ class EntityTmplAttachRepository {
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplLink]s
   /// by setting each [EntityTmplLink]'s foreign key `targetId` to refer to this [EntityTmpl].
   Future<void> incomingLinks(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl entityTmpl,
-    List<_i3.EntityTmplLink> entityTmplLink, {
-    _i1.Transaction? transaction,
+    List<_i4.EntityTmplLink> entityTmplLink, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplLink.any((e) => e.id == null)) {
       throw ArgumentError.notNull('entityTmplLink.id');
@@ -805,9 +807,9 @@ class EntityTmplAttachRepository {
     var $entityTmplLink = entityTmplLink
         .map((e) => e.copyWith(targetId: entityTmpl.id))
         .toList();
-    await session.db.update<_i3.EntityTmplLink>(
+    await session.db.update<_i4.EntityTmplLink>(
       $entityTmplLink,
-      columns: [_i3.EntityTmplLink.t.targetId],
+      columns: [_i4.EntityTmplLink.t.targetId],
       transaction: transaction,
     );
   }
@@ -819,10 +821,10 @@ class EntityTmplAttachRowRepository {
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplAttribute]
   /// by setting the [EntityTmplAttribute]'s foreign key `entityTmplId` to refer to this [EntityTmpl].
   Future<void> attributes(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl entityTmpl,
-    _i2.EntityTmplAttribute entityTmplAttribute, {
-    _i1.Transaction? transaction,
+    _i3.EntityTmplAttribute entityTmplAttribute, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplAttribute.id == null) {
       throw ArgumentError.notNull('entityTmplAttribute.id');
@@ -834,9 +836,9 @@ class EntityTmplAttachRowRepository {
     var $entityTmplAttribute = entityTmplAttribute.copyWith(
       entityTmplId: entityTmpl.id,
     );
-    await session.db.updateRow<_i2.EntityTmplAttribute>(
+    await session.db.updateRow<_i3.EntityTmplAttribute>(
       $entityTmplAttribute,
-      columns: [_i2.EntityTmplAttribute.t.entityTmplId],
+      columns: [_i3.EntityTmplAttribute.t.entityTmplId],
       transaction: transaction,
     );
   }
@@ -844,10 +846,10 @@ class EntityTmplAttachRowRepository {
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplLink]
   /// by setting the [EntityTmplLink]'s foreign key `sourceId` to refer to this [EntityTmpl].
   Future<void> outgoingLinks(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl entityTmpl,
-    _i3.EntityTmplLink entityTmplLink, {
-    _i1.Transaction? transaction,
+    _i4.EntityTmplLink entityTmplLink, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplLink.id == null) {
       throw ArgumentError.notNull('entityTmplLink.id');
@@ -857,9 +859,9 @@ class EntityTmplAttachRowRepository {
     }
 
     var $entityTmplLink = entityTmplLink.copyWith(sourceId: entityTmpl.id);
-    await session.db.updateRow<_i3.EntityTmplLink>(
+    await session.db.updateRow<_i4.EntityTmplLink>(
       $entityTmplLink,
-      columns: [_i3.EntityTmplLink.t.sourceId],
+      columns: [_i4.EntityTmplLink.t.sourceId],
       transaction: transaction,
     );
   }
@@ -867,10 +869,10 @@ class EntityTmplAttachRowRepository {
   /// Creates a relation between this [EntityTmpl] and the given [EntityTmplLink]
   /// by setting the [EntityTmplLink]'s foreign key `targetId` to refer to this [EntityTmpl].
   Future<void> incomingLinks(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     EntityTmpl entityTmpl,
-    _i3.EntityTmplLink entityTmplLink, {
-    _i1.Transaction? transaction,
+    _i4.EntityTmplLink entityTmplLink, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplLink.id == null) {
       throw ArgumentError.notNull('entityTmplLink.id');
@@ -880,9 +882,9 @@ class EntityTmplAttachRowRepository {
     }
 
     var $entityTmplLink = entityTmplLink.copyWith(targetId: entityTmpl.id);
-    await session.db.updateRow<_i3.EntityTmplLink>(
+    await session.db.updateRow<_i4.EntityTmplLink>(
       $entityTmplLink,
-      columns: [_i3.EntityTmplLink.t.targetId],
+      columns: [_i4.EntityTmplLink.t.targetId],
       transaction: transaction,
     );
   }
@@ -897,9 +899,9 @@ class EntityTmplDetachRepository {
   /// This removes the association between the two models without deleting
   /// the related record.
   Future<void> attributes(
-    _i1.DatabaseSession session,
-    List<_i2.EntityTmplAttribute> entityTmplAttribute, {
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    List<_i3.EntityTmplAttribute> entityTmplAttribute, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplAttribute.any((e) => e.id == null)) {
       throw ArgumentError.notNull('entityTmplAttribute.id');
@@ -908,9 +910,9 @@ class EntityTmplDetachRepository {
     var $entityTmplAttribute = entityTmplAttribute
         .map((e) => e.copyWith(entityTmplId: null))
         .toList();
-    await session.db.update<_i2.EntityTmplAttribute>(
+    await session.db.update<_i3.EntityTmplAttribute>(
       $entityTmplAttribute,
-      columns: [_i2.EntityTmplAttribute.t.entityTmplId],
+      columns: [_i3.EntityTmplAttribute.t.entityTmplId],
       transaction: transaction,
     );
   }
@@ -921,9 +923,9 @@ class EntityTmplDetachRepository {
   /// This removes the association between the two models without deleting
   /// the related record.
   Future<void> outgoingLinks(
-    _i1.DatabaseSession session,
-    List<_i3.EntityTmplLink> entityTmplLink, {
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    List<_i4.EntityTmplLink> entityTmplLink, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplLink.any((e) => e.id == null)) {
       throw ArgumentError.notNull('entityTmplLink.id');
@@ -932,9 +934,9 @@ class EntityTmplDetachRepository {
     var $entityTmplLink = entityTmplLink
         .map((e) => e.copyWith(sourceId: null))
         .toList();
-    await session.db.update<_i3.EntityTmplLink>(
+    await session.db.update<_i4.EntityTmplLink>(
       $entityTmplLink,
-      columns: [_i3.EntityTmplLink.t.sourceId],
+      columns: [_i4.EntityTmplLink.t.sourceId],
       transaction: transaction,
     );
   }
@@ -945,9 +947,9 @@ class EntityTmplDetachRepository {
   /// This removes the association between the two models without deleting
   /// the related record.
   Future<void> incomingLinks(
-    _i1.DatabaseSession session,
-    List<_i3.EntityTmplLink> entityTmplLink, {
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    List<_i4.EntityTmplLink> entityTmplLink, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplLink.any((e) => e.id == null)) {
       throw ArgumentError.notNull('entityTmplLink.id');
@@ -956,9 +958,9 @@ class EntityTmplDetachRepository {
     var $entityTmplLink = entityTmplLink
         .map((e) => e.copyWith(targetId: null))
         .toList();
-    await session.db.update<_i3.EntityTmplLink>(
+    await session.db.update<_i4.EntityTmplLink>(
       $entityTmplLink,
-      columns: [_i3.EntityTmplLink.t.targetId],
+      columns: [_i4.EntityTmplLink.t.targetId],
       transaction: transaction,
     );
   }
@@ -973,18 +975,18 @@ class EntityTmplDetachRowRepository {
   /// This removes the association between the two models without deleting
   /// the related record.
   Future<void> attributes(
-    _i1.DatabaseSession session,
-    _i2.EntityTmplAttribute entityTmplAttribute, {
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    _i3.EntityTmplAttribute entityTmplAttribute, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplAttribute.id == null) {
       throw ArgumentError.notNull('entityTmplAttribute.id');
     }
 
     var $entityTmplAttribute = entityTmplAttribute.copyWith(entityTmplId: null);
-    await session.db.updateRow<_i2.EntityTmplAttribute>(
+    await session.db.updateRow<_i3.EntityTmplAttribute>(
       $entityTmplAttribute,
-      columns: [_i2.EntityTmplAttribute.t.entityTmplId],
+      columns: [_i3.EntityTmplAttribute.t.entityTmplId],
       transaction: transaction,
     );
   }
@@ -995,18 +997,18 @@ class EntityTmplDetachRowRepository {
   /// This removes the association between the two models without deleting
   /// the related record.
   Future<void> outgoingLinks(
-    _i1.DatabaseSession session,
-    _i3.EntityTmplLink entityTmplLink, {
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    _i4.EntityTmplLink entityTmplLink, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplLink.id == null) {
       throw ArgumentError.notNull('entityTmplLink.id');
     }
 
     var $entityTmplLink = entityTmplLink.copyWith(sourceId: null);
-    await session.db.updateRow<_i3.EntityTmplLink>(
+    await session.db.updateRow<_i4.EntityTmplLink>(
       $entityTmplLink,
-      columns: [_i3.EntityTmplLink.t.sourceId],
+      columns: [_i4.EntityTmplLink.t.sourceId],
       transaction: transaction,
     );
   }
@@ -1017,18 +1019,18 @@ class EntityTmplDetachRowRepository {
   /// This removes the association between the two models without deleting
   /// the related record.
   Future<void> incomingLinks(
-    _i1.DatabaseSession session,
-    _i3.EntityTmplLink entityTmplLink, {
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    _i4.EntityTmplLink entityTmplLink, {
+    _i2.Transaction? transaction,
   }) async {
     if (entityTmplLink.id == null) {
       throw ArgumentError.notNull('entityTmplLink.id');
     }
 
     var $entityTmplLink = entityTmplLink.copyWith(targetId: null);
-    await session.db.updateRow<_i3.EntityTmplLink>(
+    await session.db.updateRow<_i4.EntityTmplLink>(
       $entityTmplLink,
-      columns: [_i3.EntityTmplLink.t.targetId],
+      columns: [_i4.EntityTmplLink.t.targetId],
       transaction: transaction,
     );
   }

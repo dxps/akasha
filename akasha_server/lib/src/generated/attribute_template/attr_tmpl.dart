@@ -11,12 +11,13 @@
 // ignore_for_file: unnecessary_null_comparison
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../access_level/access_level.dart' as _i2;
-import 'package:akasha_server/src/generated/protocol.dart' as _i3;
+import '../protocol.dart' as _i1;
+import 'package:serverpod/serverpod.dart' as _i2;
+import '../access_level/access_level.dart' as _i3;
+import 'package:akasha_server/src/generated/protocol.dart' as _i4;
 
-abstract class AttributeTmpl
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+abstract class AttributeTmpl extends _i1.HasId
+    implements _i2.TableRow<_i2.UuidValue?>, _i2.ProtocolSerialization {
   AttributeTmpl._({
     this.id,
     required this.name,
@@ -29,30 +30,30 @@ abstract class AttributeTmpl
   });
 
   factory AttributeTmpl({
-    _i1.UuidValue? id,
+    _i2.UuidValue? id,
     required String name,
     String? description,
     required String valueType,
     required String defaultValue,
     required bool required,
     required int accessLevelId,
-    required _i2.AccessLevel? accessLevel,
+    required _i3.AccessLevel? accessLevel,
   }) = _AttributeTmplImpl;
 
   factory AttributeTmpl.fromJson(Map<String, dynamic> jsonSerialization) {
     return AttributeTmpl(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _i2.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       description: jsonSerialization['description'] as String?,
       valueType: jsonSerialization['valueType'] as String,
       defaultValue: jsonSerialization['defaultValue'] as String,
-      required: _i1.BoolJsonExtension.fromJson(jsonSerialization['required']),
+      required: _i2.BoolJsonExtension.fromJson(jsonSerialization['required']),
       accessLevelId: jsonSerialization['accessLevelId'] as int,
       accessLevel: jsonSerialization['accessLevel'] == null
           ? null
-          : _i3.Protocol().deserialize<_i2.AccessLevel>(
+          : _i4.Protocol().deserialize<_i3.AccessLevel>(
               jsonSerialization['accessLevel'],
             ),
     );
@@ -63,7 +64,7 @@ abstract class AttributeTmpl
   static const db = AttributeTmplRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _i2.UuidValue? id;
 
   String name;
 
@@ -77,23 +78,24 @@ abstract class AttributeTmpl
 
   int accessLevelId;
 
-  _i2.AccessLevel? accessLevel;
+  _i3.AccessLevel? accessLevel;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _i2.Table<_i2.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [AttributeTmpl]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @override
+  @_i2.useResult
   AttributeTmpl copyWith({
-    _i1.UuidValue? id,
+    Object? id,
     String? name,
     String? description,
     String? valueType,
     String? defaultValue,
     bool? required,
     int? accessLevelId,
-    _i2.AccessLevel? accessLevel,
+    _i3.AccessLevel? accessLevel,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -125,17 +127,17 @@ abstract class AttributeTmpl
     };
   }
 
-  static AttributeTmplInclude include({_i2.AccessLevelInclude? accessLevel}) {
+  static AttributeTmplInclude include({_i3.AccessLevelInclude? accessLevel}) {
     return AttributeTmplInclude._(accessLevel: accessLevel);
   }
 
   static AttributeTmplIncludeList includeList({
-    _i1.WhereExpressionBuilder<AttributeTmplTable>? where,
+    _i2.WhereExpressionBuilder<AttributeTmplTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<AttributeTmplTable>? orderBy,
+    _i2.OrderByBuilder<AttributeTmplTable>? orderBy,
     bool orderDescending = false,
-    _i1.OrderByListBuilder<AttributeTmplTable>? orderByList,
+    _i2.OrderByListBuilder<AttributeTmplTable>? orderByList,
     AttributeTmplInclude? include,
   }) {
     return AttributeTmplIncludeList._(
@@ -151,7 +153,7 @@ abstract class AttributeTmpl
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _i2.SerializationManager.encode(this);
   }
 }
 
@@ -159,14 +161,14 @@ class _Undefined {}
 
 class _AttributeTmplImpl extends AttributeTmpl {
   _AttributeTmplImpl({
-    _i1.UuidValue? id,
+    _i2.UuidValue? id,
     required String name,
     String? description,
     required String valueType,
     required String defaultValue,
     required bool required,
     required int accessLevelId,
-    required _i2.AccessLevel? accessLevel,
+    required _i3.AccessLevel? accessLevel,
   }) : super._(
          id: id,
          name: name,
@@ -180,7 +182,7 @@ class _AttributeTmplImpl extends AttributeTmpl {
 
   /// Returns a shallow copy of this [AttributeTmpl]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_i2.useResult
   @override
   AttributeTmpl copyWith({
     Object? id = _Undefined,
@@ -193,79 +195,79 @@ class _AttributeTmplImpl extends AttributeTmpl {
     Object? accessLevel = _Undefined,
   }) {
     return AttributeTmpl(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _i2.UuidValue? ? id : this.id,
       name: name ?? this.name,
       description: description is String? ? description : this.description,
       valueType: valueType ?? this.valueType,
       defaultValue: defaultValue ?? this.defaultValue,
       required: required ?? this.required,
       accessLevelId: accessLevelId ?? this.accessLevelId,
-      accessLevel: accessLevel is _i2.AccessLevel?
+      accessLevel: accessLevel is _i3.AccessLevel?
           ? accessLevel
           : this.accessLevel?.copyWith(),
     );
   }
 }
 
-class AttributeTmplUpdateTable extends _i1.UpdateTable<AttributeTmplTable> {
+class AttributeTmplUpdateTable extends _i2.UpdateTable<AttributeTmplTable> {
   AttributeTmplUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
+  _i2.ColumnValue<String, String> name(String value) => _i2.ColumnValue(
     table.name,
     value,
   );
 
-  _i1.ColumnValue<String, String> description(String? value) => _i1.ColumnValue(
+  _i2.ColumnValue<String, String> description(String? value) => _i2.ColumnValue(
     table.description,
     value,
   );
 
-  _i1.ColumnValue<String, String> valueType(String value) => _i1.ColumnValue(
+  _i2.ColumnValue<String, String> valueType(String value) => _i2.ColumnValue(
     table.valueType,
     value,
   );
 
-  _i1.ColumnValue<String, String> defaultValue(String value) => _i1.ColumnValue(
+  _i2.ColumnValue<String, String> defaultValue(String value) => _i2.ColumnValue(
     table.defaultValue,
     value,
   );
 
-  _i1.ColumnValue<bool, bool> required(bool value) => _i1.ColumnValue(
+  _i2.ColumnValue<bool, bool> required(bool value) => _i2.ColumnValue(
     table.required,
     value,
   );
 
-  _i1.ColumnValue<int, int> accessLevelId(int value) => _i1.ColumnValue(
+  _i2.ColumnValue<int, int> accessLevelId(int value) => _i2.ColumnValue(
     table.accessLevelId,
     value,
   );
 }
 
-class AttributeTmplTable extends _i1.Table<_i1.UuidValue?> {
+class AttributeTmplTable extends _i2.Table<_i2.UuidValue?> {
   AttributeTmplTable({super.tableRelation})
     : super(tableName: 'attribute_tmpls') {
     updateTable = AttributeTmplUpdateTable(this);
-    name = _i1.ColumnString(
+    name = _i2.ColumnString(
       'name',
       this,
     );
-    description = _i1.ColumnString(
+    description = _i2.ColumnString(
       'description',
       this,
     );
-    valueType = _i1.ColumnString(
+    valueType = _i2.ColumnString(
       'valueType',
       this,
     );
-    defaultValue = _i1.ColumnString(
+    defaultValue = _i2.ColumnString(
       'defaultValue',
       this,
     );
-    required = _i1.ColumnBool(
+    required = _i2.ColumnBool(
       'required',
       this,
     );
-    accessLevelId = _i1.ColumnInt(
+    accessLevelId = _i2.ColumnInt(
       'accessLevelId',
       this,
     );
@@ -273,35 +275,35 @@ class AttributeTmplTable extends _i1.Table<_i1.UuidValue?> {
 
   late final AttributeTmplUpdateTable updateTable;
 
-  late final _i1.ColumnString name;
+  late final _i2.ColumnString name;
 
-  late final _i1.ColumnString description;
+  late final _i2.ColumnString description;
 
-  late final _i1.ColumnString valueType;
+  late final _i2.ColumnString valueType;
 
-  late final _i1.ColumnString defaultValue;
+  late final _i2.ColumnString defaultValue;
 
-  late final _i1.ColumnBool required;
+  late final _i2.ColumnBool required;
 
-  late final _i1.ColumnInt accessLevelId;
+  late final _i2.ColumnInt accessLevelId;
 
-  _i2.AccessLevelTable? _accessLevel;
+  _i3.AccessLevelTable? _accessLevel;
 
-  _i2.AccessLevelTable get accessLevel {
+  _i3.AccessLevelTable get accessLevel {
     if (_accessLevel != null) return _accessLevel!;
-    _accessLevel = _i1.createRelationTable(
+    _accessLevel = _i2.createRelationTable(
       relationFieldName: 'accessLevel',
       field: AttributeTmpl.t.accessLevelId,
-      foreignField: _i2.AccessLevel.t.id,
+      foreignField: _i3.AccessLevel.t.id,
       tableRelation: tableRelation,
       createTable: (foreignTableRelation) =>
-          _i2.AccessLevelTable(tableRelation: foreignTableRelation),
+          _i3.AccessLevelTable(tableRelation: foreignTableRelation),
     );
     return _accessLevel!;
   }
 
   @override
-  List<_i1.Column> get columns => [
+  List<_i2.Column> get columns => [
     id,
     name,
     description,
@@ -312,7 +314,7 @@ class AttributeTmplTable extends _i1.Table<_i1.UuidValue?> {
   ];
 
   @override
-  _i1.Table? getRelationTable(String relationField) {
+  _i2.Table? getRelationTable(String relationField) {
     if (relationField == 'accessLevel') {
       return accessLevel;
     }
@@ -320,23 +322,23 @@ class AttributeTmplTable extends _i1.Table<_i1.UuidValue?> {
   }
 }
 
-class AttributeTmplInclude extends _i1.IncludeObject {
-  AttributeTmplInclude._({_i2.AccessLevelInclude? accessLevel}) {
+class AttributeTmplInclude extends _i2.IncludeObject {
+  AttributeTmplInclude._({_i3.AccessLevelInclude? accessLevel}) {
     _accessLevel = accessLevel;
   }
 
-  _i2.AccessLevelInclude? _accessLevel;
+  _i3.AccessLevelInclude? _accessLevel;
 
   @override
-  Map<String, _i1.Include?> get includes => {'accessLevel': _accessLevel};
+  Map<String, _i2.Include?> get includes => {'accessLevel': _accessLevel};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => AttributeTmpl.t;
+  _i2.Table<_i2.UuidValue?> get table => AttributeTmpl.t;
 }
 
-class AttributeTmplIncludeList extends _i1.IncludeList {
+class AttributeTmplIncludeList extends _i2.IncludeList {
   AttributeTmplIncludeList._({
-    _i1.WhereExpressionBuilder<AttributeTmplTable>? where,
+    _i2.WhereExpressionBuilder<AttributeTmplTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
@@ -348,10 +350,10 @@ class AttributeTmplIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _i2.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => AttributeTmpl.t;
+  _i2.Table<_i2.UuidValue?> get table => AttributeTmpl.t;
 }
 
 class AttributeTmplRepository {
@@ -382,17 +384,17 @@ class AttributeTmplRepository {
   /// );
   /// ```
   Future<List<AttributeTmpl>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<AttributeTmplTable>? where,
+    _i2.DatabaseSession session, {
+    _i2.WhereExpressionBuilder<AttributeTmplTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<AttributeTmplTable>? orderBy,
+    _i2.OrderByBuilder<AttributeTmplTable>? orderBy,
     bool orderDescending = false,
-    _i1.OrderByListBuilder<AttributeTmplTable>? orderByList,
-    _i1.Transaction? transaction,
+    _i2.OrderByListBuilder<AttributeTmplTable>? orderByList,
+    _i2.Transaction? transaction,
     AttributeTmplInclude? include,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _i2.LockMode? lockMode,
+    _i2.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<AttributeTmpl>(
       where: where?.call(AttributeTmpl.t),
@@ -426,16 +428,16 @@ class AttributeTmplRepository {
   /// );
   /// ```
   Future<AttributeTmpl?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<AttributeTmplTable>? where,
+    _i2.DatabaseSession session, {
+    _i2.WhereExpressionBuilder<AttributeTmplTable>? where,
     int? offset,
-    _i1.OrderByBuilder<AttributeTmplTable>? orderBy,
+    _i2.OrderByBuilder<AttributeTmplTable>? orderBy,
     bool orderDescending = false,
-    _i1.OrderByListBuilder<AttributeTmplTable>? orderByList,
-    _i1.Transaction? transaction,
+    _i2.OrderByListBuilder<AttributeTmplTable>? orderByList,
+    _i2.Transaction? transaction,
     AttributeTmplInclude? include,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _i2.LockMode? lockMode,
+    _i2.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<AttributeTmpl>(
       where: where?.call(AttributeTmpl.t),
@@ -452,12 +454,12 @@ class AttributeTmplRepository {
 
   /// Finds a single [AttributeTmpl] by its [id] or null if no such row exists.
   Future<AttributeTmpl?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    _i2.UuidValue id, {
+    _i2.Transaction? transaction,
     AttributeTmplInclude? include,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _i2.LockMode? lockMode,
+    _i2.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<AttributeTmpl>(
       id,
@@ -479,9 +481,9 @@ class AttributeTmplRepository {
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
   Future<List<AttributeTmpl>> insert(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     List<AttributeTmpl> rows, {
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
     bool ignoreConflicts = false,
   }) async {
     return session.db.insert<AttributeTmpl>(
@@ -495,9 +497,9 @@ class AttributeTmplRepository {
   ///
   /// The returned [AttributeTmpl] will have its `id` field set.
   Future<AttributeTmpl> insertRow(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     AttributeTmpl row, {
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.insertRow<AttributeTmpl>(
       row,
@@ -511,10 +513,10 @@ class AttributeTmplRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<AttributeTmpl>> update(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     List<AttributeTmpl> rows, {
-    _i1.ColumnSelections<AttributeTmplTable>? columns,
-    _i1.Transaction? transaction,
+    _i2.ColumnSelections<AttributeTmplTable>? columns,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.update<AttributeTmpl>(
       rows,
@@ -527,10 +529,10 @@ class AttributeTmplRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<AttributeTmpl> updateRow(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     AttributeTmpl row, {
-    _i1.ColumnSelections<AttributeTmplTable>? columns,
-    _i1.Transaction? transaction,
+    _i2.ColumnSelections<AttributeTmplTable>? columns,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.updateRow<AttributeTmpl>(
       row,
@@ -542,10 +544,10 @@ class AttributeTmplRepository {
   /// Updates a single [AttributeTmpl] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<AttributeTmpl?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<AttributeTmplUpdateTable> columnValues,
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session,
+    _i2.UuidValue id, {
+    required _i2.ColumnValueListBuilder<AttributeTmplUpdateTable> columnValues,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.updateById<AttributeTmpl>(
       id,
@@ -557,15 +559,15 @@ class AttributeTmplRepository {
   /// Updates all [AttributeTmpl]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<AttributeTmpl>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<AttributeTmplUpdateTable> columnValues,
-    required _i1.WhereExpressionBuilder<AttributeTmplTable> where,
+    _i2.DatabaseSession session, {
+    required _i2.ColumnValueListBuilder<AttributeTmplUpdateTable> columnValues,
+    required _i2.WhereExpressionBuilder<AttributeTmplTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<AttributeTmplTable>? orderBy,
-    _i1.OrderByListBuilder<AttributeTmplTable>? orderByList,
+    _i2.OrderByBuilder<AttributeTmplTable>? orderBy,
+    _i2.OrderByListBuilder<AttributeTmplTable>? orderByList,
     bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.updateWhere<AttributeTmpl>(
       columnValues: columnValues(AttributeTmpl.t.updateTable),
@@ -583,9 +585,9 @@ class AttributeTmplRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<AttributeTmpl>> delete(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     List<AttributeTmpl> rows, {
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.delete<AttributeTmpl>(
       rows,
@@ -595,9 +597,9 @@ class AttributeTmplRepository {
 
   /// Deletes a single [AttributeTmpl].
   Future<AttributeTmpl> deleteRow(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     AttributeTmpl row, {
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.deleteRow<AttributeTmpl>(
       row,
@@ -607,9 +609,9 @@ class AttributeTmplRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<AttributeTmpl>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<AttributeTmplTable> where,
-    _i1.Transaction? transaction,
+    _i2.DatabaseSession session, {
+    required _i2.WhereExpressionBuilder<AttributeTmplTable> where,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.deleteWhere<AttributeTmpl>(
       where: where(AttributeTmpl.t),
@@ -620,10 +622,10 @@ class AttributeTmplRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<AttributeTmplTable>? where,
+    _i2.DatabaseSession session, {
+    _i2.WhereExpressionBuilder<AttributeTmplTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _i2.Transaction? transaction,
   }) async {
     return session.db.count<AttributeTmpl>(
       where: where?.call(AttributeTmpl.t),
@@ -634,11 +636,11 @@ class AttributeTmplRepository {
 
   /// Acquires row-level locks on [AttributeTmpl] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<AttributeTmplTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _i2.DatabaseSession session, {
+    required _i2.WhereExpressionBuilder<AttributeTmplTable> where,
+    required _i2.LockMode lockMode,
+    required _i2.Transaction transaction,
+    _i2.LockBehavior lockBehavior = _i2.LockBehavior.wait,
   }) async {
     return session.db.lockRows<AttributeTmpl>(
       where: where(AttributeTmpl.t),
@@ -655,10 +657,10 @@ class AttributeTmplAttachRowRepository {
   /// Creates a relation between the given [AttributeTmpl] and [AccessLevel]
   /// by setting the [AttributeTmpl]'s foreign key `accessLevelId` to refer to the [AccessLevel].
   Future<void> accessLevel(
-    _i1.DatabaseSession session,
+    _i2.DatabaseSession session,
     AttributeTmpl attributeTmpl,
-    _i2.AccessLevel accessLevel, {
-    _i1.Transaction? transaction,
+    _i3.AccessLevel accessLevel, {
+    _i2.Transaction? transaction,
   }) async {
     if (attributeTmpl.id == null) {
       throw ArgumentError.notNull('attributeTmpl.id');

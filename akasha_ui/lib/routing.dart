@@ -1,8 +1,8 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_ui/access_level/access_levels_screen.dart';
-import 'package:akasha_ui/attribute_template/attr_tmpls_list_screen.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpls_screen.dart';
 import 'package:akasha_ui/entity/ents_screen.dart';
-import 'package:akasha_ui/entity_template/ent_tmpl_list_screen.dart';
+import 'package:akasha_ui/entity_template/ent_tmpl_screen.dart';
 import 'package:akasha_ui/screens/home_screen.dart';
 import 'package:akasha_ui/widgets/app_shell.dart';
 import 'package:flutter/material.dart';

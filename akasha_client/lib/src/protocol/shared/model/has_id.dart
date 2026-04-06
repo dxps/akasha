@@ -23,6 +23,7 @@ class HasId implements _i1.SerializableModel {
     );
   }
 
+  /// Its unique identifier.
   _i1.UuidValue? id;
 
   /// Returns a shallow copy of this [HasId]

@@ -1,4 +1,6 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpl_repo.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
 import 'package:akasha_ui/entity/ent_repo.dart';
 import 'package:akasha_ui/entity/ents_cubit.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_repo.dart';
@@ -58,12 +60,21 @@ void main() async {
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
+
+        BlocProvider(
+          create: (_) {
+            final repo = AttributeTemplateRepo(client: client);
+            return AttributeTemplatesLogic(repo: repo);
+          },
+        ),
+
         BlocProvider(
           create: (_) {
             final repo = EntityTemplateRepo(client: client);
             return EntityTemplatesCubit(repo: repo);
           },
         ),
+
         RepositoryProvider(
           create: (_) {
             final repo = EntityRepo(client);

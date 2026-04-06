@@ -1,8 +1,7 @@
 class: AttributeTmpl
+extends: HasId
 table: attribute_tmpls
 fields:
-    ### The public ID.
-    id: UuidValue?, defaultPersist=random_v7
     name: String
     description: String?
     valueType: String

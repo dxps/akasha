@@ -1,0 +1,4 @@
+enum UpsertType {
+  insert,
+  update,
+}

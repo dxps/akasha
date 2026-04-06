@@ -1,10 +1,8 @@
 class: EntityTmpl
+extends: HasId
 table: entity_tmpls
 
 fields:
-    ### The public ID.
-    id: UuidValue?, defaultPersist=random_v7
-
     name: String
     description: String?
 

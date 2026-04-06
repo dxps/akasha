@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_client/shared/upsert_type.dart';
 import 'package:akasha_ui/attribute_template/attr_tmpl_form.dart';
-import 'package:akasha_ui/main.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpls_state.dart';
 import 'package:akasha_ui/theming/colors.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/string.dart';
@@ -20,145 +22,120 @@ class AttributeTmplsScreen extends StatefulWidget {
   State<AttributeTmplsScreen> createState() => _AttributeTmplsScreenState();
 }
 
-class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
-  bool isFetchingData = false;
-  List<AttributeTmpl> attributeTmpls = [];
+class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _ModalHelpers {
   int? _hoveredRowIndex;
-  final List<ModalData> _modals = [];
   int _nextModalId = 1;
-
-  Future<void> getAttributeTmpls() async {
-    setState(() => isFetchingData = true);
-    final items = await client.attrTmpls.readAll();
-    debugPrint("Got ${items.length} attribute templates.");
-    setState(() {
-      attributeTmpls = items;
-      isFetchingData = false;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    getAttributeTmpls();
+    context.read<AttributeTemplatesLogic>().loadAll();
   }
-
-  // -----------------------
-  // Modals related methods.
-
-  void _addModal({
-    required int id,
-    String? type,
-    required String title,
-    required Offset offset,
-    required Size size,
-    required AttributeTemplateForm child,
-  }) {
-    for (final modal in _modals) {
-      if ((modal.child as AttributeTemplateForm).item == child.item) {
-        debugPrint('That (attribute template) modal is already open.');
-        return;
-      }
-    }
-    setState(() {
-      _modals.add(ModalData(id: id, type: type, title: title, offset: offset, size: size, child: child));
-    });
-  }
-
-  void _bringToFront(int id) {
-    setState(() {
-      final int index = _modals.indexWhere((m) => m.id == id);
-      if (index == -1) return;
-      final ModalData item = _modals.removeAt(index);
-      _modals.add(item);
-    });
-  }
-
-  void _closeModal(int id) {
-    setState(() {
-      _modals.removeWhere((m) => m.id == id);
-    });
-  }
-
-  void _updatePosition(int id, Offset nextOffset, Size viewport) {
-    setState(() {
-      final int index = _modals.indexWhere((m) => m.id == id);
-      if (index == -1) return;
-
-      final ModalData modal = _modals[index];
-      final double maxLeft = math.max(0, viewport.width - modal.size.width);
-      final double maxTop = math.max(0, viewport.height - modal.size.height);
-
-      _modals[index] = modal.copyWith(offset: Offset(nextOffset.dx.clamp(0.0, maxLeft), nextOffset.dy.clamp(0.0, maxTop)));
-    });
-  }
-
-  // ----------------------
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<ThemeCubit, ThemeMode, bool>(
-      selector: (themeMode) => themeMode == ThemeMode.dark,
-      builder: (context, isDarkMode) {
-        return Scaffold(
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
-              final addButton = IconButton(
-                onPressed: () {
-                  final size = MediaQuery.of(context).size;
-                  _openModal(viewportSize: size);
-                },
-                icon: const Icon(Icons.add),
-                tooltip: 'Add Attribute Template',
-              );
-              return Stack(
-                children: [
-                  const TopHeader(),
-                  isFetchingData
-                      ? const Center(child: CircularProgressIndicator())
-                      : attributeTmpls.isEmpty
-                      ? Center(
+    final viewportSize = MediaQuery.sizeOf(context);
+    final addButton = IconButton(
+      onPressed: () => _openModal(viewportSize: viewportSize),
+      icon: const Icon(Icons.add),
+      tooltip: 'Add Attribute Template',
+    );
+
+    return BlocConsumer<AttributeTemplatesLogic, AttributeTemplatesState>(
+      listenWhen: (previous, current) => current is AttributeTemplatesStateOpenModalFor || current is AttributeTemplatesLoadErrorState,
+      listener: (context, state) async {
+        // Note: BlocListener does not rebuild UI. It is meant for side effects such as dialogs, snackbars, and navigation.
+        switch (state) {
+          case AttributeTemplatesStateOpenModalFor(forItem: final attributeTmpl):
+            debugPrint(
+              '>>> [_AttributeTmplsScreenState.build] Reacting to AttributeTemplatesStateOpenModalFor item w/ id=${attributeTmpl.id} ...',
+            );
+            _openModal(item: attributeTmpl, readOnly: true, viewportSize: viewportSize);
+            break;
+
+          case AttributeTemplatesLoadErrorState(:final errorMessage):
+            debugPrint('>>> [_AttributeTmplsScreenState.build] Reacting to AttributeTemplatesLoadErrorState: $errorMessage');
+            showErrorSnackbar(context, errorMessage);
+            break;
+
+          default:
+            break;
+        }
+      },
+      buildWhen: (previous, current) => current is! AttributeTemplatesStateOpenModalFor,
+      builder: (context, state) {
+        return BlocSelector<ThemeCubit, ThemeMode, bool>(
+          selector: (themeMode) => themeMode == ThemeMode.dark,
+          builder: (context, isDarkMode) {
+            return Scaffold(
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  final vwSize = Size(constraints.maxWidth, constraints.maxHeight);
+                  return Stack(
+                    children: [
+                      const TopHeader(),
+
+                      switch (state) {
+                        AttributeTemplatesLoadingState() => const Center(child: CircularProgressIndicator()),
+
+                        AttributeTemplatesLoadedState(:final items) =>
+                          items.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    children: [
+                                      const Text('No attribute templates yet.'),
+                                      const SizedBox(height: 20),
+                                      addButton,
+                                    ],
+                                  ),
+                                )
+                              : Center(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        _buildTable(vwSize, isDarkMode, items),
+                                        const SizedBox(height: 20),
+                                        addButton,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                        AttributeTemplatesLoadErrorState() => Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('No attribute templates yet.'),
-                              const SizedBox(height: 20),
+                              const Text('Failed to load entity templates.'),
+                              const SizedBox(height: 16),
                               addButton,
                             ],
                           ),
-                        )
-                      : Center(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                _buildTable(vwSize, isDarkMode),
-                                const SizedBox(height: 20),
-                                addButton,
-                              ],
-                            ),
-                          ),
                         ),
 
-                  for (final modal in _modals) // Render the modals.
-                    DraggableModal(
-                      key: ValueKey(modal.id),
-                      data: modal,
-                      viewport: vwSize,
-                      onTap: () => _bringToFront(modal.id),
-                      onClose: () => _closeModal(modal.id),
-                      onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
-                    ),
-                ],
-              );
-            },
-          ),
+                        _ => const SizedBox.shrink(),
+                      },
+
+                      for (final modal in modals) // Render the modals.
+                        DraggableModal(
+                          key: ValueKey(modal.id),
+                          data: modal,
+                          viewport: viewportSize,
+                          onTap: () => bringToFront(modal.id),
+                          onClose: () => closeModal(modal.id),
+                          onDrag: (offset) => updatePosition(modal.id, offset, viewportSize),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildTable(Size? viewportSize, bool isDarkMode) {
+  Widget _buildTable(Size viewportSize, bool isDarkMode, List<AttributeTmpl> items) {
     final headerTextColor = isDarkMode ? darkFgColor.withAlpha(120) : Colors.grey.shade700;
 
     return Column(
@@ -195,15 +172,12 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
               ),
               SizedBox(
                 width: 40,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  child: Text(''),
-                ),
+                child: Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2), child: Text('')),
               ),
             ],
           ),
         ),
-        ...attributeTmpls.asMap().entries.map((entry) {
+        ...items.asMap().entries.map((entry) {
           final index = entry.key;
           final tmpl = entry.value;
           final isHovered = _hoveredRowIndex == index;
@@ -216,9 +190,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
               height: 28,
               decoration: BoxDecoration(
                 color: isHovered ? (isDarkMode ? Colors.grey.shade700 : Colors.white) : Colors.transparent,
-                border: Border(
-                  bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300),
-                ),
+                border: Border(bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300)),
                 borderRadius: isHovered ? BorderRadius.circular(6) : null,
               ),
               child: Row(
@@ -235,18 +207,13 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                       children: [
                         SizedBox(
                           width: 200,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            child: Text(limitChars(tmpl.name, 32)),
-                          ),
+                          child: Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2), child: Text(limitChars(tmpl.name, 32))),
                         ),
                         SizedBox(
                           width: 300,
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            child: Text(
-                              tmpl.description != null ? limitChars(tmpl.description!, 40) : '',
-                            ),
+                            child: Text(tmpl.description != null ? limitChars(tmpl.description!, 40) : ''),
                           ),
                         ),
                         SizedBox(
@@ -263,11 +230,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
                     width: 30,
                     child: Builder(
                       builder: (context) => IconButton(
-                        icon: Icon(
-                          Icons.more_vert,
-                          size: 15,
-                          color: isHovered ? Colors.grey[800] : Colors.grey[500],
-                        ),
+                        icon: Icon(Icons.more_vert, size: 15, color: isHovered ? Colors.grey[800] : Colors.grey[500]),
                         onPressed: () => _openContextualMenu(context, tmpl, viewportSize),
                       ),
                     ),
@@ -288,15 +251,13 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(
-          button.size.bottomRight(Offset.zero),
-          ancestor: overlay,
-        ),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
       ),
       Offset.zero & overlay.size,
     );
 
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+    final attrTemplatesLogic = context.read<AttributeTemplatesLogic>();
     final result = await showMenu<String>(
       context: context,
       items: const [
@@ -315,7 +276,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     if (result == 'edit') {
       _openModal(item: tmpl, viewportSize: viewportSize);
     } else if (result == 'delete') {
-      _deleteAttributeTmpl(tmpl);
+      _deleteAttributeTmpl(attrTemplatesLogic, tmpl);
     }
   }
 
@@ -327,9 +288,10 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
   }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
+    final logic = context.read<AttributeTemplatesLogic>();
 
     debugPrint(
-      'Opening modal (id: $id) to ${readOnly
+      '>>> [_AttributeTmplsScreenState._openModal] Opening modal (id: $id) to ${readOnly
           ? 'view'
           : isEdit
           ? 'edit'
@@ -337,17 +299,13 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     );
 
     const modalSize = Size(340, 400);
-
     final offset =
         initialOffset ??
         (viewportSize != null
-            ? Offset(
-                (viewportSize.width - modalSize.width) / 2,
-                (viewportSize.height - modalSize.height) / 2,
-              )
+            ? Offset((viewportSize.width - modalSize.width) / 2, (viewportSize.height - modalSize.height) / 2)
             : const Offset(24, 80));
 
-    _addModal(
+    addModal(
       id: id,
       title: readOnly
           ? 'Attribute Template'
@@ -361,11 +319,10 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
         readOnly: readOnly,
         onRequestEdit: readOnly && item != null
             ? () {
-                final currentModal = _modals.firstWhere((m) => m.id == id);
+                final currentModal = modals.firstWhere((m) => m.id == id);
                 final currentOffset = currentModal.offset;
 
-                _closeModal(id);
-
+                closeModal(id);
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!mounted) return;
                   _openModal(
@@ -380,11 +337,9 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
         onSave: (item) async {
           try {
             if (isEdit) {
-              final response = await client.attrTmpls.update(item);
-
+              final response = await logic.upsert(UpsertType.update, item, emitAll: true);
               if (response.success && mounted) {
-                _closeModal(id);
-                await getAttributeTmpls();
+                closeModal(id);
               } else if (!response.success) {
                 if (!mounted) return;
                 showErrorSnackbar(
@@ -395,11 +350,9 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
               return;
             }
 
-            final response = await client.attrTmpls.create(item);
-
+            final response = await logic.upsert(UpsertType.insert, item, emitAll: true);
             if (response.success && mounted) {
-              _closeModal(id);
-              await getAttributeTmpls();
+              closeModal(id);
             } else if (!response.success) {
               if (!mounted) return;
               showErrorSnackbar(
@@ -408,7 +361,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
               );
             }
           } catch (e) {
-            debugPrint('>>> Failed to save attribute template: $e');
+            debugPrint('>>> [_AttributeTmplsScreenState._openModal] Failed to save attribute template: $e');
             if (!mounted) return;
             showErrorSnackbar(context, 'Failed to save attribute template: $e');
           }
@@ -417,13 +370,13 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
     );
   }
 
-  Future<void> _deleteAttributeTmpl(AttributeTmpl tmpl) async {
+  Future<void> _deleteAttributeTmpl(AttributeTemplatesLogic logic, AttributeTmpl item) async {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Attribute Template', style: TextStyle(fontSize: 18)),
-        content: Text('Are you sure you want to delete "${tmpl.name}"?'),
+        content: Text('Are you sure you want to delete "${item.name}"?'),
         backgroundColor: isDarkMode ? Colors.grey.shade800 : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         actions: [
@@ -442,10 +395,9 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
 
     if (confirmed == true) {
       try {
-        await client.attrTmpls.delete(tmpl.id!);
-        await getAttributeTmpls();
+        await logic.delete(item.id!, emitAll: true);
       } catch (e) {
-        debugPrint('Error deleting attribute template: $e');
+        debugPrint('>>> [_AttributeTmplsScreenState._deleteAttributeTmpl] Error deleting attribute template: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error deleting template: $e')),
@@ -453,5 +405,59 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> {
         }
       }
     }
+  }
+
+  @override
+  final List<ModalData> modals = []; // Just to satisfy the mixin requirement. The actual state is managed in _ModalHelpers.
+}
+
+mixin _ModalHelpers on State<AttributeTmplsScreen> {
+  List<ModalData> get modals;
+
+  void addModal({
+    required int id,
+    String? type,
+    required String title,
+    required Offset offset,
+    required Size size,
+    required AttributeTemplateForm child,
+  }) {
+    for (final modal in modals) {
+      if ((modal.child as AttributeTemplateForm).item == child.item) {
+        debugPrint('>>> [_ModalHelpers.addModal] That (attribute template) modal is already open.');
+        return;
+      }
+    }
+    setState(() {
+      modals.add(ModalData(id: id, type: type, title: title, offset: offset, size: size, child: child));
+    });
+  }
+
+  void bringToFront(int id) {
+    setState(() {
+      final int index = modals.indexWhere((m) => m.id == id);
+      if (index == -1) return;
+      final ModalData item = modals.removeAt(index);
+      modals.add(item);
+    });
+  }
+
+  void closeModal(int id) {
+    setState(() {
+      modals.removeWhere((m) => m.id == id);
+    });
+  }
+
+  void updatePosition(int id, Offset nextOffset, Size viewport) {
+    setState(() {
+      final int index = modals.indexWhere((m) => m.id == id);
+      if (index == -1) return;
+
+      final ModalData modal = modals[index];
+      final double maxLeft = math.max(0, viewport.width - modal.size.width);
+      final double maxTop = math.max(0, viewport.height - modal.size.height);
+
+      modals[index] = modal.copyWith(offset: Offset(nextOffset.dx.clamp(0.0, maxLeft), nextOffset.dy.clamp(0.0, maxTop)));
+    });
   }
 }

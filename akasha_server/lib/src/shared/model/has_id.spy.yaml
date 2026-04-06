@@ -1,3 +1,4 @@
 class: HasId
 fields:
+    ### Its unique identifier.
     id: UuidValue?, defaultPersist=random_v7

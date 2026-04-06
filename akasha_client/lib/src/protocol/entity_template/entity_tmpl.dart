@@ -10,12 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import '../entity_template/entity_tmpl_attribute.dart' as _i2;
-import '../entity_template/entity_tmpl_link.dart' as _i3;
-import 'package:akasha_client/src/protocol/protocol.dart' as _i4;
+import '../protocol.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _i2;
+import '../entity_template/entity_tmpl_attribute.dart' as _i3;
+import '../entity_template/entity_tmpl_link.dart' as _i4;
+import 'package:akasha_client/src/protocol/protocol.dart' as _i5;
 
-abstract class EntityTmpl implements _i1.SerializableModel {
+abstract class EntityTmpl extends _i1.HasId implements _i2.SerializableModel {
   EntityTmpl._({
     this.id,
     required this.name,
@@ -26,64 +27,65 @@ abstract class EntityTmpl implements _i1.SerializableModel {
   });
 
   factory EntityTmpl({
-    _i1.UuidValue? id,
+    _i2.UuidValue? id,
     required String name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributes,
-    List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinks,
+    List<_i3.EntityTmplAttribute>? attributes,
+    List<_i4.EntityTmplLink>? outgoingLinks,
+    List<_i4.EntityTmplLink>? incomingLinks,
   }) = _EntityTmplImpl;
 
   factory EntityTmpl.fromJson(Map<String, dynamic> jsonSerialization) {
     return EntityTmpl(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _i2.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       description: jsonSerialization['description'] as String?,
       attributes: jsonSerialization['attributes'] == null
           ? null
-          : _i4.Protocol().deserialize<List<_i2.EntityTmplAttribute>>(
+          : _i5.Protocol().deserialize<List<_i3.EntityTmplAttribute>>(
               jsonSerialization['attributes'],
             ),
       outgoingLinks: jsonSerialization['outgoingLinks'] == null
           ? null
-          : _i4.Protocol().deserialize<List<_i3.EntityTmplLink>>(
+          : _i5.Protocol().deserialize<List<_i4.EntityTmplLink>>(
               jsonSerialization['outgoingLinks'],
             ),
       incomingLinks: jsonSerialization['incomingLinks'] == null
           ? null
-          : _i4.Protocol().deserialize<List<_i3.EntityTmplLink>>(
+          : _i5.Protocol().deserialize<List<_i4.EntityTmplLink>>(
               jsonSerialization['incomingLinks'],
             ),
     );
   }
 
-  /// The public ID.
-  _i1.UuidValue? id;
+  /// Its unique identifier.
+  _i2.UuidValue? id;
 
   String name;
 
   String? description;
 
-  List<_i2.EntityTmplAttribute>? attributes;
+  List<_i3.EntityTmplAttribute>? attributes;
 
   /// The links where this entity template is the source.
-  List<_i3.EntityTmplLink>? outgoingLinks;
+  List<_i4.EntityTmplLink>? outgoingLinks;
 
   /// Optional reverse traversal: links where this entity template is a target.
-  List<_i3.EntityTmplLink>? incomingLinks;
+  List<_i4.EntityTmplLink>? incomingLinks;
 
   /// Returns a shallow copy of this [EntityTmpl]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @override
+  @_i2.useResult
   EntityTmpl copyWith({
-    _i1.UuidValue? id,
+    Object? id,
     String? name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributes,
-    List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinks,
+    List<_i3.EntityTmplAttribute>? attributes,
+    List<_i4.EntityTmplLink>? outgoingLinks,
+    List<_i4.EntityTmplLink>? incomingLinks,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -103,7 +105,7 @@ abstract class EntityTmpl implements _i1.SerializableModel {
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _i2.SerializationManager.encode(this);
   }
 }
 
@@ -111,12 +113,12 @@ class _Undefined {}
 
 class _EntityTmplImpl extends EntityTmpl {
   _EntityTmplImpl({
-    _i1.UuidValue? id,
+    _i2.UuidValue? id,
     required String name,
     String? description,
-    List<_i2.EntityTmplAttribute>? attributes,
-    List<_i3.EntityTmplLink>? outgoingLinks,
-    List<_i3.EntityTmplLink>? incomingLinks,
+    List<_i3.EntityTmplAttribute>? attributes,
+    List<_i4.EntityTmplLink>? outgoingLinks,
+    List<_i4.EntityTmplLink>? incomingLinks,
   }) : super._(
          id: id,
          name: name,
@@ -128,7 +130,7 @@ class _EntityTmplImpl extends EntityTmpl {
 
   /// Returns a shallow copy of this [EntityTmpl]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_i2.useResult
   @override
   EntityTmpl copyWith({
     Object? id = _Undefined,
@@ -139,16 +141,16 @@ class _EntityTmplImpl extends EntityTmpl {
     Object? incomingLinks = _Undefined,
   }) {
     return EntityTmpl(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _i2.UuidValue? ? id : this.id,
       name: name ?? this.name,
       description: description is String? ? description : this.description,
-      attributes: attributes is List<_i2.EntityTmplAttribute>?
+      attributes: attributes is List<_i3.EntityTmplAttribute>?
           ? attributes
           : this.attributes?.map((e0) => e0.copyWith()).toList(),
-      outgoingLinks: outgoingLinks is List<_i3.EntityTmplLink>?
+      outgoingLinks: outgoingLinks is List<_i4.EntityTmplLink>?
           ? outgoingLinks
           : this.outgoingLinks?.map((e0) => e0.copyWith()).toList(),
-      incomingLinks: incomingLinks is List<_i3.EntityTmplLink>?
+      incomingLinks: incomingLinks is List<_i4.EntityTmplLink>?
           ? incomingLinks
           : this.incomingLinks?.map((e0) => e0.copyWith()).toList(),
     );

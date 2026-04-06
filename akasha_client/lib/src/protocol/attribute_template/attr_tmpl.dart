@@ -10,11 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import '../access_level/access_level.dart' as _i2;
-import 'package:akasha_client/src/protocol/protocol.dart' as _i3;
+import '../protocol.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _i2;
+import '../access_level/access_level.dart' as _i3;
+import 'package:akasha_client/src/protocol/protocol.dart' as _i4;
 
-abstract class AttributeTmpl implements _i1.SerializableModel {
+abstract class AttributeTmpl extends _i1.HasId
+    implements _i2.SerializableModel {
   AttributeTmpl._({
     this.id,
     required this.name,
@@ -27,37 +29,37 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
   });
 
   factory AttributeTmpl({
-    _i1.UuidValue? id,
+    _i2.UuidValue? id,
     required String name,
     String? description,
     required String valueType,
     required String defaultValue,
     required bool required,
     required int accessLevelId,
-    required _i2.AccessLevel? accessLevel,
+    required _i3.AccessLevel? accessLevel,
   }) = _AttributeTmplImpl;
 
   factory AttributeTmpl.fromJson(Map<String, dynamic> jsonSerialization) {
     return AttributeTmpl(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _i2.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       description: jsonSerialization['description'] as String?,
       valueType: jsonSerialization['valueType'] as String,
       defaultValue: jsonSerialization['defaultValue'] as String,
-      required: _i1.BoolJsonExtension.fromJson(jsonSerialization['required']),
+      required: _i2.BoolJsonExtension.fromJson(jsonSerialization['required']),
       accessLevelId: jsonSerialization['accessLevelId'] as int,
       accessLevel: jsonSerialization['accessLevel'] == null
           ? null
-          : _i3.Protocol().deserialize<_i2.AccessLevel>(
+          : _i4.Protocol().deserialize<_i3.AccessLevel>(
               jsonSerialization['accessLevel'],
             ),
     );
   }
 
-  /// The public ID.
-  _i1.UuidValue? id;
+  /// Its unique identifier.
+  _i2.UuidValue? id;
 
   String name;
 
@@ -71,20 +73,21 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
 
   int accessLevelId;
 
-  _i2.AccessLevel? accessLevel;
+  _i3.AccessLevel? accessLevel;
 
   /// Returns a shallow copy of this [AttributeTmpl]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @override
+  @_i2.useResult
   AttributeTmpl copyWith({
-    _i1.UuidValue? id,
+    Object? id,
     String? name,
     String? description,
     String? valueType,
     String? defaultValue,
     bool? required,
     int? accessLevelId,
-    _i2.AccessLevel? accessLevel,
+    _i3.AccessLevel? accessLevel,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -103,7 +106,7 @@ abstract class AttributeTmpl implements _i1.SerializableModel {
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _i2.SerializationManager.encode(this);
   }
 }
 
@@ -111,14 +114,14 @@ class _Undefined {}
 
 class _AttributeTmplImpl extends AttributeTmpl {
   _AttributeTmplImpl({
-    _i1.UuidValue? id,
+    _i2.UuidValue? id,
     required String name,
     String? description,
     required String valueType,
     required String defaultValue,
     required bool required,
     required int accessLevelId,
-    required _i2.AccessLevel? accessLevel,
+    required _i3.AccessLevel? accessLevel,
   }) : super._(
          id: id,
          name: name,
@@ -132,7 +135,7 @@ class _AttributeTmplImpl extends AttributeTmpl {
 
   /// Returns a shallow copy of this [AttributeTmpl]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_i2.useResult
   @override
   AttributeTmpl copyWith({
     Object? id = _Undefined,
@@ -145,14 +148,14 @@ class _AttributeTmplImpl extends AttributeTmpl {
     Object? accessLevel = _Undefined,
   }) {
     return AttributeTmpl(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _i2.UuidValue? ? id : this.id,
       name: name ?? this.name,
       description: description is String? ? description : this.description,
       valueType: valueType ?? this.valueType,
       defaultValue: defaultValue ?? this.defaultValue,
       required: required ?? this.required,
       accessLevelId: accessLevelId ?? this.accessLevelId,
-      accessLevel: accessLevel is _i2.AccessLevel?
+      accessLevel: accessLevel is _i3.AccessLevel?
           ? accessLevel
           : this.accessLevel?.copyWith(),
     );
