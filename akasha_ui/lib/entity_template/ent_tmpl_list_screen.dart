@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
-import 'package:akasha_ui/entity_template/ent_tmpl_dialogs_cubit.dart';
-import 'package:akasha_ui/entity_template/ent_tmpl_dialogs_state.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_form.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_row.dart';
+import 'package:akasha_ui/entity_template/ent_tmpls_cubit.dart';
+import 'package:akasha_ui/entity_template/ent_tmpls_state.dart';
 import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/string.dart';
@@ -26,13 +26,13 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
   int _nextModalId = 1;
 
   Future<void> _forceReloadEntries() async {
-    context.read<EntityTemplatesCubit>().getAll(forceRefresh: true);
+    context.read<EntityTemplatesCubit>().loadAll();
   }
 
   @override
   void initState() {
     super.initState();
-    context.read<EntityTemplatesCubit>().getAll();
+    context.read<EntityTemplatesCubit>().loadAll();
   }
 
   @override
@@ -46,7 +46,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
       onPressed: () {
         _openModal(
           viewportSize: viewportSize,
-          items: context.read<EntityTemplatesCubit>().state.items,
+          items: context.read<EntityTemplatesCubit>().cachedItems,
         );
       },
     );
@@ -62,7 +62,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
               item: entityTmpl,
               readOnly: true,
               viewportSize: viewportSize,
-              items: context.read<EntityTemplatesCubit>().state.items,
+              items: context.read<EntityTemplatesCubit>().cachedItems,
             );
             break;
 
@@ -343,7 +343,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
   }
 
   @override
-  final List<ModalData> modals = []; // Just to satisfy the mixin requirement, actual state is managed in _ModalHelpers.
+  final List<ModalData> modals = []; // Just to satisfy the mixin requirement. The actual state is managed in _ModalHelpers.
 }
 
 mixin _ModalHelpers on State<EntityTemplatesScreen> {
