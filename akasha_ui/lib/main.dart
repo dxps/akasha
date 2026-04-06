@@ -4,7 +4,7 @@ import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
 import 'package:akasha_ui/entity/ent_repo.dart';
 import 'package:akasha_ui/entity/ents_cubit.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_repo.dart';
-import 'package:akasha_ui/entity_template/ent_tmpls_cubit.dart';
+import 'package:akasha_ui/entity_template/ent_tmpls_logic.dart';
 import 'package:akasha_ui/routing.dart';
 import 'package:akasha_ui/theming/init_theme.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
@@ -71,7 +71,7 @@ void main() async {
         BlocProvider(
           create: (_) {
             final repo = EntityTemplateRepo(client: client);
-            return EntityTemplatesCubit(repo: repo);
+            return EntityTemplatesLogic(repo: repo);
           },
         ),
 

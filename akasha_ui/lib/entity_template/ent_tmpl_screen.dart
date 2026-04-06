@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_form.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_row.dart';
-import 'package:akasha_ui/entity_template/ent_tmpls_cubit.dart';
+import 'package:akasha_ui/entity_template/ent_tmpls_logic.dart';
 import 'package:akasha_ui/entity_template/ent_tmpls_state.dart';
 import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
@@ -26,13 +26,13 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
   int _nextModalId = 1;
 
   Future<void> _forceReloadEntries() async {
-    context.read<EntityTemplatesCubit>().loadAll();
+    context.read<EntityTemplatesLogic>().loadAll();
   }
 
   @override
   void initState() {
     super.initState();
-    context.read<EntityTemplatesCubit>().loadAll();
+    context.read<EntityTemplatesLogic>().loadAll();
   }
 
   @override
@@ -46,28 +46,28 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
       onPressed: () {
         _openModal(
           viewportSize: viewportSize,
-          items: context.read<EntityTemplatesCubit>().cachedItems,
+          items: context.read<EntityTemplatesLogic>().cachedItems,
         );
       },
     );
 
-    return BlocConsumer<EntityTemplatesCubit, EntityTemplatesState>(
+    return BlocConsumer<EntityTemplatesLogic, EntityTemplatesState>(
       listenWhen: (previous, current) => current is EntityTemplatesStateOpenModalFor || current is EntityTemplatesStateError,
       listener: (context, state) async {
         // Note: BlocListener does not rebuild UI. It is meant for side effects such as dialogs, snackbars, and navigation.
         switch (state) {
           case EntityTemplatesStateOpenModalFor(forItem: final entityTmpl):
-            debugPrint('>>> Reacting to EntityTemplatesStateOpenModalFor $entityTmpl ...');
+            debugPrint('>>> [_EntityTemplatesScreenState.build] Reacting to EntityTemplatesStateOpenModalFor ent tmpl w/ id=${entityTmpl.id} ...');
             _openModal(
               item: entityTmpl,
               readOnly: true,
               viewportSize: viewportSize,
-              items: context.read<EntityTemplatesCubit>().cachedItems,
+              items: context.read<EntityTemplatesLogic>().cachedItems,
             );
             break;
 
           case EntityTemplatesStateError(:final errorMessage):
-            debugPrint('>>> Reacting to EntityTemplatesStateError: $errorMessage');
+            debugPrint('>>> [_EntityTemplatesScreenState.build] Reacting to EntityTemplatesStateError: $errorMessage');
             showErrorSnackbar(context, errorMessage);
             break;
 
@@ -198,20 +198,20 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
             item: template,
             nameText: limitChars(template.name, 32),
             descriptionText: template.description != null ? limitChars(template.description!, 40) : '',
-            onView: () async => context.read<EntityTemplatesCubit>().openModal(template.id!),
+            onView: () async => context.read<EntityTemplatesLogic>().openModal(template.id!),
             onEdit: () async {
-              debugPrint('>>> Got entity template for edit: $template');
+              debugPrint('>>> [_EntityTemplatesScreenState._buildTable] Got entity template for edit: $template');
               final item = await client.entityTmpl.read(template.id!);
               if (item != null) {
-                debugPrint('>>> Got entity template for edit: $item');
+                debugPrint('>>> [_EntityTemplatesScreenState._buildTable] Got entity template for edit: $item');
                 _openModal(item: item, viewportSize: size, items: items);
               } else {
-                debugPrint('Failed to load entity template with id ${template.id} for edit.');
+                debugPrint('>>> [_EntityTemplatesScreenState._buildTable] Failed to load entity template with id ${template.id} for edit.');
                 if (!mounted) return;
                 showErrorSnackbar(context, 'Failed to load entity template details for edit.');
               }
             },
-            onDelete: () => _deleteEntityTemplate(template),
+            onDelete: () => _delete(template),
           );
         }),
       ],
@@ -270,10 +270,10 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
           }
         },
         onSave: (item) async {
-          debugPrint('>>> Got from form the item (EntityTmpl): $item');
+          debugPrint('>>> [_EntityTemplatesScreenState._openModal] Got from form the item (EntityTmpl): $item');
           try {
             if (isEdit) {
-              final response = await client.entityTmpl.update(item);
+              final response = await client.entityTmpl.update(item); // TODO: use logic's upsert.
 
               if (response.success && mounted) {
                 _closeModal(id);
@@ -285,7 +285,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
               return;
             }
 
-            final response = await client.entityTmpl.create(item);
+            final response = await client.entityTmpl.create(item); // TODO: use logic's upsert.
 
             if (response.success && mounted) {
               _closeModal(id);
@@ -295,7 +295,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
               showErrorSnackbar(context, response.errorMessage ?? 'Failed to create entity template: ${response.errorCode}');
             }
           } catch (e) {
-            debugPrint('Failed to save entity template: $e.');
+            debugPrint('>>> [_EntityTemplatesScreenState._openModal] Failed to save entity template: $e.');
             if (!mounted) return;
             showErrorSnackbar(context, 'Failed to save entity template: $e');
           }
@@ -304,7 +304,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     );
   }
 
-  Future<void> _deleteEntityTemplate(EntityTmpl template) async {
+  Future<void> _delete(EntityTmpl template) async {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -329,10 +329,10 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
 
     if (confirmed == true) {
       try {
-        await client.entityTmpl.delete(template.id!);
+        await client.entityTmpl.delete(template.id!); // TODO: use logic's delete.
         await _forceReloadEntries();
       } catch (e) {
-        debugPrint('Error deleting entity template: $e');
+        debugPrint('>>> [_EntityTemplatesScreenState._delete] Error deleting entity template: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error deleting entity template: $e')),
@@ -359,7 +359,7 @@ mixin _ModalHelpers on State<EntityTemplatesScreen> {
   }) {
     for (final modal in modals) {
       if ((modal.child as EntityTmplForm).item?.id == child.item?.id) {
-        debugPrint('That (entity template) modal is already open.');
+        debugPrint('>>> [_EntityTemplatesScreenState._addModal] That (entity template) modal is already open.');
         return;
       }
     }

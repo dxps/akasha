@@ -87,9 +87,7 @@ abstract class Entity extends _i1.HasId implements _i2.SerializableModel {
     );
   }
 
-  /// The database id, set if the object has been inserted into the
-  /// database or if it has been fetched from the database. Otherwise,
-  /// the id will be null.
+  /// Its unique identifier.
   _i2.UuidValue? id;
 
   /// The attribute (the name and its value) that is presented in the listing of entities.

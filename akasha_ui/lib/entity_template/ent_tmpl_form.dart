@@ -1,7 +1,7 @@
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_client/shared/zero_uuid.dart';
-import 'package:akasha_ui/entity_template/ent_tmpls_cubit.dart';
-import 'package:akasha_ui/main.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
+import 'package:akasha_ui/entity_template/ent_tmpls_logic.dart';
 import 'package:akasha_ui/theming/colors.dart';
 import 'package:akasha_ui/theming/sizes.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
@@ -41,7 +41,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   late final TextEditingController nameCtrl;
   late final TextEditingController descriptionController;
 
-  List<AttributeTmpl> attributeTmpls = [];
+  //   List<AttributeTmpl> attributeTmpls = [];
   List<AttributeTmpl> includedAttributeTmpls = [];
   AttributeTmpl? selectedAttributeTmpl;
 
@@ -58,18 +58,19 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   // ------------------------
   // attributes related logic
 
-  Future<void> _fetchAttributeTmpls() async {
-    try {
-      final entries = await client.attrTmpls.readAll();
-      setState(() => attributeTmpls = entries);
-    } catch (e) {
-      debugPrint('>>> Failed to fetch attribute templates: $e');
-    }
-  }
+  //   Future<void> _fetchAttributeTmpls() async {
+  // try {
+  //   final entries = await client.attrTmpls.readAll();
+  //   setState(() => attributeTmpls = entries);
+  // } catch (e) {
+  //   debugPrint('>>> Failed to fetch attribute templates: $e');
+  // }
+  //   }
 
   List<AttributeTmpl> get availableAttributeTmpls {
     final includedIds = includedAttributeTmpls.map((e) => e.id).whereType<UuidValue>().toSet();
-    return attributeTmpls.where((attr) {
+    final attrTmpls = context.read<AttributeTemplatesLogic>().cachedItems;
+    return attrTmpls.where((attr) {
       final id = attr.id;
       if (id == null) return true;
       return !includedIds.contains(id);
@@ -149,8 +150,9 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     });
   }
 
-  // -------------------
-  // lifecycle and build
+  // --------------------------------------
+  // lifecycle (init and dispose) and build
+  // --------------------------------------
 
   @override
   void initState() {
@@ -163,19 +165,16 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     linkDescCtrl = TextEditingController();
 
     includedAttributeTmpls = [...?widget.item?.attributes?.map((link) => link.attributeTmpl)].whereType<AttributeTmpl>().toList();
-    _fetchAttributeTmpls().then(
-      (_) {
-        if (widget.item?.attributes != null) {
-          widget.item?.attributes?.forEach((entTmplAttr) {
-            for (var attr in attributeTmpls) {
-              if (attr.id == entTmplAttr.attributeTmplId) {
-                includedAttributeTmpls.add(attr);
-              }
-            }
-          });
+    final attrTmpls = context.read<AttributeTemplatesLogic>().cachedItems;
+    if (widget.item?.attributes != null) {
+      widget.item?.attributes?.forEach((entTmplAttr) {
+        for (var attr in attrTmpls) {
+          if (attr.id == entTmplAttr.attributeTmplId) {
+            includedAttributeTmpls.add(attr);
+          }
         }
-      },
-    );
+      });
+    }
     includedOutLinks = [...?widget.item?.outgoingLinks];
   }
 
@@ -186,62 +185,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     linkNameCtrl.dispose();
     linkDescCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> onSave() async {
-    if (_isReadOnly || widget.onSave == null) {
-      return;
-    }
-
-    // Note: We don't do the whole form validation, since in the Links tab, the name is empty most of the time.
-    // if (!formKey.currentState!.validate()) { return; }
-
-    if (nameCtrl.text.trim().isEmpty) {
-      nameFieldKey.currentState?.validate();
-      return;
-    }
-    if (includedAttributeTmpls.isEmpty) {
-      showErrorSnackbar(context, 'An entity template must have at least one attribute template.');
-      return;
-    }
-
-    setState(() => _isSaving = true);
-
-    try {
-      int orderIdx = -1;
-      final entityTmpl = EntityTmpl(
-        id: widget.item?.id,
-        name: nameCtrl.text.trim(),
-        description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
-        attributes: includedAttributeTmpls
-            .map(
-              (attr) => EntityTmplAttribute(
-                entityTmplId: widget.item?.id ?? zeroUuid,
-                attributeTmplId: attr.id ?? zeroUuid,
-                orderIdx: ++orderIdx,
-              ),
-            )
-            .toList(),
-        outgoingLinks: includedOutLinks
-            .map(
-              (link) => EntityTmplLink(
-                id: link.id,
-                sourceId: widget.item?.id ?? zeroUuid,
-                targetId: link.targetId,
-                name: link.name,
-                description: link.description,
-                orderIdx: includedOutLinks.indexOf(link),
-              ),
-            )
-            .toList(),
-      );
-      debugPrint('>>> Prepared entity template for saving: $entityTmpl');
-      await widget.onSave!(entityTmpl);
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
-    }
   }
 
   @override
@@ -353,5 +296,61 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
         ),
       ),
     );
+  }
+
+  Future<void> onSave() async {
+    if (_isReadOnly || widget.onSave == null) {
+      return;
+    }
+
+    // Note: We don't do the whole form validation, since in the Links tab, the name is empty most of the time.
+    // if (!formKey.currentState!.validate()) { return; }
+
+    if (nameCtrl.text.trim().isEmpty) {
+      nameFieldKey.currentState?.validate();
+      return;
+    }
+    if (includedAttributeTmpls.isEmpty) {
+      showErrorSnackbar(context, 'An entity template must have at least one attribute template.');
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      int orderIdx = -1;
+      final entityTmpl = EntityTmpl(
+        id: widget.item?.id,
+        name: nameCtrl.text.trim(),
+        description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+        attributes: includedAttributeTmpls
+            .map(
+              (attr) => EntityTmplAttribute(
+                entityTmplId: widget.item?.id ?? zeroUuid,
+                attributeTmplId: attr.id ?? zeroUuid,
+                orderIdx: ++orderIdx,
+              ),
+            )
+            .toList(),
+        outgoingLinks: includedOutLinks
+            .map(
+              (link) => EntityTmplLink(
+                id: link.id,
+                sourceId: widget.item?.id ?? zeroUuid,
+                targetId: link.targetId,
+                name: link.name,
+                description: link.description,
+                orderIdx: includedOutLinks.indexOf(link),
+              ),
+            )
+            .toList(),
+      );
+      debugPrint('>>> [_EntityTmplForm.onSave] Prepared entity template for saving: $entityTmpl');
+      await widget.onSave!(entityTmpl);
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
   }
 }
