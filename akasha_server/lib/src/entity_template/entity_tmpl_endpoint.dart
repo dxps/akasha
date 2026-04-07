@@ -8,17 +8,6 @@ class EntityTmplEndpoint extends Endpoint {
     if (item == null) {
       return null;
     }
-
-    await EntityTmplAttribute.db
-        .find(
-          session,
-          where: (t) => t.entityTmplId.equals(id),
-          orderBy: (t) => t.orderIdx,
-        )
-        .then((attributes) {
-          item.attributes = attributes;
-        });
-
     await EntityTmplAttribute.db
         .find(
           session,

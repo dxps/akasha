@@ -1,11 +1,9 @@
 import 'package:akasha_client/akasha_client.dart';
-import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/model/attr_value_type.dart';
 import 'package:akasha_ui/theming/colors.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/date_time.dart';
 import 'package:akasha_ui/widgets/datetime_pickers.dart';
-import 'package:akasha_ui/widgets/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,11 +14,13 @@ class AttributeTemplateForm extends StatefulWidget {
     this.onSave,
     this.onRequestEdit,
     this.readOnly = false,
+    required this.accessLevels,
   });
 
   final AttributeTmpl? item;
   final Future<void> Function(AttributeTmpl)? onSave;
   final VoidCallback? onRequestEdit;
+  final List<AccessLevel> accessLevels;
   final bool readOnly;
 
   @override
@@ -41,9 +41,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
   late bool defaultBooleanValue;
   late int? selectedAccessLevelId;
 
-  List<AccessLevel> accessLevels = [];
   bool _isSaving = false;
-  bool _isLoadingAccessLevels = true;
 
   bool get _isEdit => widget.item != null;
   bool get _isReadOnly => widget.readOnly;
@@ -70,24 +68,6 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
     isRequired = tmpl?.required ?? false;
     defaultBooleanValue = tmpl?.valueType == 'boolean' ? tmpl?.defaultValue.toLowerCase() == 'true' : false;
     selectedAccessLevelId = tmpl?.accessLevelId;
-
-    _fetchAccessLevels();
-  }
-
-  Future<void> _fetchAccessLevels() async {
-    try {
-      final items = await client.accessLevel.readAll();
-      if (!mounted) return;
-      setState(() {
-        accessLevels = items;
-        _isLoadingAccessLevels = false;
-      });
-    } catch (e) {
-      debugPrint('Error fetching access levels: $e');
-      if (!mounted) return;
-      setState(() => _isLoadingAccessLevels = false);
-      showErrorSnackbar(context, 'Error fetching access levels: $e');
-    }
   }
 
   @override
@@ -117,26 +97,12 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
       case AttributeValueType.boolean:
         return DropdownButtonFormField<bool?>(
           initialValue: defaultBooleanValue,
-          decoration: const InputDecoration(
-            labelText: 'Default value',
-          ),
+          decoration: const InputDecoration(labelText: 'Default value'),
           items: const [
-            DropdownMenuItem<bool?>(
-              value: false,
-              child: Text('False'),
-            ),
-            DropdownMenuItem<bool?>(
-              value: true,
-              child: Text('True'),
-            ),
+            DropdownMenuItem<bool?>(value: false, child: Text('False')),
+            DropdownMenuItem<bool?>(value: true, child: Text('True')),
           ],
-          onChanged: _isReadOnly
-              ? null
-              : (value) {
-                  setState(() {
-                    defaultBooleanValue = value ?? false;
-                  });
-                },
+          onChanged: _isReadOnly ? null : (value) => setState(() => defaultBooleanValue = value ?? false),
         );
 
       case AttributeValueType.number:
@@ -165,11 +131,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
           controller: defaultValueController,
           readOnly: _isReadOnly,
           selectAllOnFocus: false,
-          decoration: const InputDecoration(
-            labelText: 'Default value',
-            hintText: 'YYYY-MM-DD',
-            suffixIcon: Icon(Icons.calendar_today),
-          ),
+          decoration: const InputDecoration(labelText: 'Default value', hintText: 'YYYY-MM-DD', suffixIcon: Icon(Icons.calendar_today)),
           onTap: _isReadOnly ? null : pickDate,
         );
 
@@ -255,10 +217,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                 key: nameFieldKey,
                 controller: nameController,
                 readOnly: _isReadOnly,
-                decoration: InputDecoration(
-                  labelText: _isReadOnly ? 'Name' : 'Name *',
-                  hintText: _isReadOnly ? null : 'Required',
-                ),
+                decoration: InputDecoration(labelText: _isReadOnly ? 'Name' : 'Name *', hintText: _isReadOnly ? null : 'Required'),
                 validator: _isReadOnly
                     ? null
                     : (value) {
@@ -273,10 +232,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
               TextFormField(
                 controller: descriptionController,
                 readOnly: _isReadOnly,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
-                ),
+                decoration: const InputDecoration(labelText: 'Description', contentPadding: EdgeInsets.symmetric(vertical: 8)),
                 maxLines: _isReadOnly ? 1 : null,
                 minLines: 1,
               ),
@@ -301,12 +257,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                               });
                               formKey.currentState?.validate();
                             },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Value type is required';
-                        }
-                        return null;
-                      },
+                      validator: (value) => (value == null) ? 'Value type is required' : null,
                       menuHeight: 220,
                       requestFocusOnTap: false,
                     ),
@@ -314,35 +265,21 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                   const SizedBox(width: 12),
                   SizedBox(
                     width: 154,
-                    child: _isLoadingAccessLevels
-                        ? const Padding(
-                            padding: EdgeInsets.all(8),
-                            child: SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          )
-                        : DropdownMenuFormField<int>(
-                            initialSelection: selectedAccessLevelId,
-                            label: const Text('Access Level *', overflow: TextOverflow.ellipsis),
-                            dropdownMenuEntries: accessLevels.map((level) => DropdownMenuEntry<int>(value: level.id!, label: level.name)).toList(),
-                            onSelected: (value) {
-                              setState(() {
-                                selectedAccessLevelId = value;
-                              });
-                              formKey.currentState?.validate();
-                            },
-                            validator: (value) {
-                              if (value == null) {
-                                return 'Access level is required';
-                              }
-                              return null;
-                            },
-                            menuHeight: 200,
-                            width: 170,
-                            requestFocusOnTap: false,
-                          ),
+                    child: DropdownMenuFormField<int>(
+                      initialSelection: selectedAccessLevelId,
+                      label: const Text('Access Level *', overflow: TextOverflow.ellipsis),
+                      dropdownMenuEntries: widget.accessLevels.map((level) => DropdownMenuEntry<int>(value: level.id!, label: level.name)).toList(),
+                      onSelected: (value) {
+                        setState(() {
+                          selectedAccessLevelId = value;
+                        });
+                        formKey.currentState?.validate();
+                      },
+                      validator: (value) => (value == null) ? 'Access level is required' : null,
+                      menuHeight: 200,
+                      width: 170,
+                      requestFocusOnTap: false,
+                    ),
                   ),
                 ],
               ),
@@ -356,11 +293,7 @@ class _AttributeTemplateFormState extends State<AttributeTemplateForm> {
                 value: isRequired,
                 visualDensity: VisualDensity.compact,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                onChanged: _isReadOnly
-                    ? null
-                    : (value) {
-                        setState(() => isRequired = value ?? false);
-                      },
+                onChanged: _isReadOnly ? null : (value) => setState(() => isRequired = value ?? false),
               ),
               const SizedBox(height: 12),
               Align(

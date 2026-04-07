@@ -31,7 +31,7 @@ class AccessLevelEndpoint extends Endpoint {
   Future<List<AccessLevel>> readAll(Session session) async {
     return AccessLevel.db.find(
       session,
-      orderBy: (t) => t.id,
+      orderBy: (t) => t.name,
     );
   }
 

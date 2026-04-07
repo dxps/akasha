@@ -34,11 +34,11 @@ class AccessLevelRepo {
   }
 
   Future<AccessLevelApiResponse> delete(int id) async {
-    final isOk = await client.accessLevel.delete(id);
-    if (isOk) {
+    final done = await client.accessLevel.delete(id);
+    if (done) {
       cache.removeWhere((e) => e.id == id);
     }
-    return AccessLevelApiResponse(success: isOk);
+    return AccessLevelApiResponse(success: done);
   }
 }
 

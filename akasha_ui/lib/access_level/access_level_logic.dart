@@ -11,7 +11,7 @@ class AccessLevelsLogic extends Cubit<AccessLevelsState> {
 
   AccessLevelsLogic({required this.repo}) : super(AccessLevelsState.initial());
 
-  List<AccessLevel> get cachedItems => state.items;
+  List<AccessLevel> get cachedItems => repo.cache;
 
   Future<void> loadAll({bool forceRefresh = false}) async {
     if (state.isLoading == true) {

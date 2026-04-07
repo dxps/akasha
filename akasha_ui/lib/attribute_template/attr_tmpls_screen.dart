@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_client/shared/upsert_type.dart';
+import 'package:akasha_ui/access_level/access_level_logic.dart';
 import 'package:akasha_ui/attribute_template/attr_tmpl_form.dart';
 import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
 import 'package:akasha_ui/attribute_template/attr_tmpls_state.dart';
@@ -38,7 +39,8 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
     final addButton = IconButton(
       onPressed: () => _openModal(viewportSize: viewportSize),
       icon: const Icon(Icons.add),
-      tooltip: 'Add Attribute Template',
+      iconSize: 20,
+      tooltip: 'Add an attribute template',
     );
 
     return BlocConsumer<AttributeTmplsLogic, AttributeTemplatesState>(
@@ -207,7 +209,10 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
                       children: [
                         SizedBox(
                           width: 200,
-                          child: Padding(padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2), child: Text(limitChars(tmpl.name, 32))),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            child: Text(limitChars(tmpl.name, 32)),
+                          ),
                         ),
                         SizedBox(
                           width: 300,
@@ -244,7 +249,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
     );
   }
 
-  Future<void> _openContextualMenu(BuildContext context, AttributeTmpl tmpl, Size? viewportSize) async {
+  Future<void> _openContextualMenu(BuildContext context, AttributeTmpl item, Size? viewportSize) async {
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
 
@@ -257,7 +262,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
     );
 
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
-    final attrTemplatesLogic = context.read<AttributeTmplsLogic>();
+    final logic = context.read<AttributeTmplsLogic>();
     final result = await showMenu<String>(
       context: context,
       items: const [
@@ -274,9 +279,9 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
     );
 
     if (result == 'edit') {
-      _openModal(item: tmpl, viewportSize: viewportSize);
+      _openModal(item: item, viewportSize: viewportSize);
     } else if (result == 'delete') {
-      _deleteAttributeTmpl(attrTemplatesLogic, tmpl);
+      _delete(item, logic);
     }
   }
 
@@ -305,6 +310,9 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
             ? Offset((viewportSize.width - modalSize.width) / 2, (viewportSize.height - modalSize.height) / 2)
             : const Offset(24, 80));
 
+    final accessLevelsLogic = context.read<AccessLevelsLogic>();
+    await accessLevelsLogic.loadAll();
+    final accessLevels = accessLevelsLogic.cachedItems;
     addModal(
       id: id,
       title: readOnly
@@ -317,6 +325,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
       child: AttributeTemplateForm(
         item: item,
         readOnly: readOnly,
+        accessLevels: accessLevels,
         onRequestEdit: readOnly && item != null
             ? () {
                 final currentModal = modals.firstWhere((m) => m.id == id);
@@ -370,7 +379,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
     );
   }
 
-  Future<void> _deleteAttributeTmpl(AttributeTmplsLogic logic, AttributeTmpl item) async {
+  Future<void> _delete(AttributeTmpl item, AttributeTmplsLogic logic) async {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final confirmed = await showDialog<bool>(
       context: context,

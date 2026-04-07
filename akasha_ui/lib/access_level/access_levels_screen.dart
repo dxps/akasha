@@ -38,6 +38,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> with _ModalHelp
     final addButton = IconButton(
       onPressed: () => _openModal(viewportSize: viewportSize),
       icon: const Icon(Icons.add),
+      iconSize: 20,
       tooltip: 'Add an access level',
     );
 

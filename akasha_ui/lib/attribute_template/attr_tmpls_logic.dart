@@ -26,15 +26,15 @@ class AttributeTmplsLogic extends Cubit<AttributeTemplatesState> {
     }
     if (forceRefresh) {
       emit(AttributeTemplatesLoadingState());
-      debugPrint('>>> [AttributeTemplatesLogic.loadAll] Loading state emitted, fetching attribute templates from repo ...');
+      debugPrint('>>> [AttributeTmplsLogic.loadAll] Loading state emitted, fetching items from repo ...');
     }
     try {
       final items = await repo.getAll();
       emit(AttributeTemplatesLoadedState(items));
-      debugPrint('>>> [AttributeTemplatesLogic.loadAll] Loaded state emitted, got ${state.items.length} items from repo.');
+      debugPrint('>>> [AttributeTmplsLogic.loadAll] Loaded state emitted, got ${state.items.length} items from repo.');
     } catch (e) {
       emit(AttributeTemplatesLoadErrorState(errorMessage: e.toString()));
-      debugPrint('>>> [AttributeTemplatesLogic.loadAll] Load error state emitted: ${e.toString()}');
+      debugPrint('>>> [AttributeTmplsLogic.loadAll] Load error state emitted: ${e.toString()}');
     }
   }
 
