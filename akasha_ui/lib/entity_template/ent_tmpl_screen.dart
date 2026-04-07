@@ -1,11 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_client/shared/upsert_type.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_form.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_row.dart';
 import 'package:akasha_ui/entity_template/ent_tmpls_logic.dart';
 import 'package:akasha_ui/entity_template/ent_tmpls_state.dart';
-import 'package:akasha_ui/main.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/string.dart';
 import 'package:akasha_ui/widgets/feedback.dart';
@@ -24,15 +25,20 @@ class EntityTemplatesScreen extends StatefulWidget {
 
 class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _ModalHelpers {
   int _nextModalId = 1;
+  late final EntityTmplLogic entTmplsLogic;
+  late final AttributeTmplsLogic attrTmplsLogic;
 
   Future<void> _forceReloadEntries() async {
-    context.read<EntityTemplatesLogic>().loadAll();
+    entTmplsLogic.loadAll(forceRefresh: true);
   }
 
   @override
   void initState() {
     super.initState();
-    context.read<EntityTemplatesLogic>().loadAll();
+    entTmplsLogic = context.read<EntityTmplLogic>();
+    attrTmplsLogic = context.read<AttributeTmplsLogic>();
+    entTmplsLogic.loadAll();
+    attrTmplsLogic.loadAll();
   }
 
   @override
@@ -42,16 +48,16 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     final addButton = IconButton(
       icon: const Icon(Icons.add),
       iconSize: 20,
-      tooltip: 'Add Entity Template',
+      tooltip: 'Add an entity template',
       onPressed: () {
         _openModal(
           viewportSize: viewportSize,
-          items: context.read<EntityTemplatesLogic>().cachedItems,
+          items: entTmplsLogic.cachedItems,
         );
       },
     );
 
-    return BlocConsumer<EntityTemplatesLogic, EntityTemplatesState>(
+    return BlocConsumer<EntityTmplLogic, EntityTemplatesState>(
       listenWhen: (previous, current) => current is EntityTemplatesStateOpenModalFor || current is EntityTemplatesStateError,
       listener: (context, state) async {
         // Note: BlocListener does not rebuild UI. It is meant for side effects such as dialogs, snackbars, and navigation.
@@ -62,7 +68,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
               item: entityTmpl,
               readOnly: true,
               viewportSize: viewportSize,
-              items: context.read<EntityTemplatesLogic>().cachedItems,
+              items: entTmplsLogic.cachedItems,
             );
             break;
 
@@ -153,6 +159,8 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
   Widget _buildTable(Size? viewportSize, bool isDarkMode, List<EntityTmpl> items) {
     final size = viewportSize ?? MediaQuery.sizeOf(context);
     const colPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+    final logic = context.read<EntityTmplLogic>();
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -198,10 +206,10 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
             item: template,
             nameText: limitChars(template.name, 32),
             descriptionText: template.description != null ? limitChars(template.description!, 40) : '',
-            onView: () async => context.read<EntityTemplatesLogic>().openModal(template.id!),
+            onView: () async => logic.openModal(template.id!),
             onEdit: () async {
               debugPrint('>>> [_EntityTemplatesScreenState._buildTable] Got entity template for edit: $template');
-              final item = await client.entityTmpl.read(template.id!);
+              final item = await entTmplsLogic.repo.getById(template.id!, full: true);
               if (item != null) {
                 debugPrint('>>> [_EntityTemplatesScreenState._buildTable] Got entity template for edit: $item');
                 _openModal(item: item, viewportSize: size, items: items);
@@ -211,7 +219,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
                 showErrorSnackbar(context, 'Failed to load entity template details for edit.');
               }
             },
-            onDelete: () => _delete(template),
+            onDelete: () => _delete(logic, template),
           );
         }),
       ],
@@ -271,9 +279,10 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
         },
         onSave: (item) async {
           debugPrint('>>> [_EntityTemplatesScreenState._openModal] Got from form the item (EntityTmpl): $item');
+          final logic = context.read<EntityTmplLogic>();
           try {
             if (isEdit) {
-              final response = await client.entityTmpl.update(item); // TODO: use logic's upsert.
+              final response = await logic.upsert(UpsertType.update, item);
 
               if (response.success && mounted) {
                 _closeModal(id);
@@ -285,7 +294,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
               return;
             }
 
-            final response = await client.entityTmpl.create(item); // TODO: use logic's upsert.
+            final response = await logic.upsert(UpsertType.insert, item);
 
             if (response.success && mounted) {
               _closeModal(id);
@@ -304,13 +313,13 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
     );
   }
 
-  Future<void> _delete(EntityTmpl template) async {
+  Future<void> _delete(EntityTmplLogic logic, EntityTmpl item) async {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Entity Template'),
-        content: Text('Are you sure you want to delete "${template.name}"?'),
+        content: Text('Are you sure you want to delete "${item.name}"?'),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         backgroundColor: isDarkMode ? Colors.grey.shade800 : Colors.white,
         actions: [
@@ -329,8 +338,8 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
 
     if (confirmed == true) {
       try {
-        await client.entityTmpl.delete(template.id!); // TODO: use logic's delete.
-        await _forceReloadEntries();
+        await logic.delete(item.id!, emitAll: true);
+        // await _forceReloadEntries();
       } catch (e) {
         debugPrint('>>> [_EntityTemplatesScreenState._delete] Error deleting entity template: $e');
         if (mounted) {

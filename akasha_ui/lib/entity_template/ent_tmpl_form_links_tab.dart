@@ -70,9 +70,9 @@ class _LinksTab extends StatelessWidget {
                                   InkWell(
                                     onTap: () {
                                       debugPrint(
-                                        '>>> Opening the modal with entity template (of the outgoing link target) w/ id:=${link.targetId} ...',
+                                        '>>> [_LinksTab] Opening the modal with entity template (of the outgoing link target) w/ id:=${link.targetId} ...',
                                       );
-                                      context.read<EntityTemplatesLogic>().openModal(link.targetId);
+                                      context.read<EntityTmplLogic>().openModal(link.targetId);
                                     },
                                     child: Tooltip(message: 'Open in new modal', child: const Icon(Icons.open_in_new, size: 14)),
                                   ),
@@ -108,9 +108,9 @@ class _LinksTab extends StatelessWidget {
                                   InkWell(
                                     onTap: () {
                                       debugPrint(
-                                        '>>> Opening the modal with entity template (of the incoming link source) w/ id:=${link.sourceId} ...',
+                                        '>>> [_LinksTab] Opening the modal with entity template (of the incoming link source) w/ id:=${link.sourceId} ...',
                                       );
-                                      context.read<EntityTemplatesLogic>().openModal(link.sourceId);
+                                      context.read<EntityTmplLogic>().openModal(link.sourceId);
                                     },
                                     child: Tooltip(message: 'Open in new modal', child: const Icon(Icons.open_in_new, size: 14)),
                                   ),

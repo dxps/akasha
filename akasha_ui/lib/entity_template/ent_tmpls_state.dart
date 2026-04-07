@@ -1,4 +1,5 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_ui/entity_template/ent_tmpl_repo.dart';
 
 class EntityTemplatesState {
   List<EntityTmpl> items = [];
@@ -9,7 +10,14 @@ class EntityTemplatesState {
 
   (EntityTmpl? item, bool isEmpty) getItemById(UuidValue id) {
     final item = items.firstWhere((ent) => ent.id == id, orElse: () => EntityTmpl(name: ''));
-    return (isEntityTmplEmpty(item) ? (null, true) : (item, false));
+    return (isEmpty(item) ? (null, true) : (item, false));
+  }
+
+  EntityTemplatesState copyWith({List<EntityTmpl>? items, bool? isLoading}) {
+    final newState = EntityTemplatesState();
+    newState.items = items ?? this.items;
+    newState.isLoading = isLoading ?? this.isLoading;
+    return newState;
   }
 }
 
@@ -38,10 +46,4 @@ class EntityTemplatesStateError extends EntityTemplatesState {
   EntityTemplatesStateError({required this.errorMessage}) : super() {
     isLoading = false;
   }
-}
-
-/// Tells if the given entity template is "empty", meaning it has no attributes or links fetched from the backend.
-/// Used to determine if we can return a cached version of the entity template or if we need to fetch it completely from the server.
-bool isEntityTmplEmpty(EntityTmpl item) {
-  return item.attributes?.isEmpty ?? true;
 }

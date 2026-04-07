@@ -29,7 +29,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
   @override
   void initState() {
     super.initState();
-    context.read<AttributeTemplatesLogic>().loadAll();
+    context.read<AttributeTmplsLogic>().loadAll();
   }
 
   @override
@@ -41,7 +41,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
       tooltip: 'Add Attribute Template',
     );
 
-    return BlocConsumer<AttributeTemplatesLogic, AttributeTemplatesState>(
+    return BlocConsumer<AttributeTmplsLogic, AttributeTemplatesState>(
       listenWhen: (previous, current) => current is AttributeTemplatesStateOpenModalFor || current is AttributeTemplatesLoadErrorState,
       listener: (context, state) async {
         // Note: BlocListener does not rebuild UI. It is meant for side effects such as dialogs, snackbars, and navigation.
@@ -257,7 +257,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
     );
 
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
-    final attrTemplatesLogic = context.read<AttributeTemplatesLogic>();
+    final attrTemplatesLogic = context.read<AttributeTmplsLogic>();
     final result = await showMenu<String>(
       context: context,
       items: const [
@@ -288,7 +288,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
   }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
-    final logic = context.read<AttributeTemplatesLogic>();
+    final logic = context.read<AttributeTmplsLogic>();
 
     debugPrint(
       '>>> [_AttributeTmplsScreenState._openModal] Opening modal (id: $id) to ${readOnly
@@ -370,7 +370,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
     );
   }
 
-  Future<void> _deleteAttributeTmpl(AttributeTemplatesLogic logic, AttributeTmpl item) async {
+  Future<void> _deleteAttributeTmpl(AttributeTmplsLogic logic, AttributeTmpl item) async {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final confirmed = await showDialog<bool>(
       context: context,

@@ -64,14 +64,14 @@ void main() async {
         BlocProvider(
           create: (_) {
             final repo = AttributeTemplateRepo(client: client);
-            return AttributeTemplatesLogic(repo: repo);
+            return AttributeTmplsLogic(repo: repo);
           },
         ),
 
         BlocProvider(
           create: (_) {
             final repo = EntityTemplateRepo(client: client);
-            return EntityTemplatesLogic(repo: repo);
+            return EntityTmplLogic(repo: repo);
           },
         ),
 

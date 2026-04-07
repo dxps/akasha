@@ -6,15 +6,15 @@ import 'package:akasha_ui/utils/upsert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AttributeTemplatesLogic extends Cubit<AttributeTemplatesState> {
+class AttributeTmplsLogic extends Cubit<AttributeTemplatesState> {
   //
   final AttributeTemplateRepo repo;
 
-  AttributeTemplatesLogic({required this.repo}) : super(AttributeTemplatesState.initial());
+  AttributeTmplsLogic({required this.repo}) : super(AttributeTemplatesState.initial());
 
   List<AttributeTmpl> get cachedItems => state.items;
 
-  void loadAll({bool forceRefresh = false}) async {
+  Future<void> loadAll({bool forceRefresh = false}) async {
     if (state.isLoading == true) {
       debugPrint('>>> [AttributeTemplatesLogic.loadAll] Already loading, aborting current loadAll().');
       return;

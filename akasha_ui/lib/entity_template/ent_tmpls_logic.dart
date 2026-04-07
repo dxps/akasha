@@ -1,19 +1,19 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_client/shared/upsert_type.dart';
 import 'package:akasha_ui/entity_template/ent_tmpl_repo.dart';
 import 'package:akasha_ui/entity_template/ent_tmpls_state.dart';
-import 'package:akasha_ui/utils/upsert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class EntityTemplatesLogic extends Cubit<EntityTemplatesState> {
+class EntityTmplLogic extends Cubit<EntityTemplatesState> {
   //
   final EntityTemplateRepo repo;
 
-  EntityTemplatesLogic({required this.repo}) : super(EntityTemplatesState.initial());
+  List<EntityTmpl> get cachedItems => repo.getAllFromCache();
 
-  List<EntityTmpl> get cachedItems => state.items;
+  EntityTmplLogic({required this.repo}) : super(EntityTemplatesState.initial());
 
-  void loadAll({bool forceRefresh = false}) async {
+  Future<void> loadAll({bool forceRefresh = false}) async {
     if (state.isLoading == true) {
       debugPrint('>>> [EntityTemplatesLogic.loadAll] Already loading, aborting current loadAll().');
       return;
@@ -24,7 +24,7 @@ class EntityTemplatesLogic extends Cubit<EntityTemplatesState> {
       return;
     }
     emit(EntityTemplatesStateLoading());
-    debugPrint('>>> [EntityTemplatesLogic.loadAll] Loading state emitted, fetching entity templates from repo ...');
+    debugPrint('>>> [EntityTemplatesLogic.loadAll] Loading state emitted, fetching items from repo ...');
     try {
       final items = await repo.getAll();
       emit(EntityTemplatesStateLoaded(items));
@@ -34,14 +34,36 @@ class EntityTemplatesLogic extends Cubit<EntityTemplatesState> {
     }
   }
 
-  void openModal(UuidValue id) async {
-    debugPrint('>>> [EntityTemplatesLogic.openModal] Opening modal for entity template w/ id: $id ...');
-    final item = await repo.getById(id);
+  Future<void> openModal(UuidValue id) async {
+    debugPrint('>>> [EntityTemplatesLogic.openModal] Opening modal for item w/ id: $id ...');
+    final item = await repo.getById(id, full: true);
     if (item != null) {
-      upsertList(cachedItems, item);
+      debugPrint('>>> [EntityTemplatesLogic.openModal] Got from repo the (full) item w/ id $id: $item');
       emit(EntityTemplatesStateOpenModalFor(forItem: item));
     } else {
-      debugPrint('>>> [error] [EntityTemplatesLogic.openModal] No entity template found w/ id: $id');
+      debugPrint('>>> [error] [EntityTemplatesLogic.openModal] No item found w/ id: $id in repo.');
+    }
+  }
+
+  Future<EntityTmplApiResponse> upsert(UpsertType type, EntityTmpl item, {bool emitAll = false}) async {
+    final response = switch (type) {
+      UpsertType.insert => await repo.create(item),
+      UpsertType.update => await repo.update(item),
+    };
+    if (response.success) {
+      if (emitAll) {
+        emit(EntityTemplatesStateLoaded(cachedItems));
+      }
+    }
+    return response;
+  }
+
+  Future<void> delete(UuidValue id, {bool emitAll = false}) async {
+    final done = await repo.delete(id);
+    if (done) {
+      if (emitAll) {
+        emit(EntityTemplatesStateLoaded(cachedItems));
+      }
     }
   }
 }

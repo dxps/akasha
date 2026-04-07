@@ -41,7 +41,6 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   late final TextEditingController nameCtrl;
   late final TextEditingController descriptionController;
 
-  //   List<AttributeTmpl> attributeTmpls = [];
   List<AttributeTmpl> includedAttributeTmpls = [];
   AttributeTmpl? selectedAttributeTmpl;
 
@@ -69,7 +68,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
 
   List<AttributeTmpl> get availableAttributeTmpls {
     final includedIds = includedAttributeTmpls.map((e) => e.id).whereType<UuidValue>().toSet();
-    final attrTmpls = context.read<AttributeTemplatesLogic>().cachedItems;
+    final attrTmpls = context.read<AttributeTmplsLogic>().cachedItems;
     return attrTmpls.where((attr) {
       final id = attr.id;
       if (id == null) return true;
@@ -157,6 +156,8 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
   @override
   void initState() {
     super.initState();
+    final attrTmplsLogic = context.read<AttributeTmplsLogic>();
+    attrTmplsLogic.loadAll();
 
     nameCtrl = TextEditingController(text: widget.item?.name ?? '');
     descriptionController = TextEditingController(text: widget.item?.description ?? '');
@@ -165,7 +166,7 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     linkDescCtrl = TextEditingController();
 
     includedAttributeTmpls = [...?widget.item?.attributes?.map((link) => link.attributeTmpl)].whereType<AttributeTmpl>().toList();
-    final attrTmpls = context.read<AttributeTemplatesLogic>().cachedItems;
+    final attrTmpls = attrTmplsLogic.cachedItems;
     if (widget.item?.attributes != null) {
       widget.item?.attributes?.forEach((entTmplAttr) {
         for (var attr in attrTmpls) {
