@@ -1,4 +1,6 @@
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_ui/access_level/access_level_logic.dart';
+import 'package:akasha_ui/access_level/access_level_repo.dart';
 import 'package:akasha_ui/attribute_template/attr_tmpl_repo.dart';
 import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
 import 'package:akasha_ui/entity/ent_repo.dart';
@@ -60,6 +62,13 @@ void main() async {
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
+
+        BlocProvider(
+          create: (_) {
+            final repo = AccessLevelRepo(client: client);
+            return AccessLevelsLogic(repo: repo);
+          },
+        ),
 
         BlocProvider(
           create: (_) {

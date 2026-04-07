@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
+import 'package:akasha_client/shared/upsert_type.dart';
 import 'package:akasha_ui/access_level/access_level_form.dart';
+import 'package:akasha_ui/access_level/access_level_logic.dart';
 import 'package:akasha_ui/access_level/access_level_row.dart';
-import 'package:akasha_ui/main.dart';
+import 'package:akasha_ui/access_level/access_level_state.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/string.dart';
 import 'package:akasha_ui/widgets/feedback.dart';
@@ -20,147 +22,107 @@ class AccessLevelsScreen extends StatefulWidget {
   State<AccessLevelsScreen> createState() => _AccessLevelsScreenState();
 }
 
-class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
+class _AccessLevelsScreenState extends State<AccessLevelsScreen> with _ModalHelpers {
   bool isFetchingData = false;
-  List<AccessLevel> accessLevels = [];
-  final List<ModalData> _modals = [];
   int _nextModalId = 1;
-
-  Future<void> _getAccessLevels() async {
-    setState(() => isFetchingData = true);
-    final items = await client.accessLevel.readAll();
-    debugPrint("[_AccessLevelsScreenState] Got ${items.length} access levels.");
-    setState(() {
-      accessLevels = items;
-      isFetchingData = false;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    _getAccessLevels();
+    context.read<AccessLevelsLogic>().loadAll();
   }
-
-  // -----------------------
-  // Modals related methods.
-
-  void _addModal({
-    required int id,
-    String? type,
-    required String title,
-    required Offset offset,
-    required Size size,
-    required AccessLevelForm child,
-  }) {
-    for (final modal in _modals) {
-      if ((modal.child as AccessLevelForm).item == child.item) {
-        debugPrint('That (access level) modal is already open.');
-        return;
-      }
-    }
-    setState(() {
-      _modals.add(ModalData(id: id, type: type, title: title, offset: offset, size: size, child: child));
-    });
-  }
-
-  void _bringToFront(int id) {
-    setState(() {
-      final int index = _modals.indexWhere((m) => m.id == id);
-      if (index == -1) return;
-      final ModalData item = _modals.removeAt(index);
-      _modals.add(item);
-    });
-  }
-
-  void _closeModal(int id) {
-    setState(() {
-      _modals.removeWhere((m) => m.id == id);
-    });
-  }
-
-  void _updatePosition(int id, Offset nextOffset, Size viewport) {
-    setState(() {
-      final int index = _modals.indexWhere((m) => m.id == id);
-      if (index == -1) return;
-
-      final ModalData modal = _modals[index];
-      final double maxLeft = math.max(0, viewport.width - modal.size.width);
-      final double maxTop = math.max(0, viewport.height - modal.size.height);
-
-      _modals[index] = modal.copyWith(offset: Offset(nextOffset.dx.clamp(0.0, maxLeft), nextOffset.dy.clamp(0.0, maxTop)));
-    });
-  }
-
-  // ----------------------
 
   @override
   Widget build(BuildContext context) {
+    final viewportSize = MediaQuery.sizeOf(context);
     final addButton = IconButton(
-      onPressed: () {
-        final size = MediaQuery.of(context).size;
-        _openModal(viewportSize: size);
-      },
+      onPressed: () => _openModal(viewportSize: viewportSize),
       icon: const Icon(Icons.add),
-      tooltip: 'Add Access Level',
+      tooltip: 'Add an access level',
     );
 
-    return BlocSelector<ThemeCubit, ThemeMode, bool>(
-      selector: (themeMode) => themeMode == ThemeMode.dark,
-      builder: (context, isDarkMode) {
-        return Scaffold(
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
-              return Stack(
-                children: [
-                  const TopHeader(),
-                  isFetchingData
-                      ? const Center(child: CircularProgressIndicator())
-                      : accessLevels.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('No access levels yet.'),
-                              const SizedBox(height: 20),
-                              addButton,
-                            ],
-                          ),
-                        )
-                      : Center(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                _buildTable(vwSize, isDarkMode),
-                                const SizedBox(height: 20),
-                                addButton,
-                              ],
-                            ),
-                          ),
-                        ),
+    return BlocConsumer<AccessLevelsLogic, AccessLevelsState>(
+      listenWhen: (previous, current) => current is AccessLevelsStateOpenModalFor || current is AccessLevelLoadErrorState,
+      listener: (context, state) {
+        // Note: BlocListener does not rebuild UI. It is meant for side effects such as dialogs, snackbars, and navigation.
+        switch (state) {
+          case AccessLevelsStateOpenModalFor(forItem: final accessLevel):
+            debugPrint('>>> [_AccessLevelsScreenState.build] Reacting to AccessLevelsStateOpenModalFor access level w/ id=${accessLevel.id} ...');
+            _openModal(item: accessLevel, readOnly: true, viewportSize: viewportSize);
+            break;
 
-                  for (final modal in _modals)
-                    DraggableModal(
-                      key: ValueKey(modal.id),
-                      data: modal,
-                      viewport: vwSize,
-                      onTap: () => _bringToFront(modal.id),
-                      onClose: () => _closeModal(modal.id),
-                      onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
-                    ),
-                ],
-              );
-            },
-          ),
+          case AccessLevelLoadErrorState(:final errorMessage):
+            debugPrint('>>> [_AccessLevelsScreenState.build] Reacting to AccessLevelLoadErrorState: $errorMessage');
+            showErrorSnackbar(context, errorMessage);
+            break;
+
+          default:
+            break;
+        }
+      },
+      builder: (context, state) {
+        return BlocSelector<ThemeCubit, ThemeMode, bool>(
+          selector: (themeMode) => themeMode == ThemeMode.dark,
+          builder: (context, isDarkMode) {
+            return Scaffold(
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  final Size vwSize = Size(constraints.maxWidth, constraints.maxHeight);
+                  return Stack(
+                    children: [
+                      const TopHeader(),
+
+                      switch (state) {
+                        AccessLevelLoadingState() => const Center(child: CircularProgressIndicator()),
+                        AccessLevelLoadErrorState(:final errorMessage) => Center(child: Text('Error loading access levels: $errorMessage')),
+                        AccessLevelLoadedState(items: final items) =>
+                          items.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text('No access levels yet.'),
+                                      const SizedBox(height: 20),
+                                      addButton,
+                                    ],
+                                  ),
+                                )
+                              : Center(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      children: [
+                                        _buildTable(vwSize, isDarkMode, items),
+                                        const SizedBox(height: 20),
+                                        addButton,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                        _ => const SizedBox.shrink(),
+                      },
+
+                      for (final modal in modals)
+                        DraggableModal(
+                          key: ValueKey(modal.id),
+                          data: modal,
+                          viewport: vwSize,
+                          onTap: () => _bringToFront(modal.id),
+                          onClose: () => _closeModal(modal.id),
+                          onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildTable(Size? viewportSize, bool isDarkMode) {
-    final size = viewportSize ?? MediaQuery.sizeOf(context);
-
+  Widget _buildTable(Size viewportSize, bool isDarkMode, List<AccessLevel> items) {
+    final logic = context.read<AccessLevelsLogic>();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -201,21 +163,14 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
             ],
           ),
         ),
-        ...accessLevels.map((level) {
+        ...items.map((level) {
           return AccessLevelRow(
             level: level,
             nameText: limitChars(level.name, 32),
             descriptionText: level.description != null ? limitChars(level.description!, 40) : '',
-            onView: () => _openModal(
-              item: level,
-              viewportSize: size,
-              readOnly: true,
-            ),
-            onEdit: () => _openModal(
-              item: level,
-              viewportSize: size,
-            ),
-            onDelete: () => _deleteAccessLevel(level),
+            onView: () => _openModal(item: level, viewportSize: viewportSize, readOnly: true),
+            onEdit: () => _openModal(item: level, viewportSize: viewportSize),
+            onDelete: () => _delete(level, logic),
           );
         }),
       ],
@@ -230,14 +185,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
   }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
-
-    debugPrint(
-      'Opening modal (id: $id) to ${readOnly
-          ? 'view'
-          : isEdit
-          ? 'edit'
-          : 'create'} an access level ...',
-    );
+    final logic = context.read<AccessLevelsLogic>();
 
     const modalSize = Size(340, 226);
     final offset =
@@ -263,7 +211,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
         readOnly: readOnly,
         onRequestEdit: readOnly && item != null
             ? () {
-                final currentModal = _modals.firstWhere((m) => m.id == id);
+                final currentModal = modals.firstWhere((m) => m.id == id);
                 final currentOffset = currentModal.offset;
 
                 _closeModal(id);
@@ -280,15 +228,13 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
               }
             : null,
         onSave: (item) async {
-          debugPrint('>>> Got from form the item (AccessLevel): $item');
+          debugPrint('>>> [_AccessLevelsScreenState._openModal] Got from the form: $item');
 
           try {
             if (isEdit) {
-              final response = await client.accessLevel.update(item);
-
+              final response = await logic.upsert(UpsertType.update, item, emitAll: true);
               if (response.success && mounted) {
                 _closeModal(id);
-                await _getAccessLevels();
               } else if (!response.success) {
                 if (!mounted) return;
                 showErrorSnackbar(
@@ -299,11 +245,10 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
               return;
             }
 
-            final response = await client.accessLevel.create(item);
+            final response = await logic.upsert(UpsertType.insert, item, emitAll: true);
 
             if (response.success && mounted) {
               _closeModal(id);
-              await _getAccessLevels();
             } else if (!response.success) {
               if (!mounted) return;
               showErrorSnackbar(
@@ -321,7 +266,7 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
     );
   }
 
-  Future<void> _deleteAccessLevel(AccessLevel level) async {
+  Future<void> _delete(AccessLevel level, AccessLevelsLogic logic) async {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -346,16 +291,67 @@ class _AccessLevelsScreenState extends State<AccessLevelsScreen> {
 
     if (confirmed == true) {
       try {
-        await client.accessLevel.delete(level.id!);
-        await _getAccessLevels();
+        await logic.delete(level.id!, emitAll: true);
       } catch (e) {
-        debugPrint('Error deleting access level: $e');
+        debugPrint('>>> [_AccessLevelsScreenState._delete] Error deleting access level: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error deleting access level: $e')),
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error deleting access level: $e')));
         }
       }
     }
+  }
+
+  @override
+  final List<ModalData> modals = []; // Just to satisfy the mixin requirement. The actual state is managed in _ModalHelpers.
+}
+
+mixin _ModalHelpers on State<AccessLevelsScreen> {
+  List<ModalData> get modals;
+
+  void _addModal({
+    required int id,
+    String? type,
+    required String title,
+    required Offset offset,
+    required Size size,
+    required AccessLevelForm child,
+  }) {
+    for (final modal in modals) {
+      if ((modal.child as AccessLevelForm).item == child.item) {
+        debugPrint('That (access level) modal is already open.');
+        return;
+      }
+    }
+    setState(() {
+      modals.add(ModalData(id: id, type: type, title: title, offset: offset, size: size, child: child));
+    });
+  }
+
+  void _bringToFront(int id) {
+    setState(() {
+      final int index = modals.indexWhere((m) => m.id == id);
+      if (index == -1) return;
+      final ModalData item = modals.removeAt(index);
+      modals.add(item);
+    });
+  }
+
+  void _closeModal(int id) {
+    setState(() {
+      modals.removeWhere((m) => m.id == id);
+    });
+  }
+
+  void _updatePosition(int id, Offset nextOffset, Size viewport) {
+    setState(() {
+      final int index = modals.indexWhere((m) => m.id == id);
+      if (index == -1) return;
+
+      final ModalData modal = modals[index];
+      final double maxLeft = math.max(0, viewport.width - modal.size.width);
+      final double maxTop = math.max(0, viewport.height - modal.size.height);
+
+      modals[index] = modal.copyWith(offset: Offset(nextOffset.dx.clamp(0.0, maxLeft), nextOffset.dy.clamp(0.0, maxTop)));
+    });
   }
 }
