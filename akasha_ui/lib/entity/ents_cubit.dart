@@ -9,22 +9,40 @@ class EntitiesCubit extends Cubit<EntitiesState> {
 
   EntitiesCubit(this._repo) : super(const EntitiesState());
 
-  Future<void> fetchAll() async {
+  List<Entity> get cachedItems => _repo.getAllFromCache();
+
+  Future<void> fetchAll({bool forceRefresh = false}) async {
     emit(state.copyWith(status: EntitiesStatus.loading));
     try {
-      final entities = await _repo.getAll();
+      final entities = await _repo.getAll(forceLoad: forceRefresh);
       emit(state.copyWith(status: EntitiesStatus.success, entities: entities));
     } catch (e) {
       emit(state.copyWith(status: EntitiesStatus.failure));
     }
   }
 
-  Future<void> fetchById(UuidValue id) async {
+  Future<Entity?> fetchById(UuidValue id) async {
     try {
-      await _repo.getById(id);
-      // TODO: Do we need to update the state here? Maybe not, since the repo has its own cache and the UI can listen to that.
+      return await _repo.getById(id);
     } catch (e) {
       debugPrint('>>> Failed to fetch entity with id $id: $e');
+      return null;
     }
+  }
+
+  Future<EntityApiResponse> upsert(Entity item) async {
+    final response = item.id == null ? await _repo.create(item) : await _repo.update(item);
+    if (response.success) {
+      emit(state.copyWith(status: EntitiesStatus.success, entities: cachedItems));
+    }
+    return response;
+  }
+
+  Future<EntityApiResponse> delete(UuidValue id) async {
+    final response = await _repo.delete(id);
+    if (response.success) {
+      emit(state.copyWith(status: EntitiesStatus.success, entities: cachedItems));
+    }
+    return response;
   }
 }
