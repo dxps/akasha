@@ -24,18 +24,18 @@ dependencies:
   akasha_client:
     path: ../akasha_client
   bloc: ^9.2.0
-  cupertino_icons: ^1.0.5
+  cupertino_icons: ^1.0.9
   equatable: ^2.0.8
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
   flutter_web_plugins:
     sdk: flutter
-  go_router: ^17.1.0
+  go_router: ^17.2.0
   hydrated_bloc: ^11.0.0
   path_provider: ^2.1.5
-  serverpod_auth_idp_flutter: 3.4.5
-  serverpod_flutter: 3.4.5
+  serverpod_auth_idp_flutter: 3.4.6
+  serverpod_flutter: 3.4.6
 
 dev_dependencies:
   flutter_lints: ">=3.0.0 <7.0.0"

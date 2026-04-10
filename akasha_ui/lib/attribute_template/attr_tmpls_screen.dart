@@ -80,28 +80,23 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
                       switch (state) {
                         AttributeTemplatesLoadingState() => const Center(child: CircularProgressIndicator()),
 
-                        AttributeTemplatesLoadedState(:final items) =>
-                          items.isEmpty
-                              ? Center(
-                                  child: Column(
-                                    children: [
+                        AttributeTemplatesLoadedState(:final items) => Center(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: items.isEmpty
+                                  ? [
                                       const Text('No attribute templates yet.'),
                                       const SizedBox(height: 20),
                                       addButton,
+                                    ]
+                                  : [
+                                      _buildTable(vwSize, isDarkMode, items),
+                                      const SizedBox(height: 20),
+                                      addButton,
                                     ],
-                                  ),
-                                )
-                              : Center(
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      children: [
-                                        _buildTable(vwSize, isDarkMode, items),
-                                        const SizedBox(height: 20),
-                                        addButton,
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                            ),
+                          ),
+                        ),
 
                         AttributeTemplatesLoadErrorState() => Center(
                           child: Column(
@@ -303,7 +298,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
           : 'create'} an attribute template ...',
     );
 
-    const modalSize = Size(340, 400);
+    const modalSize = Size(340, 370);
     final offset =
         initialOffset ??
         (viewportSize != null
