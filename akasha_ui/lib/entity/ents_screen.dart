@@ -154,10 +154,7 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
     final selectedTemplate = await _selectTemplate();
     if (!mounted || selectedTemplate == null) return;
 
-    final fullTemplate = await entityTmplLogic.repo.getById(
-      selectedTemplate.id!,
-      full: true,
-    );
+    final fullTemplate = await entityTmplLogic.repo.getById(selectedTemplate.id!, full: true);
     if (!mounted) return;
     if (fullTemplate == null) {
       showErrorSnackbar(context, 'Failed to load the selected entity template.');
@@ -215,10 +212,7 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
           height: 30,
           decoration: BoxDecoration(
             border: Border(
-              bottom: BorderSide(
-                width: 0.25,
-                color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade400,
-              ),
+              bottom: BorderSide(width: 0.25, color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade400),
             ),
           ),
           child: Row(

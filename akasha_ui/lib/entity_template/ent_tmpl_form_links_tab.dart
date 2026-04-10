@@ -78,7 +78,7 @@ class _LinksTab extends StatelessWidget {
                                   ),
                               ],
                             ),
-                            subtitle: link.description != null ? Text(link.description!) : null,
+                            subtitle: link.description != null && link.description!.isNotEmpty ? Text(link.description!) : null,
                             minVerticalPadding: 6,
                           );
                         },
@@ -97,7 +97,6 @@ class _LinksTab extends StatelessWidget {
                           final sourceName = entityTmpls.firstWhere((ent) => ent.id == link.sourceId, orElse: () => EntityTmpl(name: 'Unknown')).name;
                           final linkLabel = '<-- ${link.name} -- $sourceName';
                           return ListTile(
-                            minVerticalPadding: 5,
                             leading: Text('•'),
                             title: Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
@@ -116,7 +115,8 @@ class _LinksTab extends StatelessWidget {
                                   ),
                               ],
                             ),
-                            subtitle: link.description != null ? Text(link.description!) : null,
+                            subtitle: link.description != null && link.description!.isNotEmpty ? Text(link.description!) : null,
+                            minVerticalPadding: 6,
                           );
                         },
                       ),
