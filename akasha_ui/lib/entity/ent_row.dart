@@ -60,16 +60,8 @@ class _EntityRowState extends State<EntityRow> {
       menuPadding: const EdgeInsets.symmetric(vertical: 0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       items: [
-        PopupMenuItem(
-          value: 'edit',
-          height: 32,
-          child: Text('Edit'),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          height: 32,
-          child: Text('Delete'),
-        ),
+        PopupMenuItem(value: 'edit', height: 32, child: Text('Edit')),
+        PopupMenuItem(value: 'delete', height: 32, child: Text('Delete')),
       ],
     );
 
@@ -129,11 +121,7 @@ class _EntityRowState extends State<EntityRow> {
                   width: widget.menuWidth,
                   child: Builder(
                     builder: (context) => IconButton(
-                      icon: Icon(
-                        Icons.more_vert,
-                        size: 15,
-                        color: _isHovered ? Colors.grey[800] : Colors.grey[400],
-                      ),
+                      icon: Icon(Icons.more_vert, size: 15, color: _isHovered ? Colors.grey[800] : Colors.grey[400]),
                       onPressed: () => _openContextualMenu(context),
                       tooltip: 'Actions',
                       padding: EdgeInsets.zero,

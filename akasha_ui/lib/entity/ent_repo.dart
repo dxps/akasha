@@ -22,7 +22,7 @@ class EntityRepo {
 
   Future<Entity?> getById(UuidValue id) async {
     final cached = cache.where((item) => item.id == id).firstOrNull;
-    if (cached != null) {
+    if (cached != null && (cached.outgoingLinks != null || cached.incomingLinks != null)) {
       return cached;
     }
     final resp = await client.entity.read(id);

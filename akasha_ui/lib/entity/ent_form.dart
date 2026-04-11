@@ -2,7 +2,10 @@ import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_client/shared/zero_uuid.dart';
 import 'package:akasha_ui/access_level/access_level_logic.dart';
 import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
+import 'package:akasha_ui/entity/ents_cubit.dart';
+import 'package:akasha_ui/entity/ents_state.dart';
 import 'package:akasha_ui/theming/colors.dart';
+import 'package:akasha_ui/theming/sizes.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/date_time.dart';
 import 'package:akasha_ui/widgets/datetime_pickers.dart';
@@ -33,8 +36,12 @@ class EntityForm extends StatefulWidget {
 class _EntityFormState extends State<EntityForm> {
   final formKey = GlobalKey<FormState>();
   final List<_EntityAttributeDraft> attributeDrafts = [];
+  final List<EntityLink> outgoingLinkDrafts = [];
+  late final TextEditingController linkNameController;
+  late final TextEditingController linkDescriptionController;
   int _nextDraftId = 1;
   int? _selectedListingDraftId;
+  UuidValue? _selectedLinkTargetId;
   bool _isSaving = false;
 
   bool get _isEdit => widget.item != null;
@@ -43,6 +50,7 @@ class _EntityFormState extends State<EntityForm> {
 
   List<AccessLevel> get accessLevels => context.read<AccessLevelsLogic>().cachedItems;
   List<AttributeTmpl> get attributeTemplates => context.read<AttributeTmplsLogic>().cachedItems;
+  List<Entity> get linkTargetEntities => context.read<EntitiesCubit>().cachedItems.where((entity) => entity.id != widget.item?.id).toList();
   List<EntityLink> get initialOutgoingLinks {
     if (widget.item != null) {
       return [...?widget.item!.outgoingLinks];
@@ -65,10 +73,16 @@ class _EntityFormState extends State<EntityForm> {
   @override
   void initState() {
     super.initState();
+    linkNameController = TextEditingController();
+    linkDescriptionController = TextEditingController();
     if (_isScratchCreation) {
       context.read<AttributeTmplsLogic>().loadAll();
     }
+    if (_isScratchCreation || _isEdit) {
+      context.read<EntitiesCubit>().fetchAll();
+    }
     attributeDrafts.addAll(_buildInitialDrafts());
+    outgoingLinkDrafts.addAll(initialOutgoingLinks);
     if (attributeDrafts.isNotEmpty) {
       _nextDraftId = attributeDrafts.map((draft) => draft.localId).reduce((a, b) => a > b ? a : b) + 1;
     }
@@ -175,6 +189,8 @@ class _EntityFormState extends State<EntityForm> {
     for (final draft in attributeDrafts) {
       draft.dispose();
     }
+    linkNameController.dispose();
+    linkDescriptionController.dispose();
     super.dispose();
   }
 
@@ -304,6 +320,48 @@ class _EntityFormState extends State<EntityForm> {
       if (nextIndex < 0 || nextIndex >= attributeDrafts.length) return;
       final draft = attributeDrafts.removeAt(index);
       attributeDrafts.insert(nextIndex, draft);
+    });
+  }
+
+  void _addSelectedOutgoingLink() {
+    final targetId = _selectedLinkTargetId;
+    if (targetId == null) return;
+
+    final name = linkNameController.text.trim();
+    if (name.isEmpty) {
+      showErrorSnackbar(context, 'Link name is required.');
+      return;
+    }
+
+    setState(() {
+      outgoingLinkDrafts.add(
+        EntityLink(
+          name: name,
+          description: linkDescriptionController.text.trim().isEmpty ? null : linkDescriptionController.text.trim(),
+          orderIdx: outgoingLinkDrafts.length,
+          sourceId: widget.item?.id ?? zeroUuid,
+          targetId: targetId,
+        ),
+      );
+      _selectedLinkTargetId = null;
+      linkNameController.clear();
+      linkDescriptionController.clear();
+    });
+  }
+
+  void _removeOutgoingLinkAt(int index) {
+    setState(() {
+      outgoingLinkDrafts.removeAt(index);
+    });
+  }
+
+  void _onReorderOutgoingLinks(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final item = outgoingLinkDrafts.removeAt(oldIndex);
+      outgoingLinkDrafts.insert(newIndex, item);
     });
   }
 
@@ -495,7 +553,19 @@ class _EntityFormState extends State<EntityForm> {
         boolAttributes: boolAttributes,
         dateAttributes: dateAttributes,
         dateTimeAttributes: dateTimeAttributes,
-        outgoingLinks: initialOutgoingLinks,
+        outgoingLinks: outgoingLinkDrafts
+            .map(
+              (link) => EntityLink(
+                id: link.id,
+                name: link.name,
+                description: link.description,
+                orderIdx: outgoingLinkDrafts.indexOf(link),
+                sourceId: widget.item?.id ?? zeroUuid,
+                targetId: link.targetId,
+                target: link.target,
+              ),
+            )
+            .toList(),
         incomingLinks: initialIncomingLinks,
       );
 
@@ -589,7 +659,7 @@ class _EntityFormState extends State<EntityForm> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              flex: 3,
+              flex: 2,
               child: DropdownButtonFormField<ValueType>(
                 initialValue: draft.valueType,
                 isExpanded: true,
@@ -616,7 +686,7 @@ class _EntityFormState extends State<EntityForm> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              flex: 3,
+              flex: 2,
               child: DropdownButtonFormField<int>(
                 initialValue: draft.accessLevelId,
                 isExpanded: true,
@@ -725,10 +795,290 @@ class _EntityFormState extends State<EntityForm> {
     );
   }
 
+  String _entityLabel(Entity entity) {
+    final name = entity.listingAttribute.$1.trim();
+    final value = entity.listingAttribute.$2.trim();
+    if (name.isEmpty) return value.isEmpty ? 'Untitled entity' : value;
+    if (value.isEmpty) return name;
+    return '$name: $value';
+  }
+
+  String _entityLabelById(List<Entity> entities, UuidValue entityId) {
+    final entity = entities.where((item) => item.id == entityId).firstOrNull;
+    return entity == null ? 'Unknown entity' : _entityLabel(entity);
+  }
+
+  Widget _buildAttributesSection(bool isDarkMode) {
+    final listingDraft = _selectedListingDraft;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DropdownButtonFormField<int>(
+          initialValue: _selectedListingDraftId,
+          decoration: const InputDecoration(labelText: 'Listing attribute *'),
+          items: attributeDrafts
+              .map(
+                (draft) => DropdownMenuItem<int>(
+                  value: draft.localId,
+                  child: Text(
+                    draft.nameController.text.trim().isEmpty ? 'Unnamed attribute' : draft.nameController.text.trim(),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: _isReadOnly ? null : (value) => setState(() => _selectedListingDraftId = value),
+          validator: (_) => attributeDrafts.isEmpty
+              ? 'Add at least one attribute first.'
+              : (_selectedListingDraftId == null ? 'Listing attribute is required' : null),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          listingDraft == null ? 'Listing value will be inferred from the selected attribute.' : 'Listing value: ${_displayValueFor(listingDraft)}',
+          style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Attributes',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+            ),
+            if (!_isReadOnly)
+              IconButton(
+                tooltip: 'Add attribute',
+                onPressed: _isScratchCreation ? _addAttributeWithChoice : _addAttribute,
+                icon: const Icon(Icons.add),
+              ),
+          ],
+        ),
+        if (attributeDrafts.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              _isReadOnly ? 'No attributes.' : 'No attributes yet. Add one or start from a template.',
+              style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          for (var i = 0; i < attributeDrafts.length; i++) _buildAttributeCard(attributeDrafts[i], i),
+        if (widget.initialTemplate != null) _buildTemplateLinksSection(isDarkMode),
+      ],
+    );
+  }
+
+  Widget _buildLinksSection(bool isDarkMode) {
+    return BlocBuilder<EntitiesCubit, EntitiesState>(
+      builder: (context, state) => _buildLinksSectionContent(isDarkMode, state.entities),
+    );
+  }
+
+  Widget _buildLinksSectionContent(bool isDarkMode, List<Entity> targetEntities) {
+    final faded = isDarkMode ? darkFgFadedColor : lightFgFadedColor;
+    final entities = targetEntities.where((entity) => entity.id != widget.item?.id).toList();
+    final incomingLinks = initialIncomingLinks;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: outgoingLinkDrafts.isEmpty && incomingLinks.isEmpty
+              ? Center(
+                  child: Text(
+                    'No links',
+                    style: TextStyle(fontStyle: FontStyle.italic, color: faded),
+                  ),
+                )
+              : _isReadOnly
+              ? ListView(
+                  children: [
+                    if (outgoingLinkDrafts.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 6),
+                        child: Text(
+                          'Outgoing Links',
+                          style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
+                        ),
+                      ),
+                      for (final link in outgoingLinkDrafts)
+                        ListTile(
+                          leading: const Text('•'),
+                          title: Text('--  ${link.name} --> ${_entityLabelById(entities, link.targetId)}', style: const TextStyle(fontSize: 15)),
+                          subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
+                          minVerticalPadding: 6,
+                        ),
+                    ],
+                    if (incomingLinks.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18, bottom: 6),
+                        child: Text(
+                          'Incoming Links',
+                          style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
+                        ),
+                      ),
+                      for (final link in incomingLinks)
+                        ListTile(
+                          leading: const Text('•'),
+                          title: Text('<-- ${link.name} -- ${_entityLabelById(targetEntities, link.sourceId)}', style: const TextStyle(fontSize: 15)),
+                          subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
+                          minVerticalPadding: 6,
+                        ),
+                    ],
+                  ],
+                )
+              : ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
+                  itemCount: outgoingLinkDrafts.length,
+                  onReorder: _onReorderOutgoingLinks,
+                  header: Padding(
+                    padding: const EdgeInsets.only(top: 10, bottom: 6),
+                    child: Text(
+                      'Outgoing Links',
+                      style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
+                    ),
+                  ),
+                  footer: incomingLinks.isEmpty
+                      ? null
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 18, bottom: 6),
+                              child: Text(
+                                'Incoming Links',
+                                style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
+                              ),
+                            ),
+                            for (final link in incomingLinks)
+                              ListTile(
+                                leading: const Text('•'),
+                                title: Text(
+                                  '<-- ${link.name} -- ${_entityLabelById(targetEntities, link.sourceId)}',
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
+                                minVerticalPadding: 6,
+                              ),
+                          ],
+                        ),
+                  itemBuilder: (context, index) {
+                    final link = outgoingLinkDrafts[index];
+                    return ReorderableDragStartListener(
+                      key: ValueKey('${link.id ?? link.targetId}-$index-${link.name}'),
+                      index: index,
+                      child: ListTile(
+                        mouseCursor: SystemMouseCursors.resizeUpDown,
+                        leading: const Text('•'),
+                        title: Text('--  ${link.name} --> ${_entityLabelById(entities, link.targetId)}', style: const TextStyle(fontSize: 15)),
+                        subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
+                        trailing: IconButton(
+                          onPressed: () => _removeOutgoingLinkAt(index),
+                          icon: const Icon(Icons.remove, size: 14),
+                          visualDensity: VisualDensity.compact,
+                          tooltip: 'Remove',
+                        ),
+                      ),
+                    );
+                  },
+                  proxyDecorator: (child, index, animation) => Material(
+                    elevation: 6,
+                    color: isDarkMode ? darkBgColor : lightBgColor,
+                    child: child,
+                  ),
+                ),
+        ),
+        if (!_isReadOnly) ...[
+          TextFormField(
+            controller: linkNameController,
+            decoration: const InputDecoration(
+              labelText: 'Name *',
+              hintText: 'Required',
+            ),
+          ),
+          const SizedBox(height: 2),
+          TextFormField(
+            controller: linkDescriptionController,
+            decoration: const InputDecoration(labelText: 'Description'),
+            maxLines: 1,
+            minLines: 1,
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<UuidValue>(
+                  initialValue: _selectedLinkTargetId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Target',
+                    hintText: 'Pick an entity',
+                  ),
+                  items: entities
+                      .where((entity) => entity.id != null)
+                      .map(
+                        (entity) => DropdownMenuItem<UuidValue>(
+                          value: entity.id!,
+                          child: Text(_entityLabel(entity), overflow: TextOverflow.ellipsis),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: entities.isEmpty ? null : (targetId) => setState(() => _selectedLinkTargetId = targetId),
+                ),
+              ),
+              IconButton(
+                onPressed: _selectedLinkTargetId == null ? null : _addSelectedOutgoingLink,
+                icon: const Icon(Icons.add, size: 18),
+                tooltip: 'Add link',
+              ),
+            ],
+          ),
+          if (entities.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                'Create another entity first to link to it.',
+                style: TextStyle(color: faded),
+              ),
+            ),
+          const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildScratchTabs(bool isDarkMode) {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const TabBar(
+            tabs: [
+              Tab(text: 'Attributes', height: tabHeight),
+              Tab(text: 'Links', height: tabHeight),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 470,
+            child: TabBarView(
+              children: [
+                SingleChildScrollView(child: _buildAttributesSection(isDarkMode)),
+                _buildLinksSection(isDarkMode),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
-    final listingDraft = _selectedListingDraft;
 
     return Form(
       key: formKey,
@@ -753,60 +1103,7 @@ class _EntityFormState extends State<EntityForm> {
                   ),
                 const SizedBox(height: 16),
               ],
-              DropdownButtonFormField<int>(
-                initialValue: _selectedListingDraftId,
-                decoration: const InputDecoration(labelText: 'Listing attribute *'),
-                items: attributeDrafts
-                    .map(
-                      (draft) => DropdownMenuItem<int>(
-                        value: draft.localId,
-                        child: Text(
-                          draft.nameController.text.trim().isEmpty ? 'Unnamed attribute' : draft.nameController.text.trim(),
-                        ),
-                      ),
-                    )
-                    .toList(),
-                onChanged: _isReadOnly ? null : (value) => setState(() => _selectedListingDraftId = value),
-                validator: (_) => attributeDrafts.isEmpty
-                    ? 'Add at least one attribute first.'
-                    : (_selectedListingDraftId == null ? 'Listing attribute is required' : null),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                listingDraft == null
-                    ? 'Listing value will be inferred from the selected attribute.'
-                    : 'Listing value: ${_displayValueFor(listingDraft)}',
-                style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'Attributes',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  if (!_isReadOnly)
-                    IconButton(
-                      tooltip: 'Add attribute',
-                      onPressed: _isScratchCreation ? _addAttributeWithChoice : _addAttribute,
-                      icon: const Icon(Icons.add),
-                    ),
-                ],
-              ),
-              if (attributeDrafts.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text(
-                    _isReadOnly ? 'No attributes.' : 'No attributes yet. Add one or start from a template.',
-                    style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              else
-                for (var i = 0; i < attributeDrafts.length; i++) _buildAttributeCard(attributeDrafts[i], i),
-              if (widget.initialTemplate != null) _buildTemplateLinksSection(isDarkMode),
+              if (_isScratchCreation || _isEdit) _buildScratchTabs(isDarkMode) else _buildAttributesSection(isDarkMode),
               Align(
                 alignment: Alignment.centerRight,
                 child: _isReadOnly

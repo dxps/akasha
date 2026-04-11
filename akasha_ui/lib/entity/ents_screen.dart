@@ -49,7 +49,7 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
     final viewportSize = MediaQuery.sizeOf(context);
     final addButton = IconButton(
       icon: const Icon(Icons.add),
-      iconSize: 20,
+      iconSize: 16,
       tooltip: 'Add an entity',
       onPressed: () => _startCreateFlow(viewportSize: viewportSize),
     );
@@ -97,9 +97,11 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
                                   ],
                                 ),
                               );
+                            } else {
+                              return Center(
+                                child: _buildTable(vwSize, isDarkMode, state.entities, addButton),
+                              );
                             }
-
-                            return _buildTable(vwSize, isDarkMode, state.entities, addButton);
                         }
                       },
                     ),
