@@ -7,25 +7,40 @@ class EntityEndpoint extends Endpoint {
     return Entity.db.find(session);
   }
 
-  Future<EntityApiResponse> create(Session session, Entity item) async {
-    // Persist the item first.
-    final created = await Entity.db.insertRow(session, item);
-    if (item.outgoingLinks != null) {
-      created.outgoingLinks = [];
-      for (final link in item.outgoingLinks!) {
-        final createdLink = await EntityLink.db.insertRow(
-          session,
-          EntityLink(
-            name: link.name,
-            description: link.description,
-            sourceId: created.id!,
-            targetId: link.targetId,
-            orderIdx: link.orderIdx,
-          ),
-        );
-        created.outgoingLinks!.add(createdLink);
-      }
+  Future<List<EntityLink>> _insertOutgoingLinks(
+    Session session, {
+    required UuidValue sourceId,
+    required List<EntityLink> links,
+  }) async {
+    final createdLinks = <EntityLink>[];
+    for (var i = 0; i < links.length; i++) {
+      final link = links[i];
+      final createdLink = await EntityLink.db.insertRow(
+        session,
+        EntityLink(
+          name: link.name,
+          description: link.description,
+          sourceId: sourceId,
+          targetId: link.targetId,
+          orderIdx: i,
+        ),
+      );
+      createdLinks.add(createdLink);
     }
+    return createdLinks;
+  }
+
+  Future<EntityApiResponse> create(Session session, Entity item) async {
+    final outgoingLinks = [...?item.outgoingLinks];
+    item.outgoingLinks = null;
+    item.incomingLinks = null;
+
+    final created = await Entity.db.insertRow(session, item);
+    created.outgoingLinks = await _insertOutgoingLinks(
+      session,
+      sourceId: created.id!,
+      links: outgoingLinks,
+    );
     return EntityApiResponse(success: true, data: created);
   }
 
@@ -50,27 +65,20 @@ class EntityEndpoint extends Endpoint {
   }
 
   Future<EntityApiResponse> update(Session session, Entity item) async {
+    final outgoingLinks = [...?item.outgoingLinks];
+    item.outgoingLinks = null;
+    item.incomingLinks = null;
+
     final updated = await Entity.db.updateRow(session, item);
     await EntityLink.db.deleteWhere(
       session,
       where: (t) => t.sourceId.equals(item.id!),
     );
-    if (item.outgoingLinks != null) {
-      updated.outgoingLinks = [];
-      for (final link in item.outgoingLinks!) {
-        final createdLink = await EntityLink.db.insertRow(
-          session,
-          EntityLink(
-            name: link.name,
-            description: link.description,
-            sourceId: item.id!,
-            targetId: link.targetId,
-            orderIdx: link.orderIdx,
-          ),
-        );
-        updated.outgoingLinks!.add(createdLink);
-      }
-    }
+    updated.outgoingLinks = await _insertOutgoingLinks(
+      session,
+      sourceId: item.id!,
+      links: outgoingLinks,
+    );
     return EntityApiResponse(success: true, data: updated);
   }
 

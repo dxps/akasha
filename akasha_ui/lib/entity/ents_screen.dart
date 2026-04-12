@@ -280,7 +280,7 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
   }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
-    const modalSize = Size(800, 680);
+    final modalSize = isEdit && !readOnly ? const Size(800, 620) : const Size(800, 680);
     final offset =
         initialOffset ??
         (viewportSize != null
@@ -309,6 +309,17 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               _openModal(item: item, viewportSize: viewportSize, initialOffset: currentOffset);
+            });
+          }
+        },
+        onRequestView: () {
+          if (!readOnly && item != null) {
+            final currentModal = modals.firstWhere((m) => m.id == id);
+            final currentOffset = currentModal.offset;
+            _closeModal(id);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _openModal(item: item, viewportSize: viewportSize, readOnly: true, initialOffset: currentOffset);
             });
           }
         },

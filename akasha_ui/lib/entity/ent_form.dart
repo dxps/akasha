@@ -20,6 +20,7 @@ class EntityForm extends StatefulWidget {
     this.initialTemplate,
     this.onSave,
     this.onRequestEdit,
+    this.onRequestView,
     this.readOnly = false,
   });
 
@@ -27,6 +28,7 @@ class EntityForm extends StatefulWidget {
   final EntityTmpl? initialTemplate;
   final Future<void> Function(Entity item)? onSave;
   final VoidCallback? onRequestEdit;
+  final VoidCallback? onRequestView;
   final bool readOnly;
 
   @override
@@ -312,14 +314,13 @@ class _EntityFormState extends State<EntityForm> {
     });
   }
 
-  void _moveAttribute(int localId, int delta) {
+  void _onReorderAttributes(int oldIndex, int newIndex) {
     setState(() {
-      final index = attributeDrafts.indexWhere((draft) => draft.localId == localId);
-      if (index == -1) return;
-      final nextIndex = index + delta;
-      if (nextIndex < 0 || nextIndex >= attributeDrafts.length) return;
-      final draft = attributeDrafts.removeAt(index);
-      attributeDrafts.insert(nextIndex, draft);
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final draft = attributeDrafts.removeAt(oldIndex);
+      attributeDrafts.insert(newIndex, draft);
     });
   }
 
@@ -581,6 +582,7 @@ class _EntityFormState extends State<EntityForm> {
     switch (draft.valueType) {
       case ValueType.boolean:
         return DropdownButtonFormField<bool>(
+          key: ValueKey('attr-${draft.localId}-value-bool'),
           initialValue: draft.boolValue,
           decoration: const InputDecoration(labelText: 'Value'),
           items: const [
@@ -591,6 +593,7 @@ class _EntityFormState extends State<EntityForm> {
         );
       case ValueType.date:
         return TextFormField(
+          key: ValueKey('attr-${draft.localId}-value-date'),
           controller: draft.valueController,
           readOnly: true,
           decoration: InputDecoration(
@@ -606,6 +609,7 @@ class _EntityFormState extends State<EntityForm> {
         );
       case ValueType.datetime:
         return TextFormField(
+          key: ValueKey('attr-${draft.localId}-value-datetime'),
           controller: draft.valueController,
           readOnly: true,
           decoration: InputDecoration(
@@ -621,6 +625,7 @@ class _EntityFormState extends State<EntityForm> {
         );
       case ValueType.number:
         return TextFormField(
+          key: ValueKey('attr-${draft.localId}-value-number'),
           controller: draft.valueController,
           readOnly: _isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -628,6 +633,7 @@ class _EntityFormState extends State<EntityForm> {
         );
       case ValueType.text:
         return TextFormField(
+          key: ValueKey('attr-${draft.localId}-value-text'),
           controller: draft.valueController,
           readOnly: _isReadOnly,
           decoration: const InputDecoration(labelText: 'Value'),
@@ -637,15 +643,17 @@ class _EntityFormState extends State<EntityForm> {
 
   Widget _buildAttributeCard(_EntityAttributeDraft draft, int index) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      key: ValueKey(draft.localId),
+      margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(6),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               flex: 4,
               child: TextFormField(
+                key: ValueKey('attr-${draft.localId}-name'),
                 controller: draft.nameController,
                 readOnly: _isReadOnly,
                 decoration: InputDecoration(labelText: _isReadOnly ? 'Name' : 'Name *'),
@@ -661,6 +669,7 @@ class _EntityFormState extends State<EntityForm> {
             Expanded(
               flex: 2,
               child: DropdownButtonFormField<ValueType>(
+                key: ValueKey('attr-${draft.localId}-value-type'),
                 initialValue: draft.valueType,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Value type'),
@@ -688,6 +697,7 @@ class _EntityFormState extends State<EntityForm> {
             Expanded(
               flex: 2,
               child: DropdownButtonFormField<int>(
+                key: ValueKey('attr-${draft.localId}-access-level'),
                 initialValue: draft.accessLevelId,
                 isExpanded: true,
                 decoration: InputDecoration(labelText: _isReadOnly ? 'Access level' : 'Access level *'),
@@ -703,34 +713,31 @@ class _EntityFormState extends State<EntityForm> {
               ),
             ),
             if (!_isReadOnly) ...[
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               SizedBox(
-                width: 28,
+                width: 18,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      tooltip: 'Move up',
-                      onPressed: index == 0 ? null : () => _moveAttribute(draft.localId, -1),
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                      icon: const Icon(Icons.keyboard_arrow_up),
+                    SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: _HoverActionIcon(
+                        icon: Icons.remove,
+                        tooltip: 'Remove attribute',
+                        onPressed: () => _removeAttribute(draft.localId),
+                        size: 14,
+                      ),
                     ),
-                    IconButton(
-                      tooltip: 'Move down',
-                      onPressed: index == attributeDrafts.length - 1 ? null : () => _moveAttribute(draft.localId, 1),
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                      icon: const Icon(Icons.keyboard_arrow_down),
-                    ),
-                    IconButton(
-                      tooltip: 'Remove attribute',
-                      onPressed: () => _removeAttribute(draft.localId),
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                      icon: const Icon(Icons.delete_outline),
+                    const SizedBox(height: 4),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: const _HoverActionIcon(
+                        icon: Icons.drag_indicator,
+                        tooltip: 'Drag to reorder',
+                        size: 16,
+                        cursor: SystemMouseCursors.resizeUpDown,
+                      ),
                     ),
                   ],
                 ),
@@ -738,6 +745,52 @@ class _EntityFormState extends State<EntityForm> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAttributeCardsList(bool isDarkMode, {required bool shrinkWrap}) {
+    return ReorderableListView.builder(
+      shrinkWrap: shrinkWrap,
+      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
+      buildDefaultDragHandles: false,
+      itemCount: attributeDrafts.length,
+      onReorder: _onReorderAttributes,
+      itemBuilder: (context, index) => _buildAttributeCard(attributeDrafts[index], index),
+      proxyDecorator: (child, index, animation) => Material(
+        elevation: 6,
+        color: isDarkMode ? darkBgColor : lightBgColor,
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildAttributeListTile(_EntityAttributeDraft draft) {
+    final name = draft.nameController.text.trim();
+    final value = _displayValueFor(draft).trim();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(width: 22, child: Text('•')),
+          SizedBox(
+            width: 220,
+            child: Text(
+              name.isEmpty ? 'Unnamed attribute' : name,
+              style: const TextStyle(fontSize: 15),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value.isEmpty ? 'No value' : value,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -808,54 +861,36 @@ class _EntityFormState extends State<EntityForm> {
     return entity == null ? 'Unknown entity' : _entityLabel(entity);
   }
 
-  Widget _buildAttributesSection(bool isDarkMode) {
+  Widget _buildAttributesSection(bool isDarkMode, {bool expandAttributeList = false}) {
     final listingDraft = _selectedListingDraft;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DropdownButtonFormField<int>(
-          initialValue: _selectedListingDraftId,
-          decoration: const InputDecoration(labelText: 'Listing attribute *'),
-          items: attributeDrafts
-              .map(
-                (draft) => DropdownMenuItem<int>(
-                  value: draft.localId,
-                  child: Text(
-                    draft.nameController.text.trim().isEmpty ? 'Unnamed attribute' : draft.nameController.text.trim(),
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: _isReadOnly ? null : (value) => setState(() => _selectedListingDraftId = value),
-          validator: (_) => attributeDrafts.isEmpty
-              ? 'Add at least one attribute first.'
-              : (_selectedListingDraftId == null ? 'Listing attribute is required' : null),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          listingDraft == null ? 'Listing value will be inferred from the selected attribute.' : 'Listing value: ${_displayValueFor(listingDraft)}',
-          style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            const Expanded(
-              child: Text(
-                'Attributes',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-              ),
-            ),
-            if (!_isReadOnly)
-              IconButton(
-                tooltip: 'Add attribute',
-                onPressed: _isScratchCreation ? _addAttributeWithChoice : _addAttribute,
-                icon: const Icon(Icons.add),
-              ),
-          ],
-        ),
+    if (_isReadOnly) {
+      final children = [
         if (attributeDrafts.isEmpty)
           Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              'No attributes.',
+              style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          for (final draft in attributeDrafts) _buildAttributeListTile(draft),
+      ];
+
+      if (expandAttributeList) {
+        return ListView(children: children);
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      );
+    }
+
+    final listContent = attributeDrafts.isEmpty
+        ? Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Text(
               _isReadOnly ? 'No attributes.' : 'No attributes yet. Add one or start from a template.',
@@ -863,8 +898,67 @@ class _EntityFormState extends State<EntityForm> {
               textAlign: TextAlign.center,
             ),
           )
-        else
-          for (var i = 0; i < attributeDrafts.length; i++) _buildAttributeCard(attributeDrafts[i], i),
+        : _buildAttributeCardsList(isDarkMode, shrinkWrap: !expandAttributeList);
+
+    final children = [
+      DropdownButtonFormField<int>(
+        initialValue: _selectedListingDraftId,
+        decoration: const InputDecoration(labelText: 'Listing attribute *'),
+        items: attributeDrafts
+            .map(
+              (draft) => DropdownMenuItem<int>(
+                value: draft.localId,
+                child: Text(
+                  draft.nameController.text.trim().isEmpty ? 'Unnamed attribute' : draft.nameController.text.trim(),
+                ),
+              ),
+            )
+            .toList(),
+        onChanged: _isReadOnly ? null : (value) => setState(() => _selectedListingDraftId = value),
+        validator: (_) => attributeDrafts.isEmpty
+            ? 'Add at least one attribute first.'
+            : (_selectedListingDraftId == null ? 'Listing attribute is required' : null),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        listingDraft == null ? 'Listing value will be inferred from the selected attribute.' : 'Listing value: ${_displayValueFor(listingDraft)}',
+        style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
+      ),
+      const SizedBox(height: 20),
+      Row(
+        children: [
+          const Expanded(
+            child: Text(
+              'Attributes',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
+          if (!_isReadOnly)
+            IconButton(
+              tooltip: 'Add attribute',
+              onPressed: _isScratchCreation ? _addAttributeWithChoice : _addAttribute,
+              icon: const Icon(Icons.add),
+            ),
+        ],
+      ),
+    ];
+
+    if (expandAttributeList) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ...children,
+          Expanded(child: listContent),
+          if (widget.initialTemplate != null) _buildTemplateLinksSection(isDarkMode),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ...children,
+        listContent,
         if (widget.initialTemplate != null) _buildTemplateLinksSection(isDarkMode),
       ],
     );
@@ -1066,7 +1160,7 @@ class _EntityFormState extends State<EntityForm> {
             height: 470,
             child: TabBarView(
               children: [
-                SingleChildScrollView(child: _buildAttributesSection(isDarkMode)),
+                _buildAttributesSection(isDarkMode, expandAttributeList: true),
                 _buildLinksSection(isDarkMode),
               ],
             ),
@@ -1113,18 +1207,79 @@ class _EntityFormState extends State<EntityForm> {
                         icon: const Icon(Icons.edit, size: 22),
                         tooltip: 'Edit',
                       )
-                    : IconButton(
-                        onPressed: _isSaving ? null : onSave,
-                        color: isDarkMode ? darkFgColor : lightFgColor,
-                        icon: _isSaving
-                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.save, size: 22),
-                        tooltip: _isEdit ? 'Update' : 'Add',
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_isEdit)
+                            IconButton(
+                              onPressed: _isSaving ? null : widget.onRequestView,
+                              color: isDarkMode ? darkFgFadedColor : lightFgFadedColor,
+                              icon: const Icon(Icons.arrow_back, size: 22),
+                              tooltip: 'Back to view',
+                            ),
+                          IconButton(
+                            onPressed: _isSaving ? null : onSave,
+                            color: isDarkMode ? darkFgColor : lightFgColor,
+                            icon: _isSaving
+                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Icon(Icons.save, size: 22),
+                            tooltip: _isEdit ? 'Update' : 'Add',
+                          ),
+                        ],
                       ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _HoverActionIcon extends StatefulWidget {
+  const _HoverActionIcon({
+    required this.icon,
+    required this.tooltip,
+    required this.size,
+    this.onPressed,
+    this.cursor = SystemMouseCursors.click,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final double size;
+  final VoidCallback? onPressed;
+  final MouseCursor cursor;
+
+  @override
+  State<_HoverActionIcon> createState() => _HoverActionIconState();
+}
+
+class _HoverActionIconState extends State<_HoverActionIcon> {
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+    final color = isHovered ? (isDarkMode ? darkFgColor : lightFgColor) : (isDarkMode ? darkFgFadedColor : lightFgFadedColor);
+
+    final icon = Icon(widget.icon, size: widget.size, color: color);
+
+    return MouseRegion(
+      cursor: widget.cursor,
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+      child: Tooltip(
+        message: widget.tooltip,
+        child: widget.onPressed == null
+            ? Center(child: icon)
+            : IconButton(
+                onPressed: widget.onPressed,
+                padding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
+                constraints: BoxConstraints.tightFor(width: widget.size + 4, height: widget.size + 4),
+                icon: icon,
+              ),
       ),
     );
   }
