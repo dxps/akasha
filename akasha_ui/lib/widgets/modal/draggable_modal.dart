@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:akasha_ui/theming/colors.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +14,7 @@ class DraggableModal extends StatefulWidget {
     required this.onClose,
     required this.onDrag,
     this.onResize,
+    this.minSize = const Size(300, 220),
   });
 
   final ModalData data;
@@ -20,6 +23,7 @@ class DraggableModal extends StatefulWidget {
   final VoidCallback onClose;
   final ValueChanged<Offset> onDrag;
   final ValueChanged<Size>? onResize;
+  final Size minSize;
 
   @override
   State<DraggableModal> createState() => _DraggableModalState();
@@ -73,7 +77,11 @@ class _DraggableModalState extends State<DraggableModal> {
 
     final Offset delta = details.globalPosition - _resizeStartPointerGlobal!;
 
-    widget.onResize?.call(Size(_resizeStartSize!.width + delta.dx, _resizeStartSize!.height + delta.dy));
+    final nextSize = _clampSize(
+      Size(_resizeStartSize!.width + delta.dx, _resizeStartSize!.height + delta.dy),
+    );
+
+    widget.onResize?.call(nextSize);
   }
 
   void _endResize() {
@@ -82,6 +90,18 @@ class _DraggableModalState extends State<DraggableModal> {
     if (_isResizing) {
       setState(() => _isResizing = false);
     }
+  }
+
+  Size _clampSize(Size size) {
+    final availableWidth = math.max(0.0, widget.viewport.width - widget.data.offset.dx);
+    final availableHeight = math.max(0.0, widget.viewport.height - widget.data.offset.dy);
+    final minWidth = math.min(widget.minSize.width, availableWidth);
+    final minHeight = math.min(widget.minSize.height, availableHeight);
+
+    return Size(
+      size.width.clamp(minWidth, availableWidth).toDouble(),
+      size.height.clamp(minHeight, availableHeight).toDouble(),
+    );
   }
 
   @override
@@ -164,14 +184,12 @@ class _DraggableModalState extends State<DraggableModal> {
                                   onPanUpdate: _updateResize,
                                   onPanEnd: (_) => _endResize(),
                                   onPanCancel: _endResize,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(1),
-                                    child: Transform.rotate(
-                                      angle: -0.9,
-                                      child: Icon(
-                                        Icons.filter_list,
-                                        size: 18,
-                                        color: theme.colorScheme.onSurfaceVariant.withAlpha(40),
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CustomPaint(
+                                      painter: _ResizeGripPainter(
+                                        color: theme.colorScheme.onSurfaceVariant.withAlpha(_isResizing ? 120 : 55),
                                       ),
                                     ),
                                   ),
@@ -189,5 +207,33 @@ class _DraggableModalState extends State<DraggableModal> {
         ),
       ),
     );
+  }
+}
+
+class _ResizeGripPainter extends CustomPainter {
+  const _ResizeGripPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.4
+      ..strokeCap = StrokeCap.round;
+
+    for (var i = 0; i < 3; i++) {
+      final inset = 5.0 + i * 5.0;
+      canvas.drawLine(
+        Offset(size.width - inset, size.height - 3),
+        Offset(size.width - 3, size.height - inset),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ResizeGripPainter oldDelegate) {
+    return oldDelegate.color != color;
   }
 }

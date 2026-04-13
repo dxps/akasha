@@ -120,6 +120,7 @@ class _AttributeTmplsScreenState extends State<AttributeTmplsScreen> with _Modal
                           onTap: () => bringToFront(modal.id),
                           onClose: () => closeModal(modal.id),
                           onDrag: (offset) => updatePosition(modal.id, offset, viewportSize),
+                          onResize: (size) => updateSize(modal.id, size, viewportSize),
                         ),
                     ],
                   );
@@ -462,6 +463,25 @@ mixin _ModalHelpers on State<AttributeTmplsScreen> {
       final double maxTop = math.max(0, viewport.height - modal.size.height);
 
       modals[index] = modal.copyWith(offset: Offset(nextOffset.dx.clamp(0.0, maxLeft), nextOffset.dy.clamp(0.0, maxTop)));
+    });
+  }
+
+  void updateSize(int id, Size nextSize, Size viewport) {
+    setState(() {
+      final int index = modals.indexWhere((m) => m.id == id);
+      if (index == -1) return;
+
+      final ModalData modal = modals[index];
+      final double maxLeft = math.max(0, viewport.width - nextSize.width);
+      final double maxTop = math.max(0, viewport.height - nextSize.height);
+
+      modals[index] = modal.copyWith(
+        size: nextSize,
+        offset: Offset(
+          modal.offset.dx.clamp(0.0, maxLeft),
+          modal.offset.dy.clamp(0.0, maxTop),
+        ),
+      );
     });
   }
 }

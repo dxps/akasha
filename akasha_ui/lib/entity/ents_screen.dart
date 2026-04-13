@@ -114,6 +114,7 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
                       onTap: () => _bringToFront(modal.id),
                       onClose: () => _closeModal(modal.id),
                       onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
+                      onResize: (size) => _updateSize(modal.id, size, vwSize),
                     ),
                 ],
               );
@@ -281,10 +282,10 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
     final id = _nextModalId++;
     final isEdit = item != null;
     final modalSize = readOnly
-        ? const Size(560, 500)
+        ? const Size(500, 450)
         : isEdit
-        ? const Size(800, 620)
-        : const Size(800, 680);
+        ? const Size(700, 600)
+        : const Size(700, 600);
     final offset =
         initialOffset ??
         (viewportSize != null
@@ -433,6 +434,25 @@ mixin _ModalHelpers on State<EntitiesScreen> {
         offset: Offset(
           nextOffset.dx.clamp(0.0, maxLeft).toDouble(),
           nextOffset.dy.clamp(0.0, maxTop).toDouble(),
+        ),
+      );
+    });
+  }
+
+  void _updateSize(int id, Size nextSize, Size viewport) {
+    setState(() {
+      final index = modals.indexWhere((m) => m.id == id);
+      if (index == -1) return;
+
+      final modal = modals[index];
+      final maxLeft = math.max(0, viewport.width - nextSize.width);
+      final maxTop = math.max(0, viewport.height - nextSize.height);
+
+      modals[index] = modal.copyWith(
+        size: nextSize,
+        offset: Offset(
+          modal.offset.dx.clamp(0.0, maxLeft).toDouble(),
+          modal.offset.dy.clamp(0.0, maxTop).toDouble(),
         ),
       );
     });

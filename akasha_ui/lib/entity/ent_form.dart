@@ -43,6 +43,7 @@ class _EntityFormState extends State<EntityForm> {
   late final TextEditingController linkDescriptionController;
   int _nextDraftId = 1;
   int? _selectedListingDraftId;
+  int _selectedScratchTabIndex = 0;
   UuidValue? _selectedLinkTargetId;
   bool _isSaving = false;
 
@@ -642,9 +643,9 @@ class _EntityFormState extends State<EntityForm> {
   }
 
   Widget _buildAttributeCard(_EntityAttributeDraft draft, int index) {
-    return Card(
+    return Padding(
       key: ValueKey(draft.localId),
-      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Padding(
         padding: const EdgeInsets.all(6),
         child: Row(
@@ -763,7 +764,6 @@ class _EntityFormState extends State<EntityForm> {
   }
 
   Widget _buildAttributeDragProxy(_EntityAttributeDraft draft, bool isDarkMode) {
-    final bgColor = isDarkMode ? darkBgColor : lightBgColor;
     final fgColor = isDarkMode ? darkFgColor : lightFgColor;
     final fadedColor = isDarkMode ? darkFgFadedColor : lightFgFadedColor;
     final name = draft.nameController.text.trim();
@@ -773,52 +773,48 @@ class _EntityFormState extends State<EntityForm> {
     return Material(
       elevation: 6,
       color: Colors.transparent,
-      child: Card(
-        color: bgColor,
-        margin: const EdgeInsets.only(bottom: 10),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              Icon(Icons.drag_indicator, size: 18, color: fadedColor),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 4,
-                child: Text(
-                  name.isEmpty ? 'Unnamed attribute' : name,
-                  style: TextStyle(color: fgColor, fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis,
-                ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(6, 6, 6, 16),
+        child: Row(
+          children: [
+            Icon(Icons.drag_indicator, size: 18, color: fadedColor),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 4,
+              child: Text(
+                name.isEmpty ? 'Unnamed attribute' : name,
+                style: TextStyle(color: fgColor, fontWeight: FontWeight.w600),
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 5,
-                child: Text(
-                  value.isEmpty ? 'No value' : value,
-                  style: TextStyle(color: fadedColor),
-                  overflow: TextOverflow.ellipsis,
-                ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 5,
+              child: Text(
+                value.isEmpty ? 'No value' : value,
+                style: TextStyle(color: fadedColor),
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 90,
-                child: Text(
-                  draft.valueType.label,
-                  style: TextStyle(color: fadedColor),
-                  overflow: TextOverflow.ellipsis,
-                ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 90,
+              child: Text(
+                draft.valueType.label,
+                style: TextStyle(color: fadedColor),
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 120,
-                child: Text(
-                  accessLevelName ?? 'No access level',
-                  style: TextStyle(color: fadedColor),
-                  overflow: TextOverflow.ellipsis,
-                ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 120,
+              child: Text(
+                accessLevelName ?? 'No access level',
+                style: TextStyle(color: fadedColor),
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -938,10 +934,6 @@ class _EntityFormState extends State<EntityForm> {
           for (final draft in attributeDrafts) _buildAttributeListTile(draft),
       ];
 
-      if (expandAttributeList) {
-        return ListView(children: children);
-      }
-
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: children,
@@ -1033,6 +1025,55 @@ class _EntityFormState extends State<EntityForm> {
     final faded = isDarkMode ? darkFgFadedColor : lightFgFadedColor;
     final entities = targetEntities.where((entity) => entity.id != widget.item?.id).toList();
     final incomingLinks = initialIncomingLinks;
+
+    if (_isReadOnly) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (outgoingLinkDrafts.isEmpty && incomingLinks.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Text(
+                'No links',
+                style: TextStyle(fontStyle: FontStyle.italic, color: faded),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          if (outgoingLinkDrafts.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 10, bottom: 6),
+              child: Text(
+                'Outgoing Links',
+                style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
+              ),
+            ),
+            for (final link in outgoingLinkDrafts)
+              ListTile(
+                leading: const Text('•'),
+                title: Text('--  ${link.name} --> ${_entityLabelById(entities, link.targetId)}', style: const TextStyle(fontSize: 15)),
+                subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
+                minVerticalPadding: 6,
+              ),
+          ],
+          if (incomingLinks.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 18, bottom: 6),
+              child: Text(
+                'Incoming Links',
+                style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
+              ),
+            ),
+            for (final link in incomingLinks)
+              ListTile(
+                leading: const Text('•'),
+                title: Text('<-- ${link.name} -- ${_entityLabelById(targetEntities, link.sourceId)}', style: const TextStyle(fontSize: 15)),
+                subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
+                minVerticalPadding: 6,
+              ),
+          ],
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1204,29 +1245,37 @@ class _EntityFormState extends State<EntityForm> {
   }
 
   Widget _buildScratchTabs(bool isDarkMode) {
-    final tabsHeight = _isReadOnly ? 330.0 : 470.0;
+    final tabsHeight = _isReadOnly ? 300.0 : 400.0;
+    final readOnlyTabs = [
+      _buildAttributesSection(isDarkMode, expandAttributeList: true),
+      _buildLinksSection(isDarkMode),
+    ];
 
     return DefaultTabController(
       length: 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const TabBar(
-            tabs: [
+          TabBar(
+            onTap: _isReadOnly ? (index) => setState(() => _selectedScratchTabIndex = index) : null,
+            tabs: const [
               Tab(text: 'Attributes', height: tabHeight),
               Tab(text: 'Links', height: tabHeight),
             ],
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            height: tabsHeight,
-            child: TabBarView(
-              children: [
-                _buildAttributesSection(isDarkMode, expandAttributeList: true),
-                _buildLinksSection(isDarkMode),
-              ],
+          if (_isReadOnly)
+            readOnlyTabs[_selectedScratchTabIndex]
+          else
+            SizedBox(
+              height: tabsHeight,
+              child: TabBarView(
+                children: [
+                  _buildAttributesSection(isDarkMode, expandAttributeList: true),
+                  _buildLinksSection(isDarkMode),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1328,19 +1377,12 @@ class _CompactSelector<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
-    final borderColor = isDarkMode ? Colors.grey.shade700 : Colors.grey.shade400;
     final fgColor = enabled ? (isDarkMode ? darkFgColor : lightFgColor) : (isDarkMode ? darkFgFadedColor : lightFgFadedColor);
-    final bgColor = isDarkMode ? Colors.grey.shade900.withAlpha(80) : Colors.grey.shade100;
 
     final child = Container(
       width: width,
       height: 24,
-      padding: const EdgeInsets.only(left: 6, right: 2),
-      decoration: BoxDecoration(
-        color: bgColor,
-        border: Border.all(color: borderColor, width: 0.5),
-        borderRadius: BorderRadius.circular(6),
-      ),
+      padding: const EdgeInsets.only(left: 2, right: 0),
       child: Row(
         children: [
           Expanded(

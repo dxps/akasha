@@ -144,6 +144,7 @@ class _EntityTemplatesScreenState extends State<EntityTemplatesScreen> with _Mod
                           onTap: () => _bringToFront(modal.id),
                           onClose: () => _closeModal(modal.id),
                           onDrag: (offset) => _updatePosition(modal.id, offset, vwSize),
+                          onResize: (size) => _updateSize(modal.id, size, vwSize),
                         ),
                     ],
                   );
@@ -402,6 +403,25 @@ mixin _ModalHelpers on State<EntityTemplatesScreen> {
       final double maxTop = math.max(0, viewport.height - modal.size.height);
 
       modals[index] = modal.copyWith(offset: Offset(nextOffset.dx.clamp(0.0, maxLeft), nextOffset.dy.clamp(0.0, maxTop)));
+    });
+  }
+
+  void _updateSize(int id, Size nextSize, Size viewport) {
+    setState(() {
+      final int index = modals.indexWhere((m) => m.id == id);
+      if (index == -1) return;
+
+      final ModalData modal = modals[index];
+      final double maxLeft = math.max(0, viewport.width - nextSize.width);
+      final double maxTop = math.max(0, viewport.height - nextSize.height);
+
+      modals[index] = modal.copyWith(
+        size: nextSize,
+        offset: Offset(
+          modal.offset.dx.clamp(0.0, maxLeft),
+          modal.offset.dy.clamp(0.0, maxTop),
+        ),
+      );
     });
   }
 }
