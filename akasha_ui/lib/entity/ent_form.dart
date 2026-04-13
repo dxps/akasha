@@ -752,15 +752,74 @@ class _EntityFormState extends State<EntityForm> {
   Widget _buildAttributeCardsList(bool isDarkMode, {required bool shrinkWrap}) {
     return ReorderableListView.builder(
       shrinkWrap: shrinkWrap,
+      primary: false,
       physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       buildDefaultDragHandles: false,
       itemCount: attributeDrafts.length,
       onReorder: _onReorderAttributes,
       itemBuilder: (context, index) => _buildAttributeCard(attributeDrafts[index], index),
-      proxyDecorator: (child, index, animation) => Material(
-        elevation: 6,
-        color: isDarkMode ? darkBgColor : lightBgColor,
-        child: child,
+      proxyDecorator: (child, index, animation) => _buildAttributeDragProxy(attributeDrafts[index], isDarkMode),
+    );
+  }
+
+  Widget _buildAttributeDragProxy(_EntityAttributeDraft draft, bool isDarkMode) {
+    final bgColor = isDarkMode ? darkBgColor : lightBgColor;
+    final fgColor = isDarkMode ? darkFgColor : lightFgColor;
+    final fadedColor = isDarkMode ? darkFgFadedColor : lightFgFadedColor;
+    final name = draft.nameController.text.trim();
+    final value = _displayValueFor(draft).trim();
+    final accessLevelName = accessLevels.where((level) => level.id == draft.accessLevelId).firstOrNull?.name;
+
+    return Material(
+      elevation: 6,
+      color: Colors.transparent,
+      child: Card(
+        color: bgColor,
+        margin: const EdgeInsets.only(bottom: 10),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Icon(Icons.drag_indicator, size: 18, color: fadedColor),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 4,
+                child: Text(
+                  name.isEmpty ? 'Unnamed attribute' : name,
+                  style: TextStyle(color: fgColor, fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 5,
+                child: Text(
+                  value.isEmpty ? 'No value' : value,
+                  style: TextStyle(color: fadedColor),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 90,
+                child: Text(
+                  draft.valueType.label,
+                  style: TextStyle(color: fadedColor),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                width: 120,
+                child: Text(
+                  accessLevelName ?? 'No access level',
+                  style: TextStyle(color: fadedColor),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1024,6 +1083,7 @@ class _EntityFormState extends State<EntityForm> {
                   ],
                 )
               : ReorderableListView.builder(
+                  primary: false,
                   buildDefaultDragHandles: false,
                   itemCount: outgoingLinkDrafts.length,
                   onReorder: _onReorderOutgoingLinks,
