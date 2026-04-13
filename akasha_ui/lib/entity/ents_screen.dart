@@ -280,7 +280,11 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
   }) async {
     final id = _nextModalId++;
     final isEdit = item != null;
-    final modalSize = isEdit && !readOnly ? const Size(800, 620) : const Size(800, 680);
+    final modalSize = readOnly
+        ? const Size(560, 500)
+        : isEdit
+        ? const Size(800, 620)
+        : const Size(800, 680);
     final offset =
         initialOffset ??
         (viewportSize != null

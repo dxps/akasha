@@ -665,51 +665,16 @@ class _EntityFormState extends State<EntityForm> {
               flex: 5,
               child: _buildValueField(draft),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              flex: 2,
-              child: DropdownButtonFormField<ValueType>(
-                key: ValueKey('attr-${draft.localId}-value-type'),
-                initialValue: draft.valueType,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Value type'),
-                items: ValueType.values
-                    .map(
-                      (type) => DropdownMenuItem<ValueType>(
-                        value: type,
-                        child: Text(type.label, overflow: TextOverflow.ellipsis),
-                      ),
-                    )
-                    .toList(),
-                onChanged: _isReadOnly
-                    ? null
-                    : (value) {
-                        if (value == null) return;
-                        setState(() {
-                          draft.valueType = value;
-                          draft.valueController.clear();
-                          draft.boolValue = false;
-                        });
-                      },
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              flex: 2,
-              child: DropdownButtonFormField<int>(
-                key: ValueKey('attr-${draft.localId}-access-level'),
-                initialValue: draft.accessLevelId,
-                isExpanded: true,
-                decoration: InputDecoration(labelText: _isReadOnly ? 'Access level' : 'Access level *'),
-                items: accessLevels
-                    .map(
-                      (level) => DropdownMenuItem<int>(
-                        value: level.id,
-                        child: Text(level.name, overflow: TextOverflow.ellipsis),
-                      ),
-                    )
-                    .toList(),
-                onChanged: _isReadOnly ? null : (value) => setState(() => draft.accessLevelId = value),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 88,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildValueTypeSelector(draft),
+                  const SizedBox(height: 4),
+                  _buildAccessLevelSelector(draft),
+                ],
               ),
             ),
             if (!_isReadOnly) ...[
@@ -746,6 +711,41 @@ class _EntityFormState extends State<EntityForm> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildValueTypeSelector(_EntityAttributeDraft draft) {
+    return _CompactSelector<ValueType>(
+      width: 88,
+      tooltip: 'Value type',
+      valueLabel: draft.valueType.label,
+      enabled: !_isReadOnly,
+      options: [
+        for (final type in ValueType.values) _CompactSelectOption(value: type, label: type.label),
+      ],
+      onSelected: (value) {
+        setState(() {
+          draft.valueType = value;
+          draft.valueController.clear();
+          draft.boolValue = false;
+        });
+      },
+    );
+  }
+
+  Widget _buildAccessLevelSelector(_EntityAttributeDraft draft) {
+    final selectedAccessLevel = accessLevels.where((level) => level.id == draft.accessLevelId).firstOrNull;
+
+    return _CompactSelector<int>(
+      width: 88,
+      tooltip: 'Access level',
+      valueLabel: selectedAccessLevel?.name ?? 'Access *',
+      enabled: !_isReadOnly && accessLevels.isNotEmpty,
+      options: [
+        for (final level in accessLevels)
+          if (level.id != null) _CompactSelectOption(value: level.id!, label: level.name),
+      ],
+      onSelected: (value) => setState(() => draft.accessLevelId = value),
     );
   }
 
@@ -1204,6 +1204,8 @@ class _EntityFormState extends State<EntityForm> {
   }
 
   Widget _buildScratchTabs(bool isDarkMode) {
+    final tabsHeight = _isReadOnly ? 330.0 : 470.0;
+
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -1217,7 +1219,7 @@ class _EntityFormState extends State<EntityForm> {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 470,
+            height: tabsHeight,
             child: TabBarView(
               children: [
                 _buildAttributesSection(isDarkMode, expandAttributeList: true),
@@ -1292,6 +1294,95 @@ class _EntityFormState extends State<EntityForm> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CompactSelectOption<T> {
+  const _CompactSelectOption({
+    required this.value,
+    required this.label,
+  });
+
+  final T value;
+  final String label;
+}
+
+class _CompactSelector<T> extends StatelessWidget {
+  const _CompactSelector({
+    required this.width,
+    required this.tooltip,
+    required this.valueLabel,
+    required this.enabled,
+    required this.options,
+    required this.onSelected,
+  });
+
+  final double width;
+  final String tooltip;
+  final String valueLabel;
+  final bool enabled;
+  final List<_CompactSelectOption<T>> options;
+  final ValueChanged<T> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+    final borderColor = isDarkMode ? Colors.grey.shade700 : Colors.grey.shade400;
+    final fgColor = enabled ? (isDarkMode ? darkFgColor : lightFgColor) : (isDarkMode ? darkFgFadedColor : lightFgFadedColor);
+    final bgColor = isDarkMode ? Colors.grey.shade900.withAlpha(80) : Colors.grey.shade100;
+
+    final child = Container(
+      width: width,
+      height: 24,
+      padding: const EdgeInsets.only(left: 6, right: 2),
+      decoration: BoxDecoration(
+        color: bgColor,
+        border: Border.all(color: borderColor, width: 0.5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              valueLabel,
+              style: TextStyle(color: fgColor, fontSize: 11),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (enabled)
+            Icon(
+              Icons.arrow_drop_down,
+              size: 14,
+              color: fgColor,
+            ),
+        ],
+      ),
+    );
+
+    if (!enabled) {
+      return Tooltip(message: tooltip, child: child);
+    }
+
+    return PopupMenuButton<T>(
+      tooltip: tooltip,
+      enabled: enabled,
+      padding: EdgeInsets.zero,
+      constraints: BoxConstraints(minWidth: width),
+      onSelected: onSelected,
+      itemBuilder: (context) => [
+        for (final option in options)
+          PopupMenuItem<T>(
+            value: option.value,
+            height: 28,
+            child: Text(
+              option.label,
+              style: const TextStyle(fontSize: 12),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+      ],
+      child: child,
     );
   }
 }
