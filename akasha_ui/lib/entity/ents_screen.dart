@@ -8,6 +8,7 @@ import 'package:akasha_ui/entity/ent_row.dart';
 import 'package:akasha_ui/entity/ents_cubit.dart';
 import 'package:akasha_ui/entity/ents_state.dart';
 import 'package:akasha_ui/entity_template/ent_tmpls_logic.dart';
+import 'package:akasha_ui/theming/colors.dart';
 import 'package:akasha_ui/theming/theme_cubit.dart';
 import 'package:akasha_ui/utils/string.dart';
 import 'package:akasha_ui/widgets/feedback.dart';
@@ -295,6 +296,7 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
         (viewportSize != null
             ? Offset((viewportSize.width - modalSize.width) / 2, (viewportSize.height - modalSize.height) / 2)
             : const Offset(24, 80));
+    final formController = EntityFormController();
 
     _addModal(
       id: id,
@@ -306,9 +308,15 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
           : 'Entity :: New',
       offset: offset,
       size: modalSize,
+      titleActions: _EntityModalTitleActions(
+        controller: formController,
+        readOnly: readOnly,
+        isEdit: isEdit,
+      ),
       child: EntityForm(
         item: item,
         initialTemplate: initialTemplate,
+        controller: formController,
         readOnly: readOnly,
         onRequestEdit: () {
           if (readOnly && item != null) {
@@ -389,6 +397,75 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
   final List<ModalData> modals = [];
 }
 
+class _EntityModalTitleActions extends StatelessWidget {
+  const _EntityModalTitleActions({
+    required this.controller,
+    required this.readOnly,
+    required this.isEdit,
+  });
+
+  final EntityFormController controller;
+  final bool readOnly;
+  final bool isEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+    final actionColor = isDarkMode ? darkFgFadedColor : lightFgFadedColor;
+
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        if (readOnly) {
+          return IconButton(
+            onPressed: isEdit ? controller.requestEdit : null,
+            color: actionColor,
+            disabledColor: actionColor.withAlpha(90),
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            tooltip: 'Edit',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            visualDensity: VisualDensity.compact,
+            style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          );
+        }
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isEdit)
+              IconButton(
+                onPressed: controller.isSaving ? null : controller.requestView,
+                color: actionColor,
+                disabledColor: actionColor.withAlpha(90),
+                icon: const Icon(Icons.arrow_back, size: 18),
+                tooltip: 'Back to view',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                visualDensity: VisualDensity.compact,
+                style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+              ),
+            if (isEdit) const SizedBox(width: 8),
+            IconButton(
+              onPressed: controller.isSaving ? null : controller.save,
+              color: actionColor,
+              disabledColor: actionColor.withAlpha(90),
+              icon: controller.isSaving
+                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.save, size: 18),
+              tooltip: isEdit ? 'Update' : 'Add',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              visualDensity: VisualDensity.compact,
+              style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 mixin _ModalHelpers on State<EntitiesScreen> {
   List<ModalData> get modals;
 
@@ -399,6 +476,7 @@ mixin _ModalHelpers on State<EntitiesScreen> {
     required Offset offset,
     required Size size,
     required EntityForm child,
+    Widget? titleActions,
   }) {
     for (final modal in modals) {
       if ((modal.child as EntityForm).item?.id == child.item?.id) {
@@ -406,7 +484,7 @@ mixin _ModalHelpers on State<EntitiesScreen> {
       }
     }
     setState(() {
-      modals.add(ModalData(id: id, type: type, title: title, offset: offset, size: size, child: child));
+      modals.add(ModalData(id: id, type: type, title: title, offset: offset, size: size, child: child, titleActions: titleActions));
     });
   }
 

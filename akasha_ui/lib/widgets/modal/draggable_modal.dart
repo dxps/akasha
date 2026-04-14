@@ -150,6 +150,10 @@ class _DraggableModalState extends State<DraggableModal> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (widget.data.titleActions != null) ...[
+                            widget.data.titleActions!,
+                            const SizedBox(width: 8),
+                          ],
                           Padding(
                             padding: const EdgeInsets.only(right: 8.0),
                             child: IconButton(

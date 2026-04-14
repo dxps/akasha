@@ -13,11 +13,47 @@ import 'package:akasha_ui/widgets/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+class EntityFormController extends ChangeNotifier {
+  Future<void> Function()? _save;
+  VoidCallback? _requestEdit;
+  VoidCallback? _requestView;
+  bool _isSaving = false;
+
+  bool get isSaving => _isSaving;
+
+  void _attach({
+    required Future<void> Function() save,
+    VoidCallback? requestEdit,
+    VoidCallback? requestView,
+    required bool isSaving,
+  }) {
+    _save = save;
+    _requestEdit = requestEdit;
+    _requestView = requestView;
+    _isSaving = isSaving;
+  }
+
+  void _setSaving(bool value) {
+    if (_isSaving == value) return;
+    _isSaving = value;
+    notifyListeners();
+  }
+
+  Future<void> save() async {
+    await _save?.call();
+  }
+
+  void requestEdit() => _requestEdit?.call();
+
+  void requestView() => _requestView?.call();
+}
+
 class EntityForm extends StatefulWidget {
   const EntityForm({
     super.key,
     this.item,
     this.initialTemplate,
+    this.controller,
     this.onSave,
     this.onRequestEdit,
     this.onRequestView,
@@ -26,6 +62,7 @@ class EntityForm extends StatefulWidget {
 
   final Entity? item;
   final EntityTmpl? initialTemplate;
+  final EntityFormController? controller;
   final Future<void> Function(Entity item)? onSave;
   final VoidCallback? onRequestEdit;
   final VoidCallback? onRequestView;
@@ -91,6 +128,31 @@ class _EntityFormState extends State<EntityForm> {
       _nextDraftId = attributeDrafts.map((draft) => draft.localId).reduce((a, b) => a > b ? a : b) + 1;
     }
     _selectedListingDraftId = _inferInitialListingDraftId();
+    _syncController();
+  }
+
+  @override
+  void didUpdateWidget(covariant EntityForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncController();
+  }
+
+  void _syncController() {
+    widget.controller?._attach(
+      save: onSave,
+      requestEdit: widget.onRequestEdit,
+      requestView: widget.onRequestView,
+      isSaving: _isSaving,
+    );
+  }
+
+  void _setSaving(bool value) {
+    if (mounted) {
+      setState(() => _isSaving = value);
+    } else {
+      _isSaving = value;
+    }
+    widget.controller?._setSaving(value);
   }
 
   List<_EntityAttributeDraft> _buildInitialDrafts() {
@@ -448,7 +510,7 @@ class _EntityFormState extends State<EntityForm> {
       }
     }
 
-    setState(() => _isSaving = true);
+    _setSaving(true);
 
     try {
       final textAttributes = <TextAttribute>[];
@@ -560,9 +622,7 @@ class _EntityFormState extends State<EntityForm> {
 
       await widget.onSave!(entity);
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      _setSaving(false);
     }
   }
 
@@ -1221,49 +1281,27 @@ class _EntityFormState extends State<EntityForm> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildScratchTabs(isDarkMode),
+        ],
+      ),
+    );
 
     return Form(
       key: formKey,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildScratchTabs(isDarkMode),
-              Align(
-                alignment: Alignment.centerRight,
-                child: _isReadOnly
-                    ? IconButton(
-                        onPressed: _isEdit ? widget.onRequestEdit : null,
-                        color: isDarkMode ? darkFgFadedColor : lightFgFadedColor,
-                        icon: const Icon(Icons.edit, size: 22),
-                        tooltip: 'Edit',
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_isEdit)
-                            IconButton(
-                              onPressed: _isSaving ? null : widget.onRequestView,
-                              color: isDarkMode ? darkFgFadedColor : lightFgFadedColor,
-                              icon: const Icon(Icons.arrow_back, size: 22),
-                              tooltip: 'Back to view',
-                            ),
-                          IconButton(
-                            onPressed: _isSaving ? null : onSave,
-                            color: isDarkMode ? darkFgColor : lightFgColor,
-                            icon: _isSaving
-                                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                                : const Icon(Icons.save, size: 22),
-                            tooltip: _isEdit ? 'Update' : 'Add',
-                          ),
-                        ],
-                      ),
-              ),
-            ],
-          ),
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const normalEditorHeight = tabHeight + 12 + 400 + 8;
+          if (!_isReadOnly && constraints.maxHeight >= normalEditorHeight) {
+            return content;
+          }
+
+          return SingleChildScrollView(child: content);
+        },
       ),
     );
   }

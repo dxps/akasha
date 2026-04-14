@@ -8,6 +8,7 @@ class ModalData {
     required this.offset,
     required this.size,
     required this.child,
+    this.titleActions,
   });
 
   final int id;
@@ -16,8 +17,9 @@ class ModalData {
   final Offset offset;
   final Size size;
   final Widget child;
+  final Widget? titleActions;
 
-  ModalData copyWith({String? type, String? title, Offset? offset, Size? size, Widget? child}) {
+  ModalData copyWith({String? type, String? title, Offset? offset, Size? size, Widget? child, Widget? titleActions}) {
     return ModalData(
       id: id,
       type: type ?? this.type,
@@ -25,6 +27,7 @@ class ModalData {
       offset: offset ?? this.offset,
       size: size ?? this.size,
       child: child ?? this.child,
+      titleActions: titleActions ?? this.titleActions,
     );
   }
 }
