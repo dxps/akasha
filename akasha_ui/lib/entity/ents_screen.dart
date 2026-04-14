@@ -240,10 +240,7 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
                   child: Text('description', style: TextStyle(color: Colors.grey)),
                 ),
               ),
-              SizedBox(
-                width: 30,
-                child: addButton,
-              ),
+              SizedBox(width: 30, child: addButton),
             ],
           ),
         ),
@@ -287,10 +284,10 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
     final id = _nextModalId++;
     final isEdit = item != null;
     final modalSize = readOnly
-        ? const Size(500, 450)
+        ? const Size(420, 250)
         : isEdit
-        ? const Size(700, 600)
-        : const Size(700, 600);
+        ? const Size(500, 350)
+        : const Size(500, 350);
     final offset =
         initialOffset ??
         (viewportSize != null

@@ -626,13 +626,42 @@ class _EntityFormState extends State<EntityForm> {
     }
   }
 
+  InputDecoration _compactInputDecoration({
+    required String labelText,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      isDense: true,
+      contentPadding: const EdgeInsets.only(top: 2, bottom: 2),
+      suffixIcon: suffixIcon,
+      suffixIconConstraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+    );
+  }
+
+  Widget _compactSuffixIconButton({
+    required String tooltip,
+    required VoidCallback onPressed,
+    required IconData icon,
+  }) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 26, height: 26),
+      visualDensity: VisualDensity.compact,
+      style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+    );
+  }
+
   Widget _buildValueField(_EntityAttributeDraft draft) {
     switch (draft.valueType) {
       case ValueType.boolean:
         return DropdownButtonFormField<bool>(
           key: ValueKey('attr-${draft.localId}-value-bool'),
           initialValue: draft.boolValue,
-          decoration: const InputDecoration(labelText: 'Value'),
+          decoration: _compactInputDecoration(labelText: 'Value'),
           items: const [
             DropdownMenuItem(value: false, child: Text('False')),
             DropdownMenuItem(value: true, child: Text('True')),
@@ -644,14 +673,14 @@ class _EntityFormState extends State<EntityForm> {
           key: ValueKey('attr-${draft.localId}-value-date'),
           controller: draft.valueController,
           readOnly: true,
-          decoration: InputDecoration(
+          decoration: _compactInputDecoration(
             labelText: 'Value',
             suffixIcon: _isReadOnly
                 ? null
-                : IconButton(
+                : _compactSuffixIconButton(
                     tooltip: 'Pick date',
                     onPressed: () => _pickDate(draft),
-                    icon: const Icon(Icons.calendar_month_outlined),
+                    icon: Icons.calendar_month_outlined,
                   ),
           ),
         );
@@ -660,14 +689,14 @@ class _EntityFormState extends State<EntityForm> {
           key: ValueKey('attr-${draft.localId}-value-datetime'),
           controller: draft.valueController,
           readOnly: true,
-          decoration: InputDecoration(
+          decoration: _compactInputDecoration(
             labelText: 'Value',
             suffixIcon: _isReadOnly
                 ? null
-                : IconButton(
+                : _compactSuffixIconButton(
                     tooltip: 'Pick date and time',
                     onPressed: () => _pickDateTime(draft),
-                    icon: const Icon(Icons.schedule),
+                    icon: Icons.schedule,
                   ),
           ),
         );
@@ -677,14 +706,14 @@ class _EntityFormState extends State<EntityForm> {
           controller: draft.valueController,
           readOnly: _isReadOnly,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(labelText: 'Value'),
+          decoration: _compactInputDecoration(labelText: 'Value'),
         );
       case ValueType.text:
         return TextFormField(
           key: ValueKey('attr-${draft.localId}-value-text'),
           controller: draft.valueController,
           readOnly: _isReadOnly,
-          decoration: const InputDecoration(labelText: 'Value'),
+          decoration: _compactInputDecoration(labelText: 'Value'),
         );
     }
   }
@@ -692,9 +721,9 @@ class _EntityFormState extends State<EntityForm> {
   Widget _buildAttributeCard(_EntityAttributeDraft draft, int index) {
     return Padding(
       key: ValueKey(draft.localId),
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 4),
       child: Padding(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.symmetric(vertical: 2),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -704,7 +733,7 @@ class _EntityFormState extends State<EntityForm> {
                 key: ValueKey('attr-${draft.localId}-name'),
                 controller: draft.nameController,
                 readOnly: _isReadOnly,
-                decoration: InputDecoration(labelText: _isReadOnly ? 'Name' : 'Name *'),
+                decoration: _compactInputDecoration(labelText: _isReadOnly ? 'Name' : 'Name *'),
                 onChanged: _isReadOnly ? null : (_) => setState(() {}),
               ),
             ),
@@ -720,7 +749,7 @@ class _EntityFormState extends State<EntityForm> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildValueTypeSelector(draft),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 1),
                   _buildAccessLevelSelector(draft),
                 ],
               ),
@@ -876,19 +905,19 @@ class _EntityFormState extends State<EntityForm> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 220,
+          Expanded(
             child: Text(
               name.isEmpty ? 'Unnamed attribute' : name,
               style: const TextStyle(fontSize: 15),
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Text(
               value.isEmpty ? 'No value' : value,
               style: const TextStyle(fontSize: 15),
+              softWrap: true,
             ),
           ),
         ],
@@ -910,8 +939,6 @@ class _EntityFormState extends State<EntityForm> {
   }
 
   Widget _buildAttributesSection(bool isDarkMode, {bool expandAttributeList = false}) {
-    final listingDraft = _selectedListingDraft;
-
     if (_isReadOnly) {
       final children = [
         if (attributeDrafts.isEmpty)
@@ -947,7 +974,7 @@ class _EntityFormState extends State<EntityForm> {
     final children = [
       DropdownButtonFormField<int>(
         initialValue: _selectedListingDraftId,
-        decoration: const InputDecoration(labelText: 'Listing attribute *'),
+        decoration: _compactInputDecoration(labelText: 'Listing attribute *'),
         items: attributeDrafts
             .map(
               (draft) => DropdownMenuItem<int>(
@@ -963,25 +990,19 @@ class _EntityFormState extends State<EntityForm> {
             ? 'Add at least one attribute first.'
             : (_selectedListingDraftId == null ? 'Listing attribute is required' : null),
       ),
-      const SizedBox(height: 8),
-      Text(
-        listingDraft == null ? 'Listing value will be inferred from the selected attribute.' : 'Listing value: ${_displayValueFor(listingDraft)}',
-        style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-      ),
       const SizedBox(height: 20),
       Row(
         children: [
-          const Expanded(
-            child: Text(
-              'Attributes',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
-          ),
+          const Spacer(),
           if (!_isReadOnly)
             IconButton(
               tooltip: 'Add attribute',
               onPressed: _isScratchCreation ? _addAttributeWithChoice : _addAttribute,
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add, size: 18),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              visualDensity: VisualDensity.compact,
+              style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             ),
         ],
       ),
@@ -992,7 +1013,17 @@ class _EntityFormState extends State<EntityForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ...children,
-          Expanded(child: listContent),
+          Expanded(
+            child: attributeDrafts.isEmpty
+                ? listContent
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      const estimatedAttributeRowHeight = 72.0;
+                      final contentFits = attributeDrafts.length * estimatedAttributeRowHeight <= constraints.maxHeight;
+                      return _buildAttributeCardsList(isDarkMode, shrinkWrap: contentFits);
+                    },
+                  ),
+          ),
         ],
       );
     }
@@ -1095,55 +1126,71 @@ class _EntityFormState extends State<EntityForm> {
           ),
         ),
         Expanded(
-          child: outgoingLinkDrafts.isEmpty && !showIncomingLinks
-              ? Center(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (outgoingLinkDrafts.isEmpty && !showIncomingLinks) {
+                return Center(
                   child: Text(
                     'No links',
                     style: TextStyle(fontStyle: FontStyle.italic, color: faded),
                   ),
-                )
-              : ReorderableListView.builder(
-                  primary: false,
-                  buildDefaultDragHandles: false,
-                  itemCount: outgoingLinkDrafts.length,
-                  onReorder: _onReorderOutgoingLinks,
-                  footer: !showIncomingLinks
-                      ? null
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 18, bottom: 6),
-                              child: Text(
-                                'Incoming Links',
-                                style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
-                              ),
+                );
+              }
+
+              const estimatedOutgoingLinkRowHeight = 74.0;
+              const estimatedIncomingLinkHeaderHeight = 42.0;
+              const estimatedIncomingLinkRowHeight = 56.0;
+              final estimatedContentHeight =
+                  outgoingLinkDrafts.length * estimatedOutgoingLinkRowHeight +
+                  (showIncomingLinks ? estimatedIncomingLinkHeaderHeight + incomingLinks.length * estimatedIncomingLinkRowHeight : 0);
+              final contentFits = estimatedContentHeight <= constraints.maxHeight;
+
+              return ReorderableListView.builder(
+                shrinkWrap: contentFits,
+                physics: contentFits ? const NeverScrollableScrollPhysics() : null,
+                primary: false,
+                buildDefaultDragHandles: false,
+                itemCount: outgoingLinkDrafts.length,
+                onReorder: _onReorderOutgoingLinks,
+                footer: !showIncomingLinks
+                    ? null
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 18, bottom: 6),
+                            child: Text(
+                              'Incoming Links',
+                              style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
                             ),
-                            for (final link in incomingLinks)
-                              ListTile(
-                                contentPadding: EdgeInsets.zero,
-                                title: Text(
-                                  '<-- ${link.name} -- ${_entityLabelById(targetEntities, link.sourceId)}',
-                                  style: const TextStyle(fontSize: 15),
-                                ),
-                                subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
-                                minVerticalPadding: 6,
+                          ),
+                          for (final link in incomingLinks)
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                '<-- ${link.name} -- ${_entityLabelById(targetEntities, link.sourceId)}',
+                                style: const TextStyle(fontSize: 15),
                               ),
-                          ],
-                        ),
-                  itemBuilder: (context, index) {
-                    final link = outgoingLinkDrafts[index];
-                    return KeyedSubtree(
-                      key: ValueKey(link.localId),
-                      child: _buildOutgoingLinkDraftEditor(link, index, entities),
-                    );
-                  },
-                  proxyDecorator: (child, index, animation) => Material(
-                    elevation: 6,
-                    color: isDarkMode ? darkBgColor : lightBgColor,
-                    child: child,
-                  ),
+                              subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
+                              minVerticalPadding: 6,
+                            ),
+                        ],
+                      ),
+                itemBuilder: (context, index) {
+                  final link = outgoingLinkDrafts[index];
+                  return KeyedSubtree(
+                    key: ValueKey(link.localId),
+                    child: _buildOutgoingLinkDraftEditor(link, index, entities),
+                  );
+                },
+                proxyDecorator: (child, index, animation) => Material(
+                  elevation: 6,
+                  color: isDarkMode ? darkBgColor : lightBgColor,
+                  child: child,
                 ),
+              );
+            },
+          ),
         ),
         if (entities.isEmpty)
           Padding(
@@ -1174,7 +1221,7 @@ class _EntityFormState extends State<EntityForm> {
             flex: 3,
             child: TextFormField(
               controller: link.nameController,
-              decoration: const InputDecoration(labelText: 'Name *'),
+              decoration: _compactInputDecoration(labelText: 'Name *'),
               onChanged: (_) => setState(() {}),
             ),
           ),
@@ -1183,7 +1230,7 @@ class _EntityFormState extends State<EntityForm> {
             flex: 4,
             child: TextFormField(
               controller: link.descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: _compactInputDecoration(labelText: 'Description'),
               onChanged: (_) => setState(() {}),
             ),
           ),
@@ -1194,7 +1241,7 @@ class _EntityFormState extends State<EntityForm> {
               key: ValueKey('link-${link.localId}-target-${selectedTargetId ?? 'none'}'),
               initialValue: selectedTargetId,
               isExpanded: true,
-              decoration: const InputDecoration(labelText: 'Target *'),
+              decoration: _compactInputDecoration(labelText: 'Target *'),
               items: entities
                   .where((entity) => entity.id != null)
                   .map(
@@ -1242,7 +1289,6 @@ class _EntityFormState extends State<EntityForm> {
   }
 
   Widget _buildScratchTabs(bool isDarkMode) {
-    final tabsHeight = _isReadOnly ? 300.0 : 400.0;
     final readOnlyTabs = [
       _buildAttributesSection(isDarkMode, expandAttributeList: true),
       _buildLinksSection(isDarkMode),
@@ -1264,8 +1310,7 @@ class _EntityFormState extends State<EntityForm> {
           if (_isReadOnly)
             readOnlyTabs[_selectedScratchTabIndex]
           else
-            SizedBox(
-              height: tabsHeight,
+            Expanded(
               child: TabBarView(
                 children: [
                   _buildAttributesSection(isDarkMode, expandAttributeList: true),
@@ -1281,26 +1326,32 @@ class _EntityFormState extends State<EntityForm> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.read<ThemeCubit>().isDarkMode;
-    final content = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildScratchTabs(isDarkMode),
-        ],
-      ),
-    );
 
     return Form(
       key: formKey,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          const normalEditorHeight = tabHeight + 12 + 400 + 8;
-          if (!_isReadOnly && constraints.maxHeight >= normalEditorHeight) {
-            return content;
+          if (!_isReadOnly) {
+            return SizedBox(
+              height: constraints.maxHeight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: _buildScratchTabs(isDarkMode),
+              ),
+            );
           }
 
-          return SingleChildScrollView(child: content);
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildScratchTabs(isDarkMode),
+                ],
+              ),
+            ),
+          );
         },
       ),
     );
