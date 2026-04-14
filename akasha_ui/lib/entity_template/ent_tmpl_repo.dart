@@ -80,5 +80,7 @@ class EntityTemplateRepo {
 /// Tells if the given entity template is "empty", meaning it has no attributes or links fetched from the backend.
 /// Used to determine if we can return a cached version of the entity template or if we need to fetch it completely from the server.
 bool isEmpty(EntityTmpl item) {
-  return item.attributes?.isEmpty ?? true;
+  final attributes = item.attributes;
+  if (attributes == null || attributes.isEmpty) return true;
+  return attributes.any((attribute) => attribute.attributeTmpl == null);
 }

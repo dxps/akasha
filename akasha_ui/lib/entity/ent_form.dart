@@ -38,13 +38,10 @@ class EntityForm extends StatefulWidget {
 class _EntityFormState extends State<EntityForm> {
   final formKey = GlobalKey<FormState>();
   final List<_EntityAttributeDraft> attributeDrafts = [];
-  final List<EntityLink> outgoingLinkDrafts = [];
-  late final TextEditingController linkNameController;
-  late final TextEditingController linkDescriptionController;
+  final List<_EntityLinkDraft> outgoingLinkDrafts = [];
   int _nextDraftId = 1;
   int? _selectedListingDraftId;
   int _selectedScratchTabIndex = 0;
-  UuidValue? _selectedLinkTargetId;
   bool _isSaving = false;
 
   bool get _isEdit => widget.item != null;
@@ -54,18 +51,24 @@ class _EntityFormState extends State<EntityForm> {
   List<AccessLevel> get accessLevels => context.read<AccessLevelsLogic>().cachedItems;
   List<AttributeTmpl> get attributeTemplates => context.read<AttributeTmplsLogic>().cachedItems;
   List<Entity> get linkTargetEntities => context.read<EntitiesCubit>().cachedItems.where((entity) => entity.id != widget.item?.id).toList();
-  List<EntityLink> get initialOutgoingLinks {
+  List<_EntityLinkDraft> get initialOutgoingLinkDrafts {
     if (widget.item != null) {
-      return [...?widget.item!.outgoingLinks];
+      final links = [...?widget.item!.outgoingLinks]..sort((a, b) => a.orderIdx.compareTo(b.orderIdx));
+      return [
+        for (var i = 0; i < links.length; i++) _EntityLinkDraft.fromEntityLink(localId: i + 1, item: links[i]),
+      ];
     }
-    return _mapTemplateLinksToEntityLinks(widget.initialTemplate?.outgoingLinks, isOutgoing: true);
+    final links = [...?widget.initialTemplate?.outgoingLinks]..sort((a, b) => a.orderIdx.compareTo(b.orderIdx));
+    return [
+      for (var i = 0; i < links.length; i++) _EntityLinkDraft.fromTemplateLink(localId: i + 1, item: links[i]),
+    ];
   }
 
   List<EntityLink> get initialIncomingLinks {
     if (widget.item != null) {
       return [...?widget.item!.incomingLinks];
     }
-    return _mapTemplateLinksToEntityLinks(widget.initialTemplate?.incomingLinks, isOutgoing: false);
+    return [];
   }
 
   _EntityAttributeDraft? get _selectedListingDraft {
@@ -76,16 +79,14 @@ class _EntityFormState extends State<EntityForm> {
   @override
   void initState() {
     super.initState();
-    linkNameController = TextEditingController();
-    linkDescriptionController = TextEditingController();
     if (_isScratchCreation) {
       context.read<AttributeTmplsLogic>().loadAll();
     }
-    if (_isScratchCreation || _isEdit) {
+    if (!_isReadOnly) {
       context.read<EntitiesCubit>().fetchAll();
     }
     attributeDrafts.addAll(_buildInitialDrafts());
-    outgoingLinkDrafts.addAll(initialOutgoingLinks);
+    outgoingLinkDrafts.addAll(initialOutgoingLinkDrafts);
     if (attributeDrafts.isNotEmpty) {
       _nextDraftId = attributeDrafts.map((draft) => draft.localId).reduce((a, b) => a > b ? a : b) + 1;
     }
@@ -166,10 +167,14 @@ class _EntityFormState extends State<EntityForm> {
       for (var i = 0; i < items.length; i++)
         _EntityAttributeDraft.fromTemplate(
           localId: i + 1,
-          item: items[i].attributeTmpl,
+          item: _resolveTemplateAttribute(items[i]),
           fallbackAccessLevelId: accessLevels.firstOrNull?.id,
         ),
     ].whereType<_EntityAttributeDraft>().toList();
+  }
+
+  AttributeTmpl? _resolveTemplateAttribute(EntityTmplAttribute item) {
+    return item.attributeTmpl ?? attributeTemplates.where((attr) => attr.id == item.attributeTmplId).firstOrNull;
   }
 
   int? _inferInitialListingDraftId() {
@@ -192,8 +197,9 @@ class _EntityFormState extends State<EntityForm> {
     for (final draft in attributeDrafts) {
       draft.dispose();
     }
-    linkNameController.dispose();
-    linkDescriptionController.dispose();
+    for (final draft in outgoingLinkDrafts) {
+      draft.dispose();
+    }
     super.dispose();
   }
 
@@ -325,35 +331,22 @@ class _EntityFormState extends State<EntityForm> {
     });
   }
 
-  void _addSelectedOutgoingLink() {
-    final targetId = _selectedLinkTargetId;
-    if (targetId == null) return;
-
-    final name = linkNameController.text.trim();
-    if (name.isEmpty) {
-      showErrorSnackbar(context, 'Link name is required.');
-      return;
-    }
-
+  void _addOutgoingLinkDraft() {
     setState(() {
       outgoingLinkDrafts.add(
-        EntityLink(
-          name: name,
-          description: linkDescriptionController.text.trim().isEmpty ? null : linkDescriptionController.text.trim(),
-          orderIdx: outgoingLinkDrafts.length,
-          sourceId: widget.item?.id ?? zeroUuid,
-          targetId: targetId,
+        _EntityLinkDraft(
+          localId: _nextDraftId++,
+          nameController: TextEditingController(),
+          descriptionController: TextEditingController(),
+          targetId: null,
         ),
       );
-      _selectedLinkTargetId = null;
-      linkNameController.clear();
-      linkDescriptionController.clear();
     });
   }
 
   void _removeOutgoingLinkAt(int index) {
     setState(() {
-      outgoingLinkDrafts.removeAt(index);
+      outgoingLinkDrafts.removeAt(index).dispose();
     });
   }
 
@@ -393,25 +386,6 @@ class _EntityFormState extends State<EntityForm> {
       ValueType.number => draft.valueController.text.trim(),
       ValueType.text => draft.valueController.text,
     };
-  }
-
-  List<EntityLink> _mapTemplateLinksToEntityLinks(
-    List<EntityTmplLink>? links, {
-    required bool isOutgoing,
-  }) {
-    return [
-      for (final link in links ?? <EntityTmplLink>[])
-        EntityLink(
-          id: link.id,
-          name: link.name,
-          description: link.description,
-          orderIdx: link.orderIdx,
-          sourceId: isOutgoing ? zeroUuid : link.sourceId,
-          source: null,
-          targetId: isOutgoing ? link.targetId : zeroUuid,
-          target: null,
-        ),
-    ];
   }
 
   String? _validateDraft(_EntityAttributeDraft draft) {
@@ -456,6 +430,20 @@ class _EntityFormState extends State<EntityForm> {
       final error = _validateDraft(draft);
       if (error != null) {
         showErrorSnackbar(context, error);
+        return;
+      }
+    }
+    for (final draft in outgoingLinkDrafts) {
+      if (draft.nameController.text.trim().isEmpty) {
+        showErrorSnackbar(context, 'Each outgoing link needs a name.');
+        return;
+      }
+      if (draft.targetId == null) {
+        showErrorSnackbar(context, 'Each outgoing link needs a target entity.');
+        return;
+      }
+      if (!linkTargetEntities.any((entity) => entity.id == draft.targetId)) {
+        showErrorSnackbar(context, 'Each outgoing link needs an available target entity.');
         return;
       }
     }
@@ -559,12 +547,11 @@ class _EntityFormState extends State<EntityForm> {
             .map(
               (link) => EntityLink(
                 id: link.id,
-                name: link.name,
-                description: link.description,
+                name: link.nameController.text.trim(),
+                description: link.descriptionController.text.trim().isEmpty ? null : link.descriptionController.text.trim(),
                 orderIdx: outgoingLinkDrafts.indexOf(link),
                 sourceId: widget.item?.id ?? zeroUuid,
-                targetId: link.targetId,
-                target: link.target,
+                targetId: link.targetId!,
               ),
             )
             .toList(),
@@ -829,7 +816,6 @@ class _EntityFormState extends State<EntityForm> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(width: 22, child: Text('•')),
           SizedBox(
             width: 220,
             child: Text(
@@ -847,59 +833,6 @@ class _EntityFormState extends State<EntityForm> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildTemplateLinksSection(bool isDarkMode) {
-    final outgoingLinks = initialOutgoingLinks;
-    final incomingLinks = initialIncomingLinks;
-
-    if (outgoingLinks.isEmpty && incomingLinks.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final faded = isDarkMode ? darkFgFadedColor : lightFgFadedColor;
-
-    Widget buildLinkTile(String prefix, EntityLink link) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(
-          '$prefix ${link.name}${(link.description ?? '').isNotEmpty ? ' · ${link.description}' : ''}',
-          style: TextStyle(color: faded),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: 16),
-        const Text(
-          'Template Links',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Links from the chosen entity template are carried into the created entity payload.',
-          style: TextStyle(color: faded),
-        ),
-        if (outgoingLinks.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Text(
-            'Outgoing',
-            style: TextStyle(color: faded, fontStyle: FontStyle.italic),
-          ),
-          for (final link in outgoingLinks) buildLinkTile('->', link),
-        ],
-        if (incomingLinks.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Text(
-            'Incoming',
-            style: TextStyle(color: faded, fontStyle: FontStyle.italic),
-          ),
-          for (final link in incomingLinks) buildLinkTile('<-', link),
-        ],
-      ],
     );
   }
 
@@ -1000,7 +933,6 @@ class _EntityFormState extends State<EntityForm> {
         children: [
           ...children,
           Expanded(child: listContent),
-          if (widget.initialTemplate != null) _buildTemplateLinksSection(isDarkMode),
         ],
       );
     }
@@ -1010,7 +942,6 @@ class _EntityFormState extends State<EntityForm> {
       children: [
         ...children,
         listContent,
-        if (widget.initialTemplate != null) _buildTemplateLinksSection(isDarkMode),
       ],
     );
   }
@@ -1025,12 +956,13 @@ class _EntityFormState extends State<EntityForm> {
     final faded = isDarkMode ? darkFgFadedColor : lightFgFadedColor;
     final entities = targetEntities.where((entity) => entity.id != widget.item?.id).toList();
     final incomingLinks = initialIncomingLinks;
+    final showIncomingLinks = _isEdit && incomingLinks.isNotEmpty;
 
     if (_isReadOnly) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (outgoingLinkDrafts.isEmpty && incomingLinks.isEmpty)
+          if (outgoingLinkDrafts.isEmpty && !showIncomingLinks)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Text(
@@ -1049,13 +981,18 @@ class _EntityFormState extends State<EntityForm> {
             ),
             for (final link in outgoingLinkDrafts)
               ListTile(
-                leading: const Text('•'),
-                title: Text('--  ${link.name} --> ${_entityLabelById(entities, link.targetId)}', style: const TextStyle(fontSize: 15)),
-                subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  '--  ${link.nameController.text} --> ${_linkTargetLabel(entities, link.targetId)}',
+                  style: const TextStyle(fontSize: 15),
+                ),
+                subtitle: link.descriptionController.text.trim().isNotEmpty
+                    ? Text(link.descriptionController.text.trim(), style: const TextStyle(fontSize: 12))
+                    : null,
                 minVerticalPadding: 6,
               ),
           ],
-          if (incomingLinks.isNotEmpty) ...[
+          if (showIncomingLinks) ...[
             Padding(
               padding: const EdgeInsets.only(top: 18, bottom: 6),
               child: Text(
@@ -1065,7 +1002,7 @@ class _EntityFormState extends State<EntityForm> {
             ),
             for (final link in incomingLinks)
               ListTile(
-                leading: const Text('•'),
+                contentPadding: EdgeInsets.zero,
                 title: Text('<-- ${link.name} -- ${_entityLabelById(targetEntities, link.sourceId)}', style: const TextStyle(fontSize: 15)),
                 subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
                 minVerticalPadding: 6,
@@ -1078,64 +1015,39 @@ class _EntityFormState extends State<EntityForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 10, bottom: 6),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Outgoing Links',
+                  style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
+                ),
+              ),
+              IconButton(
+                onPressed: _addOutgoingLinkDraft,
+                icon: const Icon(Icons.add, size: 18),
+                tooltip: 'Add outgoing link',
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+        ),
         Expanded(
-          child: outgoingLinkDrafts.isEmpty && incomingLinks.isEmpty
+          child: outgoingLinkDrafts.isEmpty && !showIncomingLinks
               ? Center(
                   child: Text(
                     'No links',
                     style: TextStyle(fontStyle: FontStyle.italic, color: faded),
                   ),
                 )
-              : _isReadOnly
-              ? ListView(
-                  children: [
-                    if (outgoingLinkDrafts.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 6),
-                        child: Text(
-                          'Outgoing Links',
-                          style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
-                        ),
-                      ),
-                      for (final link in outgoingLinkDrafts)
-                        ListTile(
-                          leading: const Text('•'),
-                          title: Text('--  ${link.name} --> ${_entityLabelById(entities, link.targetId)}', style: const TextStyle(fontSize: 15)),
-                          subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
-                          minVerticalPadding: 6,
-                        ),
-                    ],
-                    if (incomingLinks.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(top: 18, bottom: 6),
-                        child: Text(
-                          'Incoming Links',
-                          style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
-                        ),
-                      ),
-                      for (final link in incomingLinks)
-                        ListTile(
-                          leading: const Text('•'),
-                          title: Text('<-- ${link.name} -- ${_entityLabelById(targetEntities, link.sourceId)}', style: const TextStyle(fontSize: 15)),
-                          subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
-                          minVerticalPadding: 6,
-                        ),
-                    ],
-                  ],
-                )
               : ReorderableListView.builder(
                   primary: false,
                   buildDefaultDragHandles: false,
                   itemCount: outgoingLinkDrafts.length,
                   onReorder: _onReorderOutgoingLinks,
-                  header: Padding(
-                    padding: const EdgeInsets.only(top: 10, bottom: 6),
-                    child: Text(
-                      'Outgoing Links',
-                      style: TextStyle(fontStyle: FontStyle.italic, color: faded, fontSize: 13),
-                    ),
-                  ),
-                  footer: incomingLinks.isEmpty
+                  footer: !showIncomingLinks
                       ? null
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1149,7 +1061,7 @@ class _EntityFormState extends State<EntityForm> {
                             ),
                             for (final link in incomingLinks)
                               ListTile(
-                                leading: const Text('•'),
+                                contentPadding: EdgeInsets.zero,
                                 title: Text(
                                   '<-- ${link.name} -- ${_entityLabelById(targetEntities, link.sourceId)}',
                                   style: const TextStyle(fontSize: 15),
@@ -1161,21 +1073,9 @@ class _EntityFormState extends State<EntityForm> {
                         ),
                   itemBuilder: (context, index) {
                     final link = outgoingLinkDrafts[index];
-                    return ReorderableDragStartListener(
-                      key: ValueKey('${link.id ?? link.targetId}-$index-${link.name}'),
-                      index: index,
-                      child: ListTile(
-                        mouseCursor: SystemMouseCursors.resizeUpDown,
-                        leading: const Text('•'),
-                        title: Text('--  ${link.name} --> ${_entityLabelById(entities, link.targetId)}', style: const TextStyle(fontSize: 15)),
-                        subtitle: (link.description ?? '').isNotEmpty ? Text(link.description!, style: const TextStyle(fontSize: 12)) : null,
-                        trailing: IconButton(
-                          onPressed: () => _removeOutgoingLinkAt(index),
-                          icon: const Icon(Icons.remove, size: 14),
-                          visualDensity: VisualDensity.compact,
-                          tooltip: 'Remove',
-                        ),
-                      ),
+                    return KeyedSubtree(
+                      key: ValueKey(link.localId),
+                      child: _buildOutgoingLinkDraftEditor(link, index, entities),
                     );
                   },
                   proxyDecorator: (child, index, animation) => Material(
@@ -1185,62 +1085,99 @@ class _EntityFormState extends State<EntityForm> {
                   ),
                 ),
         ),
-        if (!_isReadOnly) ...[
-          TextFormField(
-            controller: linkNameController,
-            decoration: const InputDecoration(
-              labelText: 'Name *',
-              hintText: 'Required',
+        if (entities.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              'Create another entity first to link to it.',
+              style: TextStyle(color: faded),
             ),
           ),
-          const SizedBox(height: 2),
-          TextFormField(
-            controller: linkDescriptionController,
-            decoration: const InputDecoration(labelText: 'Description'),
-            maxLines: 1,
-            minLines: 1,
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownButtonFormField<UuidValue>(
-                  initialValue: _selectedLinkTargetId,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Target',
-                    hintText: 'Pick an entity',
-                  ),
-                  items: entities
-                      .where((entity) => entity.id != null)
-                      .map(
-                        (entity) => DropdownMenuItem<UuidValue>(
-                          value: entity.id!,
-                          child: Text(_entityLabel(entity), overflow: TextOverflow.ellipsis),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: entities.isEmpty ? null : (targetId) => setState(() => _selectedLinkTargetId = targetId),
-                ),
-              ),
-              IconButton(
-                onPressed: _selectedLinkTargetId == null ? null : _addSelectedOutgoingLink,
-                icon: const Icon(Icons.add, size: 18),
-                tooltip: 'Add link',
-              ),
-            ],
-          ),
-          if (entities.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                'Create another entity first to link to it.',
-                style: TextStyle(color: faded),
-              ),
-            ),
-          const SizedBox(height: 12),
-        ],
+        const SizedBox(height: 12),
       ],
+    );
+  }
+
+  String _linkTargetLabel(List<Entity> entities, UuidValue? entityId) {
+    if (entityId == null) return 'No target';
+    return _entityLabelById(entities, entityId);
+  }
+
+  Widget _buildOutgoingLinkDraftEditor(_EntityLinkDraft link, int index, List<Entity> entities) {
+    final selectedTargetId = entities.any((entity) => entity.id == link.targetId) ? link.targetId : null;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: TextFormField(
+              controller: link.nameController,
+              decoration: const InputDecoration(labelText: 'Name *'),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 4,
+            child: TextFormField(
+              controller: link.descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 4,
+            child: DropdownButtonFormField<UuidValue>(
+              key: ValueKey('link-${link.localId}-target-${selectedTargetId ?? 'none'}'),
+              initialValue: selectedTargetId,
+              isExpanded: true,
+              decoration: const InputDecoration(labelText: 'Target *'),
+              items: entities
+                  .where((entity) => entity.id != null)
+                  .map(
+                    (entity) => DropdownMenuItem<UuidValue>(
+                      value: entity.id!,
+                      child: Text(_entityLabel(entity), overflow: TextOverflow.ellipsis),
+                    ),
+                  )
+                  .toList(),
+              onChanged: entities.isEmpty ? null : (targetId) => setState(() => link.targetId = targetId),
+            ),
+          ),
+          const SizedBox(width: 4),
+          SizedBox(
+            width: 18,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: _HoverActionIcon(
+                    icon: Icons.remove,
+                    tooltip: 'Remove link',
+                    onPressed: () => _removeOutgoingLinkAt(index),
+                    size: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                ReorderableDragStartListener(
+                  index: index,
+                  child: const _HoverActionIcon(
+                    icon: Icons.drag_indicator,
+                    tooltip: 'Drag to reorder',
+                    size: 16,
+                    cursor: SystemMouseCursors.resizeUpDown,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1293,22 +1230,7 @@ class _EntityFormState extends State<EntityForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (widget.initialTemplate != null && widget.item == null) ...[
-                Text(
-                  'Template: ${widget.initialTemplate!.name}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                if ((widget.initialTemplate!.description ?? '').isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      widget.initialTemplate!.description!,
-                      style: TextStyle(color: isDarkMode ? darkFgFadedColor : lightFgFadedColor),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-              ],
-              if (_isScratchCreation || _isEdit) _buildScratchTabs(isDarkMode) else _buildAttributesSection(isDarkMode),
+              _buildScratchTabs(isDarkMode),
               Align(
                 alignment: Alignment.centerRight,
                 child: _isReadOnly
@@ -1622,5 +1544,51 @@ class _EntityAttributeDraft {
     nameController.dispose();
     descriptionController.dispose();
     valueController.dispose();
+  }
+}
+
+class _EntityLinkDraft {
+  _EntityLinkDraft({
+    required this.localId,
+    this.id,
+    required this.nameController,
+    required this.descriptionController,
+    required this.targetId,
+  });
+
+  factory _EntityLinkDraft.fromEntityLink({
+    required int localId,
+    required EntityLink item,
+  }) {
+    return _EntityLinkDraft(
+      localId: localId,
+      id: item.id,
+      nameController: TextEditingController(text: item.name),
+      descriptionController: TextEditingController(text: item.description ?? ''),
+      targetId: item.targetId,
+    );
+  }
+
+  factory _EntityLinkDraft.fromTemplateLink({
+    required int localId,
+    required EntityTmplLink item,
+  }) {
+    return _EntityLinkDraft(
+      localId: localId,
+      nameController: TextEditingController(text: item.name),
+      descriptionController: TextEditingController(text: item.description ?? ''),
+      targetId: null,
+    );
+  }
+
+  final int localId;
+  final UuidValue? id;
+  final TextEditingController nameController;
+  final TextEditingController descriptionController;
+  UuidValue? targetId;
+
+  void dispose() {
+    nameController.dispose();
+    descriptionController.dispose();
   }
 }

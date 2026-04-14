@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:akasha_client/akasha_client.dart';
 import 'package:akasha_ui/access_level/access_level_logic.dart';
+import 'package:akasha_ui/attribute_template/attr_tmpls_logic.dart';
 import 'package:akasha_ui/entity/ent_form.dart';
 import 'package:akasha_ui/entity/ent_row.dart';
 import 'package:akasha_ui/entity/ents_cubit.dart';
@@ -156,6 +157,9 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
 
     final selectedTemplate = await _selectTemplate();
     if (!mounted || selectedTemplate == null) return;
+
+    await context.read<AttributeTmplsLogic>().loadAll();
+    if (!mounted) return;
 
     final fullTemplate = await entityTmplLogic.repo.getById(selectedTemplate.id!, full: true);
     if (!mounted) return;

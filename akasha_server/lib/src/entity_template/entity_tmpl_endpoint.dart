@@ -13,6 +13,9 @@ class EntityTmplEndpoint extends Endpoint {
           session,
           where: (t) => t.entityTmplId.equals(id),
           orderBy: (t) => t.orderIdx,
+          include: EntityTmplAttribute.include(
+            attributeTmpl: AttributeTmpl.include(),
+          ),
         )
         .then((attributes) {
           item.attributes = attributes;
@@ -81,7 +84,8 @@ class EntityTmplEndpoint extends Endpoint {
 
       return EntityTmplApiResponse(success: true, data: created);
     } on DatabaseQueryException catch (e) {
-      if (e.code == PgErrorCode.uniqueViolation && e.constraintName == 'entity_tmpl_name_desc_uniq_idx') {
+      if (e.code == PgErrorCode.uniqueViolation &&
+          e.constraintName == 'entity_tmpl_name_desc_uniq_idx') {
         return alreadyExistsResponse();
       }
 
@@ -93,17 +97,26 @@ class EntityTmplEndpoint extends Endpoint {
 
       return failureResponse(null, false);
     } on DatabaseException catch (e) {
-      session.log('Failed (DatabaseException) to create entity template: ${e.message}', level: LogLevel.error);
+      session.log(
+        'Failed (DatabaseException) to create entity template: ${e.message}',
+        level: LogLevel.error,
+      );
       return failureResponse(null, false);
     } catch (e) {
-      session.log('Failed to create entity template: $e', level: LogLevel.error);
+      session.log(
+        'Failed to create entity template: $e',
+        level: LogLevel.error,
+      );
       return failureResponse(null, false);
     }
   }
 
   Future<EntityTmplApiResponse> update(Session session, EntityTmpl item) async {
     try {
-      session.log('Updating entity template with id ${item.id}', level: LogLevel.info);
+      session.log(
+        'Updating entity template with id ${item.id}',
+        level: LogLevel.info,
+      );
       // Update the item first.
       final updated = await EntityTmpl.db.updateRow(session, item);
 
@@ -147,7 +160,8 @@ class EntityTmplEndpoint extends Endpoint {
 
       return EntityTmplApiResponse(success: true, data: updated);
     } on DatabaseQueryException catch (e) {
-      if (e.code == PgErrorCode.uniqueViolation && e.constraintName == 'entity_tmpl_name_desc_uniq_idx') {
+      if (e.code == PgErrorCode.uniqueViolation &&
+          e.constraintName == 'entity_tmpl_name_desc_uniq_idx') {
         return alreadyExistsResponse();
       }
 
@@ -159,10 +173,16 @@ class EntityTmplEndpoint extends Endpoint {
 
       return failureResponse(null, true);
     } on DatabaseException catch (e) {
-      session.log('Failed (DatabaseException) to update entity template: ${e.message}', level: LogLevel.error);
+      session.log(
+        'Failed (DatabaseException) to update entity template: ${e.message}',
+        level: LogLevel.error,
+      );
       return failureResponse(null, true);
     } catch (e) {
-      session.log('Failed to update entity template: $e', level: LogLevel.error);
+      session.log(
+        'Failed to update entity template: $e',
+        level: LogLevel.error,
+      );
       return failureResponse(null, true);
     }
   }
@@ -198,7 +218,9 @@ extension _ApiResponseHelpers on EntityTmplEndpoint {
     return EntityTmplApiResponse(
       success: false,
       errorCode: message != null ? 'ETE-002' : 'ETE-001',
-      errorMessage: message ?? 'Could not ${isUpdate ? 'update' : 'create'} entity template.',
+      errorMessage:
+          message ??
+          'Could not ${isUpdate ? 'update' : 'create'} entity template.',
     );
   }
 }

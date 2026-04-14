@@ -165,14 +165,12 @@ class _EntityTmplFormState extends State<EntityTmplForm> {
     linkNameCtrl = TextEditingController();
     linkDescCtrl = TextEditingController();
 
-    includedAttributeTmpls = [...?widget.item?.attributes?.map((link) => link.attributeTmpl)].whereType<AttributeTmpl>().toList();
     final attrTmpls = attrTmplsLogic.cachedItems;
     if (widget.item?.attributes != null) {
       widget.item?.attributes?.forEach((entTmplAttr) {
-        for (var attr in attrTmpls) {
-          if (attr.id == entTmplAttr.attributeTmplId) {
-            includedAttributeTmpls.add(attr);
-          }
+        final attr = entTmplAttr.attributeTmpl ?? attrTmpls.where((attr) => attr.id == entTmplAttr.attributeTmplId).firstOrNull;
+        if (attr != null && !includedAttributeTmpls.any((included) => included.id == attr.id)) {
+          includedAttributeTmpls.add(attr);
         }
       });
     }
