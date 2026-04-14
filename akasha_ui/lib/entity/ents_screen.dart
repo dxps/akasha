@@ -284,7 +284,7 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
     final id = _nextModalId++;
     final isEdit = item != null;
     final modalSize = readOnly
-        ? const Size(420, 250)
+        ? const Size(440, 250)
         : isEdit
         ? const Size(500, 350)
         : const Size(500, 350);
@@ -315,6 +315,15 @@ class _EntitiesScreenState extends State<EntitiesScreen> with _ModalHelpers {
         initialTemplate: initialTemplate,
         controller: formController,
         readOnly: readOnly,
+        onOpenEntity: (entityId) async {
+          final target = await entitiesCubit.fetchById(entityId);
+          if (!mounted) return;
+          if (target == null) {
+            showErrorSnackbar(context, 'Failed to load linked entity.');
+            return;
+          }
+          _openModal(item: target, viewportSize: viewportSize ?? MediaQuery.sizeOf(context), readOnly: true);
+        },
         onRequestEdit: () {
           if (readOnly && item != null) {
             final currentModal = modals.firstWhere((m) => m.id == id);

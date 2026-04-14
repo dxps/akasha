@@ -57,6 +57,7 @@ class EntityForm extends StatefulWidget {
     this.onSave,
     this.onRequestEdit,
     this.onRequestView,
+    this.onOpenEntity,
     this.readOnly = false,
   });
 
@@ -66,6 +67,7 @@ class EntityForm extends StatefulWidget {
   final Future<void> Function(Entity item)? onSave;
   final VoidCallback? onRequestEdit;
   final VoidCallback? onRequestView;
+  final Future<void> Function(UuidValue entityId)? onOpenEntity;
   final bool readOnly;
 
   @override
@@ -906,18 +908,16 @@ class _EntityFormState extends State<EntityForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(
+            child: SelectableText(
               name.isEmpty ? 'Unnamed attribute' : name,
               style: const TextStyle(fontSize: 15),
-              softWrap: true,
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Text(
+            child: SelectableText(
               value.isEmpty ? 'No value' : value,
               style: const TextStyle(fontSize: 15),
-              softWrap: true,
             ),
           ),
         ],
@@ -1073,10 +1073,7 @@ class _EntityFormState extends State<EntityForm> {
             for (final link in outgoingLinkDrafts)
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(
-                  '--  ${link.nameController.text} --> ${_linkTargetLabel(entities, link.targetId)}',
-                  style: const TextStyle(fontSize: 15),
-                ),
+                title: _buildReadOnlyOutgoingLinkTitle(link, entities),
                 subtitle: link.descriptionController.text.trim().isNotEmpty
                     ? Text(link.descriptionController.text.trim(), style: const TextStyle(fontSize: 12))
                     : null,
@@ -1208,6 +1205,37 @@ class _EntityFormState extends State<EntityForm> {
   String _linkTargetLabel(List<Entity> entities, UuidValue? entityId) {
     if (entityId == null) return 'No target';
     return _entityLabelById(entities, entityId);
+  }
+
+  Widget _buildReadOnlyOutgoingLinkTitle(_EntityLinkDraft link, List<Entity> entities) {
+    final targetId = link.targetId;
+    final targetLabel = _linkTargetLabel(entities, targetId);
+    final canOpenTarget = targetId != null && widget.onOpenEntity != null;
+
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 4,
+      children: [
+        Text('--  ${link.nameController.text} -->', style: const TextStyle(fontSize: 15)),
+        if (canOpenTarget)
+          InkWell(
+            onTap: () => widget.onOpenEntity!(targetId),
+            child: Tooltip(
+              message: 'Open entity',
+              child: Text(
+                targetLabel,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          )
+        else
+          Text(targetLabel, style: const TextStyle(fontSize: 15)),
+      ],
+    );
   }
 
   Widget _buildOutgoingLinkDraftEditor(_EntityLinkDraft link, int index, List<Entity> entities) {
