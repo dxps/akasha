@@ -407,7 +407,7 @@ class _EntityModalTitleActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = context.read<ThemeCubit>().isDarkMode;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final actionColor = isDarkMode ? darkFgFadedColor : lightFgFadedColor;
 
     return AnimatedBuilder(
@@ -418,7 +418,7 @@ class _EntityModalTitleActions extends StatelessWidget {
             onPressed: isEdit ? controller.requestEdit : null,
             color: actionColor,
             disabledColor: actionColor.withAlpha(90),
-            icon: const Icon(Icons.edit_outlined, size: 18),
+            icon: const Icon(Icons.edit_outlined, size: 16),
             tooltip: 'Edit',
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -449,7 +449,7 @@ class _EntityModalTitleActions extends StatelessWidget {
               disabledColor: actionColor.withAlpha(90),
               icon: controller.isSaving
                   ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.save, size: 18),
+                  : const Icon(Icons.save, size: 17),
               tooltip: isEdit ? 'Update' : 'Add',
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
